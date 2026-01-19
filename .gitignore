@@ -60,3 +60,6 @@ patch_output.log
 .gemini-clipboard/
 .eslintcache
 evals/logs/
+
+docs-site/.vitepress/dist
+docs-site/.vitepress/cache

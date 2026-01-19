@@ -6,7 +6,8 @@
   },
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "docs-site"
   ],
   "private": "true",
   "repository": {
@@ -20,6 +21,8 @@
     "start": "cross-env NODE_ENV=development node scripts/start.js",
     "start:a2a-server": "CODER_AGENT_PORT=41242 npm run start --workspace @google/gemini-cli-a2a-server",
     "debug": "cross-env DEBUG=1 node --inspect-brk scripts/start.js",
+    "docs:dev": "npm run docs:dev --workspace docs-site",
+    "docs:build": "npm run docs:build --workspace docs-site",
     "deflake": "node scripts/deflake.js",
     "deflake:test:integration:sandbox:none": "npm run deflake -- --command=\"npm run test:integration:sandbox:none -- --retry=0\"",
     "deflake:test:integration:sandbox:docker": "npm run deflake -- --command=\"npm run test:integration:sandbox:docker -- --retry=0\"",
