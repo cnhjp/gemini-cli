@@ -13,8 +13,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const UPSTREAM_REPO = 'https://github.com/google/gemini-cli.git';
 const DOCS_SRC_DIR = 'docs'; // Upstream docs location
 const DOCS_TARGET_DIR = 'docs-site/docs'; // Local docs location
+const SYNC_STATE_FILE = '.last-sync-rev'; // File to store the last synced commit hash
 const TARGET_LANG = 'Chinese (Simplified)';
-const GEMINI_MODEL = 'gemini-2.0-flash'; // Use a fast and capable model
+const GEMINI_MODEL = 'gemini-2.0-flash';
 
 // --- Setup ---
 const __filename = fileURLToPath(import.meta.url);
@@ -25,8 +26,6 @@ const git = simpleGit(ROOT_DIR);
 
 // Initialize Gemini API
 const apiKey = process.env.GEMINI_API_KEY;
-// Note: We don't exit hard here if key is missing, as users might just want to sync without translation
-// or set it up later. But for this script's purpose, we'll warn.
 if (!apiKey) {
   console.warn(
     'WARNING: GEMINI_API_KEY is not set. Translation will be skipped or mock mode used.',
@@ -73,7 +72,6 @@ ${content}
     return response.text();
   } catch (error) {
     console.error(`Failed to translate ${filePath}:`, error);
-    // Return original content as fallback
     return content;
   }
 }
@@ -97,45 +95,88 @@ async function syncDocs() {
     console.log('Fetching upstream...');
     await git.fetch('upstream');
 
-    // 3. Identify Changed Files
-    // List all markdown files in the upstream 'docs' directory
-    const rawFileList = await git.raw([
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'upstream/main',
-      DOCS_SRC_DIR,
-    ]);
+    // 3. Determine Sync Range
+    let lastSyncRev = '';
+    try {
+      lastSyncRev = (await fs.readFile(SYNC_STATE_FILE, 'utf-8')).trim();
+    } catch {
+      console.log('No previous sync state found.');
+    }
 
-    const upstreamFiles = rawFileList
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((f) => f && f.startsWith(DOCS_SRC_DIR) && f.endsWith('.md'));
+    const upstreamHead = (await git.revparse(['upstream/main'])).trim();
 
-    console.log(
-      `Found ${upstreamFiles.length} documentation files in upstream.`,
-    );
+    if (lastSyncRev === upstreamHead) {
+      console.log('Already up to date with upstream.');
+      return;
+    }
+
+    let filesChanged: string[] = [];
+
+    // If we have a last sync revision, get the diff
+    if (lastSyncRev) {
+      console.log(
+        `Checking for changes between ${lastSyncRev} and ${upstreamHead}...`,
+      );
+      // Get list of changed files with status (A, M, D, R)
+      // Format: status + \t + filename
+      const diffOutput = await git.diff([
+        '--name-status',
+        lastSyncRev,
+        upstreamHead,
+        '--',
+        DOCS_SRC_DIR,
+      ]);
+
+      filesChanged = diffOutput.split('\n').filter(Boolean);
+    } else {
+      console.log(
+        'First run or lost state. Performing full scan of upstream docs...',
+      );
+      // Treat everything as Added
+      const lsTree = await git.raw([
+        'ls-tree',
+        '-r',
+        '--name-only',
+        'upstream/main',
+        DOCS_SRC_DIR,
+      ]);
+      filesChanged = lsTree
+        .split('\n')
+        .filter((f) => f && f.endsWith('.md'))
+        .map((f) => `A\t${f}`);
+    }
+
+    console.log(`Found ${filesChanged.length} file changes to process.`);
 
     let processedCount = 0;
 
-    for (const upstreamFilePath of upstreamFiles) {
-      // Map upstream path (docs/foo.md) to local target path (docs-site/docs/foo.md)
+    for (const line of filesChanged) {
+      const [status, upstreamFilePath] = line.split('\t');
+
+      if (
+        !upstreamFilePath ||
+        !upstreamFilePath.startsWith(DOCS_SRC_DIR) ||
+        !upstreamFilePath.endsWith('.md')
+      ) {
+        continue;
+      }
+
       const relativePath = path.relative(DOCS_SRC_DIR, upstreamFilePath);
       const localPath = path.join(DOCS_TARGET_DIR, relativePath);
 
-      // Check if local file exists to decide whether to skip or update
-      // For this MVP, we only create NEW files to avoid overwriting manual edits.
-      let exists = false;
-      try {
-        await fs.access(localPath);
-        exists = true;
-      } catch {
-        exists = false;
-      }
+      console.log(`Processing [${status}] ${upstreamFilePath} -> ${localPath}`);
 
-      if (!exists) {
-        console.log(`New file detected: ${upstreamFilePath} -> ${localPath}`);
-
+      if (status.startsWith('D')) {
+        // Deleted
+        try {
+          await fs.unlink(localPath);
+          console.log(`Deleted: ${localPath}`);
+          processedCount++;
+        } catch {
+          // Ignore if file doesn't exist
+        }
+      } else if (status.startsWith('A') || status.startsWith('M')) {
+        // Added or Modified
         // Get upstream content
         const upstreamContent = await git.show([
           `upstream/main:${upstreamFilePath}`,
@@ -156,13 +197,10 @@ async function syncDocs() {
       }
     }
 
-    if (processedCount === 0) {
-      console.log(
-        'No new files to sync (all upstreams already exist locally).',
-      );
-    } else {
-      console.log(`Successfully synchronized ${processedCount} files.`);
-    }
+    // 4. Update State
+    await fs.writeFile(SYNC_STATE_FILE, upstreamHead, 'utf-8');
+    console.log(`Sync complete. Updated state to ${upstreamHead}`);
+    console.log(`Processed ${processedCount} files.`);
   } catch (error) {
     console.error('Synchronization failed:', error);
     process.exit(1);
