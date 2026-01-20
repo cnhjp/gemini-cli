@@ -93,7 +93,8 @@ async function syncDocs() {
 
     // 2. Fetch Upstream
     console.log('Fetching upstream...');
-    await git.fetch('upstream');
+    // Explicitly fetch the main branch to ensure upstream/main is available
+    await git.fetch('upstream', '+refs/heads/main:refs/remotes/upstream/main');
 
     // 3. Determine Sync Range
     let lastSyncRev = '';
