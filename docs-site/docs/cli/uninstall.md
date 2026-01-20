@@ -1,44 +1,47 @@
-# 卸载 CLI
+# Uninstalling the CLI
 
-您的卸载方法取决于您如何运行 CLI。请按照 npx 或全局 npm 安装的说明进行操作。
+Your uninstall method depends on how you ran the CLI. Follow the instructions
+for either npx or a global npm installation.
 
-## 方法 1: 使用 npx
+## Method 1: Using npx
 
-npx 从临时缓存运行包，没有永久安装。要“卸载”CLI，您必须清除此缓存，这将删除 gemini-cli 和之前使用 npx 执行的任何其他包。
+npx runs packages from a temporary cache without a permanent installation. To
+"uninstall" the CLI, you must clear this cache, which will remove gemini-cli and
+any other packages previously executed with npx.
 
-npx 缓存是位于主 npm 缓存文件夹内的名为 `_npx` 的目录。您可以通过运行
-`npm config get cache` 找到您的 npm 缓存路径。
+The npx cache is a directory named `_npx` inside your main npm cache folder. You
+can find your npm cache path by running `npm config get cache`.
 
-**对于 macOS / Linux**
+**For macOS / Linux**
 
 ```bash
-# 路径通常是 ~/.npm/_npx
+# The path is typically ~/.npm/_npx
 rm -rf "$(npm config get cache)/_npx"
 ```
 
-**对于 Windows**
+**For Windows**
 
-_命令提示符_
+_Command Prompt_
 
 ```cmd
-:: 路径通常是 %LocalAppData%\npm-cache\_npx
+:: The path is typically %LocalAppData%\npm-cache\_npx
 rmdir /s /q "%LocalAppData%\npm-cache\_npx"
 ```
 
 _PowerShell_
 
 ```powershell
-# 路径通常是 $env:LocalAppData\npm-cache\_npx
+# The path is typically $env:LocalAppData\npm-cache\_npx
 Remove-Item -Path (Join-Path $env:LocalAppData "npm-cache\_npx") -Recurse -Force
 ```
 
-## 方法 2: 使用 npm (全局安装)
+## Method 2: Using npm (global install)
 
-如果您全局安装了 CLI（例如 `npm install -g @google/gemini-cli`），请使用带有
-`-g` 标志的 `npm uninstall` 命令将其删除。
+If you installed the CLI globally (e.g., `npm install -g @google/gemini-cli`),
+use the `npm uninstall` command with the `-g` flag to remove it.
 
 ```bash
 npm uninstall -g @google/gemini-cli
 ```
 
-此命令将从您的系统中完全删除该包。
+This command completely removes the package from your system.

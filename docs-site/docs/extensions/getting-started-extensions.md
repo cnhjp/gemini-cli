@@ -1,24 +1,28 @@
-# Gemini CLI 扩展入门
+# Getting started with Gemini CLI extensions
 
-本指南将指导您创建第一个 Gemini
-CLI 扩展。您将学习如何设置新扩展、通过 MCP 服务器添加自定义工具、创建自定义命令以及使用
-`GEMINI.md` 文件为模型提供上下文。
+This guide will walk you through creating your first Gemini CLI extension.
+You'll learn how to set up a new extension, add a custom tool via an MCP server,
+create a custom command, and provide context to the model with a `GEMINI.md`
+file.
 
-## 先决条件
+## Prerequisites
 
-在开始之前，请确保您已安装 Gemini CLI，并对 Node.js 和 TypeScript 有基本的了解。
+Before you start, make sure you have the Gemini CLI installed and a basic
+understanding of Node.js and TypeScript.
 
-## 第 1 步：创建一个新扩展
+## Step 1: Create a new extension
 
-最简单的方法是使用内置模板之一。我们将使用 `mcp-server` 示例作为基础。
+The easiest way to start is by using one of the built-in templates. We'll use
+the `mcp-server` example as our foundation.
 
-运行以下命令以创建一个名为 `my-first-extension` 的新目录，其中包含模板文件：
+Run the following command to create a new directory called `my-first-extension`
+with the template files:
 
 ```bash
 gemini extensions new my-first-extension mcp-server
 ```
 
-这将创建一个具有以下结构的新目录：
+This will create a new directory with the following structure:
 
 ```
 my-first-extension/
@@ -28,13 +32,14 @@ my-first-extension/
 └── tsconfig.json
 ```
 
-## 第 2 步：了解扩展文件
+## Step 2: Understand the extension files
 
-让我们看看新扩展中的关键文件。
+Let's look at the key files in your new extension.
 
 ### `gemini-extension.json`
 
-这是扩展的清单文件。它告诉 Gemini CLI 如何加载和使用您的扩展。
+This is the manifest file for your extension. It tells Gemini CLI how to load
+and use your extension.
 
 ```json
 {
@@ -50,17 +55,19 @@ my-first-extension/
 }
 ```
 
-- `name`: 您扩展的唯一名称。
-- `version`: 您扩展的版本。
-- `mcpServers`: 此部分定义了一个或多个模型上下文协议 (MCP) 服务器。MCP 服务器是您为模型添加新工具的方式。
-  - `command`, `args`, `cwd`: 这些字段指定如何启动您的服务器。注意
-    `${extensionPath}` 变量的使用，Gemini
-    CLI 会将其替换为您扩展安装目录的绝对路径。这允许您的扩展无论安装在哪里都能工作。
+- `name`: The unique name for your extension.
+- `version`: The version of your extension.
+- `mcpServers`: This section defines one or more Model Context Protocol (MCP)
+  servers. MCP servers are how you can add new tools for the model to use.
+  - `command`, `args`, `cwd`: These fields specify how to start your server.
+    Notice the use of the `${extensionPath}` variable, which Gemini CLI replaces
+    with the absolute path to your extension's installation directory. This
+    allows your extension to work regardless of where it's installed.
 
 ### `example.ts`
 
-此文件包含 MCP 服务器的源代码。这是一个使用 `@modelcontextprotocol/sdk`
-的简单 Node.js 服务器。
+This file contains the source code for your MCP server. It's a simple Node.js
+server that uses the `@modelcontextprotocol/sdk`.
 
 ```typescript
 /**
@@ -78,7 +85,7 @@ const server = new McpServer({
   version: '1.0.0',
 });
 
-// 注册一个名为 'fetch_posts' 的新工具
+// Registers a new tool named 'fetch_posts'
 server.registerTool(
   'fetch_posts',
   {
@@ -102,63 +109,67 @@ server.registerTool(
   },
 );
 
-// ... (省略提示词注册以求简洁)
+// ... (prompt registration omitted for brevity)
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
 ```
 
-此服务器定义了一个名为 `fetch_posts` 的工具，该工具从公共 API 获取数据。
+This server defines a single tool called `fetch_posts` that fetches data from a
+public API.
 
-### `package.json` 和 `tsconfig.json`
+### `package.json` and `tsconfig.json`
 
-这些是 TypeScript 项目的标准配置文件。`package.json` 文件定义了依赖项和 `build`
-脚本，`tsconfig.json` 配置了 TypeScript 编译器。
+These are standard configuration files for a TypeScript project. The
+`package.json` file defines dependencies and a `build` script, and
+`tsconfig.json` configures the TypeScript compiler.
 
-## 第 3 步：构建和链接您的扩展
+## Step 3: Build and link your extension
 
-在使用扩展之前，您需要编译 TypeScript 代码并将扩展链接到您的 Gemini
-CLI 安装以进行本地开发。
+Before you can use the extension, you need to compile the TypeScript code and
+link the extension to your Gemini CLI installation for local development.
 
-1.  **安装依赖项:**
+1.  **Install dependencies:**
 
     ```bash
     cd my-first-extension
     npm install
     ```
 
-2.  **构建服务器:**
+2.  **Build the server:**
 
     ```bash
     npm run build
     ```
 
-    这将把 `example.ts` 编译成 `dist/example.js`，这正是 `gemini-extension.json`
-    中引用的文件。
+    This will compile `example.ts` into `dist/example.js`, which is the file
+    referenced in your `gemini-extension.json`.
 
-3.  **链接扩展:**
+3.  **Link the extension:**
 
-    `link` 命令创建一个从 Gemini
-    CLI 扩展目录到您的开发目录的符号链接。这意味着您所做的任何更改都将立即反映出来，无需重新安装。
+    The `link` command creates a symbolic link from the Gemini CLI extensions
+    directory to your development directory. This means any changes you make
+    will be reflected immediately without needing to reinstall.
 
     ```bash
     gemini extensions link .
     ```
 
-现在，重新启动您的 Gemini CLI 会话。新的 `fetch_posts`
-工具将可用。您可以通过询问 "fetch posts" 来测试它。
+Now, restart your Gemini CLI session. The new `fetch_posts` tool will be
+available. You can test it by asking: "fetch posts".
 
-## 第 4 步：添加自定义命令
+## Step 4: Add a custom command
 
-自定义命令提供了一种为复杂提示词创建快捷方式的方法。让我们添加一个在代码中搜索模式的命令。
+Custom commands provide a way to create shortcuts for complex prompts. Let's add
+a command that searches for a pattern in your code.
 
-1.  创建一个 `commands` 目录和一个用于命令组的子目录：
+1.  Create a `commands` directory and a subdirectory for your command group:
 
     ```bash
     mkdir -p commands/fs
     ```
 
-2.  创建一个名为 `commands/fs/grep-code.toml` 的文件：
+2.  Create a file named `commands/fs/grep-code.toml`:
 
     ```toml
     prompt = """
@@ -169,27 +180,29 @@ CLI 安装以进行本地开发。
     """
     ```
 
-    此命令 `/fs:grep-code` 将接受一个参数，使用它运行 `grep`
-    shell 命令，并将结果通过管道传输到提示词中进行总结。
+    This command, `/fs:grep-code`, will take an argument, run the `grep` shell
+    command with it, and pipe the results into a prompt for summarization.
 
-保存文件后，重新启动 Gemini CLI。您现在可以运行 `/fs:grep-code "some pattern"`
-来使用您的新命令。
+After saving the file, restart the Gemini CLI. You can now run
+`/fs:grep-code "some pattern"` to use your new command.
 
-## 第 5 步：添加自定义 `GEMINI.md`
+## Step 5: Add a custom `GEMINI.md`
 
-您可以通过向扩展添加 `GEMINI.md`
-文件来为模型提供持久上下文。这对于给模型关于如何行为或有关扩展工具的信息非常有用。请注意，对于旨在公开命令和提示词的扩展，您可能并不总是需要这样做。
+You can provide persistent context to the model by adding a `GEMINI.md` file to
+your extension. This is useful for giving the model instructions on how to
+behave or information about your extension's tools. Note that you may not always
+need this for extensions built to expose commands and prompts.
 
-1.  在扩展目录的根目录中创建一个名为 `GEMINI.md` 的文件：
+1.  Create a file named `GEMINI.md` in the root of your extension directory:
 
     ```markdown
-    # 我的第一个扩展说明
+    # My First Extension Instructions
 
-    您是一位专家开发人员助手。当用户要求您获取帖子时，请使用 `fetch_posts`
-    工具。在您的回答中要简洁。
+    You are an expert developer assistant. When the user asks you to fetch
+    posts, use the `fetch_posts` tool. Be concise in your responses.
     ```
 
-2.  更新您的 `gemini-extension.json` 以告诉 CLI 加载此文件：
+2.  Update your `gemini-extension.json` to tell the CLI to load this file:
 
     ```json
     {
@@ -206,58 +219,64 @@ CLI 安装以进行本地开发。
     }
     ```
 
-再次重新启动 CLI。现在，在扩展处于活动状态的每个会话中，模型都将拥有来自
-`GEMINI.md` 文件的上下文。
+Restart the CLI again. The model will now have the context from your `GEMINI.md`
+file in every session where the extension is active.
 
-## (可选) 第 6 步：添加 Agent 技能
+## (Optional) Step 6: Add an Agent Skill
 
-_注意：这是一个实验性功能，通过 `experimental.skills` 启用。_
+_Note: This is an experimental feature enabled via `experimental.skills`._
 
-[Agent 技能](../cli/skills.md)
-让您捆绑专业知识和流程化工作流。与提供持久上下文的 `GEMINI.md`
-不同，技能仅在需要时激活，从而节省上下文 token。
+[Agent Skills](../cli/skills.md) let you bundle specialized expertise and
+procedural workflows. Unlike `GEMINI.md`, which provides persistent context,
+skills are activated only when needed, saving context tokens.
 
-1.  创建一个 `skills` 目录和一个用于您的技能的子目录：
+1.  Create a `skills` directory and a subdirectory for your skill:
 
     ```bash
     mkdir -p skills/security-audit
     ```
 
-2.  创建一个 `skills/security-audit/SKILL.md` 文件：
+2.  Create a `skills/security-audit/SKILL.md` file:
 
     ```markdown
     ---
     name: security-audit
-    description: 审计代码安全漏洞的专业知识。当用户要求“检查安全问题”或“审计”他们的更改时使用。
+    description:
+      Expertise in auditing code for security vulnerabilities. Use when the user
+      asks to "check for security issues" or "audit" their changes.
     ---
 
-    # 安全审计员
+    # Security Auditor
 
-    您是一位专家安全研究员。在审计代码时：
+    You are an expert security researcher. When auditing code:
 
-    1. 寻找常见漏洞 (OWASP Top 10)。
-    2. 检查硬编码的秘密或 API 密钥。
-    3. 为任何发现建议补救措施。
+    1. Look for common vulnerabilities (OWASP Top 10).
+    2. Check for hardcoded secrets or API keys.
+    3. Suggest remediation steps for any findings.
     ```
 
-捆绑在您的扩展中的技能会被自动发现，并且当模型识别出相关任务时，可以在会话期间激活它们。
+Skills bundled with your extension are automatically discovered and can be
+activated by the model during a session when it identifies a relevant task.
 
-## 第 7 步：发布您的扩展
+## Step 7: Release your extension
 
-一旦您对您的扩展感到满意，就可以与他人分享。发布扩展的两种主要方式是通过 Git 仓库或通过 GitHub
-Releases。使用公共 Git 仓库是最简单的方法。
+Once you're happy with your extension, you can share it with others. The two
+primary ways of releasing extensions are via a Git repository or through GitHub
+Releases. Using a public Git repository is the simplest method.
 
-有关这两种方法的详细说明，请参阅 [扩展发布指南](./extension-releasing.md)。
+For detailed instructions on both methods, please refer to the
+[Extension Releasing Guide](./extension-releasing.md).
 
-## 结论
+## Conclusion
 
-您已成功创建了一个 Gemini CLI 扩展！您学到了如何：
+You've successfully created a Gemini CLI extension! You learned how to:
 
-- 从模板引导新扩展。
-- 使用 MCP 服务器添加自定义工具。
-- 创建方便的自定义命令。
-- 为模型提供持久上下文。
-- 捆绑专门的 Agent 技能。
-- 链接您的扩展以进行本地开发。
+- Bootstrap a new extension from a template.
+- Add custom tools with an MCP server.
+- Create convenient custom commands.
+- Provide persistent context to the model.
+- Bundle specialized Agent Skills.
+- Link your extension for local development.
 
-从这里开始，您可以探索更多高级功能并在 Gemini CLI 中构建强大的新功能。
+From here, you can explore more advanced features and build powerful new
+capabilities into the Gemini CLI.

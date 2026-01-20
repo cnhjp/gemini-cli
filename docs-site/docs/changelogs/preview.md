@@ -1,17 +1,17 @@
-# 预览版: Release v0.24.0-preview.0
+# Preview release: Release v0.24.0-preview.0
 
-发布时间: 2026年1月6日
+Released: January 6, 2026
 
-我们的预览版包含最新的、新的和实验性的功能。此版本可能不如我们的
-[最新稳定版](latest.md) 稳定。
+Our preview release includes the latest, new, and experimental features. This
+release may not be as stable as our [latest weekly release](latest.md).
 
-要安装预览版：
+To install the preview release:
 
 ```
 npm install -g @google/gemini-cli@preview
 ```
 
-## 变更内容
+## What's changed
 
 - chore(core): refactor model resolution and cleanup fallback logic by
   @adamfweidman in https://github.com/google-gemini/gemini-cli/pull/15228
@@ -220,5 +220,5 @@ npm install -g @google/gemini-cli@preview
 - Agent Skills: Initial Documentation & Tutorial by @NTaylorMullen in
   https://github.com/google-gemini/gemini-cli/pull/15869
 
-**完整变更日志**:
+**Full changelog**:
 https://github.com/google-gemini/gemini-cli/compare/v0.23.0-preview.6...v0.24.0-preview.0

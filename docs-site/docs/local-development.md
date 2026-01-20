@@ -1,98 +1,110 @@
-# 本地开发指南
+# Local development guide
 
-本指南提供了有关设置和使用本地开发功能（例如开发跟踪）的说明。
+This guide provides instructions for setting up and using local development
+features, such as development tracing.
 
-## 开发跟踪 (Development tracing)
+## Development tracing
 
-开发跟踪 (dev traces) 是 OpenTelemetry
-(OTel) 跟踪，通过检测模型调用、工具调度程序、工具调用等有趣事件来帮助您调试代码。
+Development traces (dev traces) are OpenTelemetry (OTel) traces that help you
+debug your code by instrumenting interesting events like model calls, tool
+scheduler, tool calls, etc.
 
-开发跟踪非常详细，专门用于理解代理行为和调试问题。它们默认是禁用的。
+Dev traces are verbose and are specifically meant for understanding agent
+behavior and debugging issues. They are disabled by default.
 
-要启用开发跟踪，请在运行 Gemini CLI 时设置 `GEMINI_DEV_TRACING=true` 环境变量。
+To enable dev traces, set the `GEMINI_DEV_TRACING=true` environment variable
+when running Gemini CLI.
 
-### 查看开发跟踪
+### Viewing dev traces
 
-您可以使用 Jaeger 或 Genkit 开发者 UI 查看开发跟踪。
+You can view dev traces using either Jaeger or the Genkit Developer UI.
 
-#### 使用 Genkit
+#### Using Genkit
 
-Genkit 提供了一个基于 Web 的 UI，用于查看跟踪和其他遥测数据。
+Genkit provides a web-based UI for viewing traces and other telemetry data.
 
-1.  **启动 Genkit 遥测服务器:**
+1.  **Start the Genkit telemetry server:**
 
-    运行以下命令以启动 Genkit 服务器：
+    Run the following command to start the Genkit server:
 
     ```bash
     npm run telemetry -- --target=genkit
     ```
 
-    脚本将输出 Genkit 开发者 UI 的 URL，例如：
+    The script will output the URL for the Genkit Developer UI, for example:
 
     ```
     Genkit Developer UI: http://localhost:4000
     ```
 
-2.  **运行带有开发跟踪的 Gemini CLI:**
+2.  **Run Gemini CLI with dev tracing:**
 
-    在单独的终端中，使用 `GEMINI_DEV_TRACING` 环境变量运行您的 Gemini CLI 命令：
+    In a separate terminal, run your Gemini CLI command with the
+    `GEMINI_DEV_TRACING` environment variable:
 
     ```bash
     GEMINI_DEV_TRACING=true gemini
     ```
 
-3.  **查看跟踪:**
+3.  **View the traces:**
 
-    在浏览器中打开 Genkit 开发者 UI URL，然后导航到 **Traces**
-    选项卡以查看跟踪。
+    Open the Genkit Developer UI URL in your browser and navigate to the
+    **Traces** tab to view the traces.
 
-#### 使用 Jaeger
+#### Using Jaeger
 
-您可以在 Jaeger UI 中查看开发跟踪。首先，请按照以下步骤操作：
+You can view dev traces in the Jaeger UI. To get started, follow these steps:
 
-1.  **启动遥测收集器:**
+1.  **Start the telemetry collector:**
 
-    在终端中运行以下命令以下载并启动 Jaeger 和 OTEL 收集器：
+    Run the following command in your terminal to download and start Jaeger and
+    an OTEL collector:
 
     ```bash
     npm run telemetry -- --target=local
     ```
 
-    此命令还会为本地遥测配置您的工作区，并提供 Jaeger UI 的链接（通常为
-    `http://localhost:16686`）。
+    This command also configures your workspace for local telemetry and provides
+    a link to the Jaeger UI (usually `http://localhost:16686`).
 
-2.  **运行带有开发跟踪的 Gemini CLI:**
+2.  **Run Gemini CLI with dev tracing:**
 
-    在单独的终端中，使用 `GEMINI_DEV_TRACING` 环境变量运行您的 Gemini CLI 命令：
+    In a separate terminal, run your Gemini CLI command with the
+    `GEMINI_DEV_TRACING` environment variable:
 
     ```bash
     GEMINI_DEV_TRACING=true gemini
     ```
 
-3.  **查看跟踪:**
+3.  **View the traces:**
 
-    运行命令后，在浏览器中打开 Jaeger UI 链接以查看跟踪。
+    After running your command, open the Jaeger UI link in your browser to view
+    the traces.
 
-有关遥测的更多详细信息，请参阅 [遥测文档](./cli/telemetry.md)。
+For more detailed information on telemetry, see the
+[telemetry documentation](./cli/telemetry.md).
 
-### 使用开发跟踪检测代码
+### Instrumenting code with dev traces
 
-您可以向自己的代码添加开发跟踪，以进行更详细的检测。这对于调试和理解执行流程非常有用。
+You can add dev traces to your own code for more detailed instrumentation. This
+is useful for debugging and understanding the flow of execution.
 
-使用 `runInDevTraceSpan` 函数将任何代码段包装在跟踪 span 中。
+Use the `runInDevTraceSpan` function to wrap any section of code in a trace
+span.
 
-这是一个基本示例：
+Here is a basic example:
 
 ```typescript
 import { runInDevTraceSpan } from '@google/gemini-cli-core';
 
 await runInDevTraceSpan({ name: 'my-custom-span' }, async ({ metadata }) => {
-  // `metadata` 对象允许您记录操作的输入和输出以及其他属性。
+  // The `metadata` object allows you to record the input and output of the
+  // operation as well as other attributes.
   metadata.input = { key: 'value' };
-  // 设置自定义属性。
+  // Set custom attributes.
   metadata.attributes['gen_ai.request.model'] = 'gemini-4.0-mega';
 
-  // 您的跟踪代码放在这里
+  // Your code to be traced goes here
   try {
     const output = await somethingRisky();
     metadata.output = output;
@@ -104,10 +116,13 @@ await runInDevTraceSpan({ name: 'my-custom-span' }, async ({ metadata }) => {
 });
 ```
 
-在此示例中：
+In this example:
 
-- `name`: span 的名称，将显示在跟踪中。
-- `metadata.input`: (可选) 包含被跟踪操作的输入数据的对象。
-- `metadata.output`: (可选) 包含被跟踪操作的输出数据的对象。
-- `metadata.attributes`: (可选) 要添加到 span 的自定义属性记录。
-- `metadata.error`: (可选) 如果操作失败，要记录的错误对象。
+- `name`: The name of the span, which will be displayed in the trace.
+- `metadata.input`: (Optional) An object containing the input data for the
+  traced operation.
+- `metadata.output`: (Optional) An object containing the output data from the
+  traced operation.
+- `metadata.attributes`: (Optional) A record of custom attributes to add to the
+  span.
+- `metadata.error`: (Optional) An error object to record if the operation fails.

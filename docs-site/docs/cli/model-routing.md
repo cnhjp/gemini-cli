@@ -1,30 +1,37 @@
-# 模型路由
+# Model routing
 
-Gemini
-CLI 包含模型路由功能，该功能会在模型故障时自动切换到回退模型。此功能默认启用，并在主模型不可用时提供弹性。
+Gemini CLI includes a model routing feature that automatically switches to a
+fallback model in case of a model failure. This feature is enabled by default
+and provides resilience when the primary model is unavailable.
 
-## 工作原理
+## How it works
 
-模型路由由 `ModelAvailabilityService`
-管理，该服务监控模型健康状况并根据定义的策略自动将请求路由到可用模型。
+Model routing is managed by the `ModelAvailabilityService`, which monitors model
+health and automatically routes requests to available models based on defined
+policies.
 
-1.  **模型故障:**
-    如果当前选择的模型失败（例如，由于配额或服务器错误），CLI 将启动回退过程。
+1.  **Model failure:** If the currently selected model fails (e.g., due to quota
+    or server errors), the CLI will initiate the fallback process.
 
-2.  **用户同意:**
-    根据故障和模型的策略，CLI 可能会提示您切换到回退模型（默认情况下总是提示您）。
+2.  **User consent:** Depending on the failure and the model's policy, the CLI
+    may prompt you to switch to a fallback model (by default always prompts
+    you).
 
-3.  **模型切换:**
-    如果获得批准，或者如果策略允许静默回退，CLI 将在当前轮次或会话的剩余时间内使用可用的回退模型。
+3.  **Model switch:** If approved, or if the policy allows for silent fallback,
+    the CLI will use an available fallback model for the current turn or the
+    remainder of the session.
 
-### 模型选择优先级
+### Model selection precedence
 
-Gemini CLI 使用的模型由以下优先级顺序决定：
+The model used by Gemini CLI is determined by the following order of precedence:
 
-1.  **`--model` 命令行标志:** 启动 CLI 时使用 `--model`
-    标志指定的模型将始终被使用。
-2.  **`GEMINI_MODEL` 环境变量:** 如果未使用 `--model` 标志，CLI 将使用
-    `GEMINI_MODEL` 环境变量中指定的模型。
-3.  **`settings.json` 中的 `model.name`:** 如果上述均未设置，将使用您的
-    `settings.json` 文件的 `model.name` 属性中指定的模型。
-4.  **默认模型:** 如果上述均未设置，将使用默认模型。默认模型是 `auto`。
+1.  **`--model` command-line flag:** A model specified with the `--model` flag
+    when launching the CLI will always be used.
+2.  **`GEMINI_MODEL` environment variable:** If the `--model` flag is not used,
+    the CLI will use the model specified in the `GEMINI_MODEL` environment
+    variable.
+3.  **`model.name` in `settings.json`:** If neither of the above are set, the
+    model specified in the `model.name` property of your `settings.json` file
+    will be used.
+4.  **Default model:** If none of the above are set, the default model will be
+    used. The default model is `auto`

@@ -1,21 +1,22 @@
-# 主题
+# Themes
 
-Gemini CLI 支持多种主题以自定义其配色方案和外观。您可以通过 `/theme` 命令或
-`"theme":` 配置设置来更改主题以适应您的偏好。
+Gemini CLI supports a variety of themes to customize its color scheme and
+appearance. You can change the theme to suit your preferences via the `/theme`
+command or `"theme":` configuration setting.
 
-## 可用主题
+## Available themes
 
-Gemini CLI 附带了一系列预定义的主题，您可以在 Gemini CLI 中使用 `/theme`
-命令列出这些主题：
+Gemini CLI comes with a selection of pre-defined themes, which you can list
+using the `/theme` command within Gemini CLI:
 
-- **深色主题:**
+- **Dark themes:**
   - `ANSI`
   - `Atom One`
   - `Ayu`
   - `Default`
   - `Dracula`
   - `GitHub`
-- **浅色主题:**
+- **Light themes:**
   - `ANSI Light`
   - `Ayu Light`
   - `Default Light`
@@ -23,33 +24,37 @@ Gemini CLI 附带了一系列预定义的主题，您可以在 Gemini CLI 中使
   - `Google Code`
   - `Xcode`
 
-### 更改主题
+### Changing themes
 
-1.  在 Gemini CLI 中输入 `/theme`。
-2.  将出现一个对话框或选择提示，列出可用主题。
-3.  使用箭头键选择一个主题。某些界面可能会在您选择时提供实时预览或高亮显示。
-4.  确认您的选择以应用主题。
+1.  Enter `/theme` into Gemini CLI.
+2.  A dialog or selection prompt appears, listing the available themes.
+3.  Using the arrow keys, select a theme. Some interfaces might offer a live
+    preview or highlight as you select.
+4.  Confirm your selection to apply the theme.
 
-**注意:** 如果主题在您的 `settings.json`
-文件中定义（通过名称或文件路径），您必须先从文件中删除 `"theme"`
-设置，然后才能使用 `/theme` 命令更改主题。
+**Note:** If a theme is defined in your `settings.json` file (either by name or
+by a file path), you must remove the `"theme"` setting from the file before you
+can change the theme using the `/theme` command.
 
-### 主题持久化
+### Theme persistence
 
-所选主题保存在 Gemini CLI 的 [配置](../get-started/configuration.md)
-中，因此您的偏好在会话之间会被记住。
+Selected themes are saved in Gemini CLI's
+[configuration](../get-started/configuration.md) so your preference is
+remembered across sessions.
 
 ---
 
-## 自定义颜色主题
+## Custom color themes
 
-Gemini CLI 允许您通过在 `settings.json`
-文件中指定它们来创建自己的自定义颜色主题。这使您可以完全控制 CLI 中使用的调色板。
+Gemini CLI allows you to create your own custom color themes by specifying them
+in your `settings.json` file. This gives you full control over the color palette
+used in the CLI.
 
-### 如何定义自定义主题
+### How to define a custom theme
 
-将 `customThemes` 块添加到您的用户、项目或系统 `settings.json`
-文件中。每个自定义主题都定义为一个具有唯一名称和一组颜色键的对象。例如：
+Add a `customThemes` block to your user, project, or system `settings.json`
+file. Each custom theme is defined as an object with a unique name and a set of
+color keys. For example:
 
 ```json
 {
@@ -66,7 +71,7 @@ Gemini CLI 允许您通过在 `settings.json`
 }
 ```
 
-**颜色键:**
+**Color keys:**
 
 - `Background`
 - `Foreground`
@@ -79,18 +84,18 @@ Gemini CLI 允许您通过在 `settings.json`
 - `AccentRed`
 - `Comment`
 - `Gray`
-- `DiffAdded` (可选，用于 diff 中的添加行)
-- `DiffRemoved` (可选，用于 diff 中的删除行)
-- `DiffModified` (可选，用于 diff 中的修改行)
+- `DiffAdded` (optional, for added lines in diffs)
+- `DiffRemoved` (optional, for removed lines in diffs)
 
-您还可以通过添加嵌套的 `text` 对象来覆盖单个 UI 文本角色。此对象支持键
-`primary`, `secondary`, `link`, `accent`, 和 `response`。当提供 `text.response`
-时，它优先于 `text.primary` 用于在聊天中渲染模型响应。
+You can also override individual UI text roles by adding a nested `text` object.
+This object supports the keys `primary`, `secondary`, `link`, `accent`, and
+`response`. When `text.response` is provided it takes precedence over
+`text.primary` for rendering model responses in chat.
 
-**必填属性:**
+**Required properties:**
 
-- `name` (必须与 `customThemes` 对象中的键匹配且为字符串)
-- `type` (必须是字符串 `"custom"`)
+- `name` (must match the key in the `customThemes` object and be a string)
+- `type` (must be the string `"custom"`)
 - `Background`
 - `Foreground`
 - `LightBlue`
@@ -103,19 +108,23 @@ Gemini CLI 允许您通过在 `settings.json`
 - `Comment`
 - `Gray`
 
-您可以对任何颜色值使用十六进制代码（例如 `#FF0000`）**或**
-标准 CSS 颜色名称（例如 `coral`, `teal`, `blue`）。请参阅
-[CSS 颜色名称](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#color_keywords)
-获取支持名称的完整列表。
+You can use either hex codes (e.g., `#FF0000`) **or** standard CSS color names
+(e.g., `coral`, `teal`, `blue`) for any color value. See
+[CSS color names](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#color_keywords)
+for a full list of supported names.
 
-您可以通过向 `customThemes` 对象添加更多条目来定义多个自定义主题。
+You can define multiple custom themes by adding more entries to the
+`customThemes` object.
 
-### 从文件加载主题
+### Loading themes from a file
 
-除了在 `settings.json` 中定义自定义主题外，您还可以通过在 `settings.json`
-中指定文件路径直接从 JSON 文件加载主题。这对共享主题或将它们与主配置分开很有用。
+In addition to defining custom themes in `settings.json`, you can also load a
+theme directly from a JSON file by specifying the file path in your
+`settings.json`. This is useful for sharing themes or keeping them separate from
+your main configuration.
 
-要从文件加载主题，请将 `settings.json` 中的 `theme` 属性设置为主题文件的路径：
+To load a theme from a file, set the `theme` property in your `settings.json` to
+the path of your theme file:
 
 ```json
 {
@@ -125,10 +134,10 @@ Gemini CLI 允许您通过在 `settings.json`
 }
 ```
 
-主题文件必须是有效的 JSON 文件，其结构与 `settings.json`
-中定义的自定义主题相同。
+The theme file must be a valid JSON file that follows the same structure as a
+custom theme defined in `settings.json`.
 
-**示例 `my-theme.json`:**
+**Example `my-theme.json`:**
 
 ```json
 {
@@ -147,30 +156,33 @@ Gemini CLI 允许您通过在 `settings.json`
   "Gray": "#ABB2BF",
   "DiffAdded": "#A6E3A1",
   "DiffRemoved": "#F38BA8",
-  "DiffModified": "#89B4FA",
   "GradientColors": ["#4796E4", "#847ACE", "#C3677F"]
 }
 ```
 
-**安全说明:** 为了您的安全，Gemini
-CLI 只会加载位于您的主目录中的主题文件。如果您尝试从主目录外部加载主题，将显示警告并且不会加载主题。这是为了防止从不受信任的来源加载潜在的恶意主题文件。
+**Security note:** For your safety, Gemini CLI will only load theme files that
+are located within your home directory. If you attempt to load a theme from
+outside your home directory, a warning will be displayed and the theme will not
+be loaded. This is to prevent loading potentially malicious theme files from
+untrusted sources.
 
-### 自定义主题示例
+### Example custom theme
 
-<img src="/assets/theme-custom.png" alt="Custom theme example" width="600" />
+<img src="../assets/theme-custom.png" alt="Custom theme example" width="600" />
 
-### 使用您的自定义主题
+### Using your custom theme
 
-- 在 Gemini CLI 中使用 `/theme`
-  命令选择您的自定义主题。您的自定义主题将出现在主题选择对话框中。
-- 或者，通过将 `"theme": "MyCustomTheme"` 添加到 `settings.json` 中的 `ui`
-  对象将其设置为默认值。
-- 自定义主题可以在用户、项目或系统级别设置，并遵循与其他设置相同的
-  [配置优先级](../get-started/configuration.md)。
+- Select your custom theme using the `/theme` command in Gemini CLI. Your custom
+  theme will appear in the theme selection dialog.
+- Or, set it as the default by adding `"theme": "MyCustomTheme"` to the `ui`
+  object in your `settings.json`.
+- Custom themes can be set at the user, project, or system level, and follow the
+  same [configuration precedence](../get-started/configuration.md) as other
+  settings.
 
 ---
 
-## 深色主题
+## Dark themes
 
 ### ANSI
 
@@ -196,7 +208,7 @@ CLI 只会加载位于您的主目录中的主题文件。如果您尝试从主�
 
 <img src="/assets/theme-github.png" alt="GitHub theme" width="600">
 
-## 浅色主题
+## Light themes
 
 ### ANSI Light
 

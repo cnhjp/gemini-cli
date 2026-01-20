@@ -1,16 +1,20 @@
-# Token 缓存和成本优化
+# Token caching and cost optimization
 
-使用 API 密钥身份验证（Gemini API 密钥或 Vertex AI）时，Gemini
-CLI 通过 token 缓存自动优化 API 成本。此功能重用先前的系统指令和上下文，以减少后续请求中处理的 token 数量。
+Gemini CLI automatically optimizes API costs through token caching when using
+API key authentication (Gemini API key or Vertex AI). This feature reuses
+previous system instructions and context to reduce the number of tokens
+processed in subsequent requests.
 
-**Token 缓存适用于:**
+**Token caching is available for:**
 
-- API 密钥用户 (Gemini API 密钥)
-- Vertex AI 用户 (已设置项目和位置)
+- API key users (Gemini API key)
+- Vertex AI users (with project and location setup)
 
-**Token 缓存不适用于:**
+**Token caching is not available for:**
 
-- OAuth 用户 (Google 个人/企业账号) - Code Assist API 目前不支持创建缓存内容
+- OAuth users (Google Personal/Enterprise accounts) - the Code Assist API does
+  not support cached content creation at this time
 
-您可以使用 `/stats`
-命令查看您的 token 使用情况和缓存 token 节省情况。当缓存 token 可用时，它们将显示在统计输出中。
+You can view your token usage and cached token savings using the `/stats`
+command. When cached tokens are available, they will be displayed in the stats
+output.

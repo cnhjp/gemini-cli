@@ -1,28 +1,33 @@
-# 最新稳定版: v0.23.0
+# Latest stable release: v0.23.0
 
-发布时间: 2026年1月6日
+Released: January 6, 2026
 
-对于大多数用户，我们最新的稳定版本是推荐版本。使用以下命令安装最新稳定版：
+For most users, our latest stable release is the recommended release. Install
+the latest stable version with:
 
 ```
 npm install -g @google/gemini-cli
 ```
 
-## 亮点
+## Highlights
 
-- **Gemini CLI wrapped:** 运行 `npx gemini-wrapped`
-  来可视化您的使用统计、顶级模型、语言等！
-- **Windows 剪贴板图像支持:** Windows 用户现在可以使用 `Alt`+`V`
-  直接将剪贴板中的图像粘贴到 CLI 中。([pr](https://github.com/google-gemini/gemini-cli/pull/13997)
-  by [@sgeraldes](https://github.com/sgeraldes))
-- **终端背景颜色检测:**
-  自动优化终端的背景颜色以选择兼容的主题并提供可访问性警告。([pr](https://github.com/google-gemini/gemini-cli/pull/15132)
-  by [@jacob314](https://github.com/jacob314))
-- **会话注销:** 使用新的 `/logout`
-  命令即时清除凭据并重置您的身份验证状态，以便无缝切换帐户。([pr](https://github.com/google-gemini/gemini-cli/pull/13383)
-  by [@CN-Scars](https://github.com/CN-Scars))
+- **Gemini CLI wrapped:** Run `npx gemini-wrapped` to visualize your usage
+  stats, top models, languages, and more!
+- **Windows clipboard image support:** Windows users can now paste images
+  directly from their clipboard into the CLI using `Alt`+`V`.
+  ([pr](https://github.com/google-gemini/gemini-cli/pull/13997) by
+  [@sgeraldes](https://github.com/sgeraldes))
+- **Terminal background color detection:** Automatically optimizes your
+  terminal's background color to select compatible themes and provide
+  accessibility warnings.
+  ([pr](https://github.com/google-gemini/gemini-cli/pull/15132) by
+  [@jacob314](https://github.com/jacob314))
+- **Session logout:** Use the new `/logout` command to instantly clear
+  credentials and reset your authentication state for seamless account
+  switching. ([pr](https://github.com/google-gemini/gemini-cli/pull/13383) by
+  [@CN-Scars](https://github.com/CN-Scars))
 
-## 变更内容
+## What's changed
 
 - Code assist service metrics. by @gundermanc in
   https://github.com/google-gemini/gemini-cli/pull/15024
@@ -156,5 +161,5 @@ npm install -g @google/gemini-cli
   [CONFLICTS] by @gemini-cli-robot in
   https://github.com/google-gemini/gemini-cli/pull/16038
 
-**完整变更日志**:
+**Full changelog**:
 https://github.com/google-gemini/gemini-cli/compare/v0.22.5...v0.23.0

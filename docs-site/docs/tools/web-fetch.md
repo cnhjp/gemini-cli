@@ -1,52 +1,59 @@
-# Web fetch 工具 (`web_fetch`)
+# Web fetch tool (`web_fetch`)
 
-本文档描述了 Gemini CLI 的 `web_fetch` 工具。
+This document describes the `web_fetch` tool for the Gemini CLI.
 
-## 描述
+## Description
 
-使用 `web_fetch` 总结、比较或提取网页中的信息。`web_fetch`
-工具处理嵌入在提示词中的一个或多个 URL（最多 20 个）的内容。`web_fetch`
-接受自然语言提示词并返回生成的响应。
+Use `web_fetch` to summarize, compare, or extract information from web pages.
+The `web_fetch` tool processes content from one or more URLs (up to 20) embedded
+in a prompt. `web_fetch` takes a natural language prompt and returns a generated
+response.
 
-### 参数
+### Arguments
 
-`web_fetch` 接受一个参数：
+`web_fetch` takes one argument:
 
-- `prompt`
-  (string, 必需): 一个综合提示词，包括要获取的 URL（最多 20 个）以及有关如何处理其内容的具体说明。例如：
-  `"Summarize https://example.com/article and extract key points from https://another.com/data"`。提示词必须包含至少一个以
-  `http://` 或 `https://` 开头的 URL。
+- `prompt` (string, required): A comprehensive prompt that includes the URL(s)
+  (up to 20) to fetch and specific instructions on how to process their content.
+  For example:
+  `"Summarize https://example.com/article and extract key points from https://another.com/data"`.
+  The prompt must contain at least one URL starting with `http://` or
+  `https://`.
 
-## 如何在 Gemini CLI 中使用 `web_fetch`
+## How to use `web_fetch` with the Gemini CLI
 
-要在 Gemini CLI 中使用
-`web_fetch`，请提供包含 URL 的自然语言提示词。该工具在获取任何 URL 之前会要求确认。确认后，该工具将通过 Gemini
-API 的 `urlContext` 处理 URL。
+To use `web_fetch` with the Gemini CLI, provide a natural language prompt that
+contains URLs. The tool will ask for confirmation before fetching any URLs. Once
+confirmed, the tool will process URLs through Gemini API's `urlContext`.
 
-如果 Gemini
-API 无法访问该 URL，该工具将回退到直接从本地机器获取内容。该工具将格式化响应，包括来源归属和可能的引用。然后，该工具将向用户提供响应。
+If the Gemini API cannot access the URL, the tool will fall back to fetching
+content directly from the local machine. The tool will format the response,
+including source attribution and citations where possible. The tool will then
+provide the response to the user.
 
-用法:
+Usage:
 
 ```
 web_fetch(prompt="Your prompt, including a URL such as https://google.com.")
 ```
 
-## `web_fetch` 示例
+## `web_fetch` examples
 
-总结单篇文章：
+Summarize a single article:
 
 ```
 web_fetch(prompt="Can you summarize the main points of https://example.com/news/latest")
 ```
 
-比较两篇文章：
+Compare two articles:
 
 ```
 web_fetch(prompt="What are the differences in the conclusions of these two papers: https://arxiv.org/abs/2401.0001 and https://arxiv.org/abs/2401.0002?")
 ```
 
-## 重要说明
+## Important notes
 
-- **URL 处理:** `web_fetch` 依赖于 Gemini API 访问和处理给定 URL 的能力。
-- **输出质量:** 输出质量将取决于提示词中说明的清晰度。
+- **URL processing:** `web_fetch` relies on the Gemini API's ability to access
+  and process the given URLs.
+- **Output quality:** The quality of the output will depend on the clarity of
+  the instructions in the prompt.

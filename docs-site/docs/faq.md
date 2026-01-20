@@ -1,141 +1,154 @@
-# 常见问题 (FAQ)
+# Frequently asked questions (FAQ)
 
-本页提供了有关使用 Gemini CLI 时遇到的常见问题的解答和解决方案。
+This page provides answers to common questions and solutions to frequent
+problems encountered while using Gemini CLI.
 
-## 一般问题
+## General issues
 
-### 为什么我会收到 `API error: 429 - Resource exhausted` 错误？
+### Why am I getting an `API error: 429 - Resource exhausted`?
 
-此错误表明您已超过 API 请求限制。Gemini
-API 设有速率限制以防止滥用并确保公平使用。
+This error indicates that you have exceeded your API request limit. The Gemini
+API has rate limits to prevent abuse and ensure fair usage.
 
-要解决此问题，您可以：
+To resolve this, you can:
 
-- **检查您的使用情况:** 在 Google AI Studio 或您的 Google
-  Cloud 项目仪表板中查看您的 API 使用情况。
-- **优化您的提示词:**
-  如果您在短时间内发出大量请求，请尝试分批处理提示词或在请求之间引入延迟。
-- **申请增加配额:** 如果您持续需要更高的限制，可以向 Google 申请增加配额。
+- **Check your usage:** Review your API usage in the Google AI Studio or your
+  Google Cloud project dashboard.
+- **Optimize your prompts:** If you are making many requests in a short period,
+  try to batch your prompts or introduce delays between requests.
+- **Request a quota increase:** If you consistently need a higher limit, you can
+  request a quota increase from Google.
 
-### 为什么我在运行 `npm run start` 时收到 `ERR_REQUIRE_ESM` 错误？
+### Why am I getting an `ERR_REQUIRE_ESM` error when running `npm run start`?
 
-此错误通常发生在 Node.js 项目中，当 CommonJS 和 ES Modules 之间存在不匹配时。
+This error typically occurs in Node.js projects when there is a mismatch between
+CommonJS and ES Modules.
 
-这通常是由于您的 `package.json` 或 `tsconfig.json` 配置错误造成的。请确保：
+This is often due to a misconfiguration in your `package.json` or
+`tsconfig.json`. Ensure that:
 
-1.  您的 `package.json` 包含 `"type": "module"`。
-2.  您的 `tsconfig.json` 在 `compilerOptions` 中包含 `"module": "NodeNext"`
-    或兼容的设置。
+1.  Your `package.json` has `"type": "module"`.
+2.  Your `tsconfig.json` has `"module": "NodeNext"` or a compatible setting in
+    the `compilerOptions`.
 
-如果问题仍然存在，请尝试删除您的 `node_modules` 目录和 `package-lock.json`
-文件，然后再次运行 `npm install`。
+If the problem persists, try deleting your `node_modules` directory and
+`package-lock.json` file, and then run `npm install` again.
 
-### 为什么我在统计输出中看不到缓存的 token 计数？
+### Why don't I see cached token counts in my stats output?
 
-缓存的 token 信息仅在使用缓存 token 时显示。此功能适用于 API 密钥用户（Gemini
-API 密钥或 Google Cloud Vertex
-AI），但不适用于 OAuth 用户（例如 Google 个人/企业账号，如 Google
-Gmail 或 Google Workspace）。这是因为 Gemini Code Assist
-API 不支持创建缓存内容。您仍然可以使用 Gemini CLI 中的 `/stats`
-命令查看总 token 使用情况。
+Cached token information is only displayed when cached tokens are being used.
+This feature is available for API key users (Gemini API key or Google Cloud
+Vertex AI) but not for OAuth users (such as Google Personal/Enterprise accounts
+like Google Gmail or Google Workspace, respectively). This is because the Gemini
+Code Assist API does not support cached content creation. You can still view
+your total token usage using the `/stats` command in Gemini CLI.
 
-## 安装和更新
+## Installation and updates
 
-### 如何将 Gemini CLI 更新到最新版本？
+### How do I update Gemini CLI to the latest version?
 
-如果您通过 `npm` 全局安装了它，请使用命令
-`npm install -g @google/gemini-cli@latest`
-进行更新。如果您是从源代码编译的，请从仓库拉取最新更改，然后使用命令
-`npm run build` 重新构建。
+If you installed it globally via `npm`, update it using the command
+`npm install -g @google/gemini-cli@latest`. If you compiled it from source, pull
+the latest changes from the repository, and then rebuild using the command
+`npm run build`.
 
-## 平台特定问题
+## Platform-specific issues
 
-### 为什么当我在 Windows 上运行像 `chmod +x` 这样的命令时 CLI 会崩溃？
+### Why does the CLI crash on Windows when I run a command like `chmod +x`?
 
-像 `chmod` 这样的命令特定于类 Unix 操作系统（Linux,
-macOS）。默认情况下，它们在 Windows 上不可用。
+Commands like `chmod` are specific to Unix-like operating systems (Linux,
+macOS). They are not available on Windows by default.
 
-要解决此问题，您可以：
+To resolve this, you can:
 
-- **使用 Windows 等效命令:** 代替 `chmod`，您可以使用 `icacls`
-  在 Windows 上修改文件权限。
-- **使用兼容层:** 像 Git Bash 或 Windows Subsystem for Linux
-  (WSL) 这样的工具在 Windows 上提供了类 Unix 环境，这些命令将在其中工作。
+- **Use Windows-equivalent commands:** Instead of `chmod`, you can use `icacls`
+  to modify file permissions on Windows.
+- **Use a compatibility layer:** Tools like Git Bash or Windows Subsystem for
+  Linux (WSL) provide a Unix-like environment on Windows where these commands
+  will work.
 
-## 配置
+## Configuration
 
-### 如何配置我的 `GOOGLE_CLOUD_PROJECT`？
+### How do I configure my `GOOGLE_CLOUD_PROJECT`?
 
-您可以使用环境变量配置您的 Google Cloud 项目 ID。
+You can configure your Google Cloud Project ID using an environment variable.
 
-在您的 shell 中设置 `GOOGLE_CLOUD_PROJECT` 环境变量：
+Set the `GOOGLE_CLOUD_PROJECT` environment variable in your shell:
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
 ```
 
-要使此设置永久生效，请将此行添加到您的 shell 启动文件（例如 `~/.bashrc`,
-`~/.zshrc`）。
+To make this setting permanent, add this line to your shell's startup file
+(e.g., `~/.bashrc`, `~/.zshrc`).
 
-### 安全存储 API 密钥的最佳方式是什么？
+### What is the best way to store my API keys securely?
 
-在脚本中暴露 API 密钥或将其检入源代码控制存在安全风险。
+Exposing API keys in scripts or checking them into source control is a security
+risk.
 
-要安全地存储您的 API 密钥，您可以：
+To store your API keys securely, you can:
 
-- **使用 `.env` 文件:** 在项目的 `.gemini` 目录中创建一个 `.env`
-  文件 (`.gemini/.env`) 并将密钥存储在那里。Gemini CLI 将自动加载这些变量。
-- **使用系统的密钥环:** 为了最安全的存储，请使用操作系统的机密管理工具（如 macOS
-  Keychain, Windows Credential
-  Manager 或 Linux 上的机密管理器）。然后，您可以让脚本或环境在运行时从安全存储加载密钥。
+- **Use a `.env` file:** Create a `.env` file in your project's `.gemini`
+  directory (`.gemini/.env`) and store your keys there. Gemini CLI will
+  automatically load these variables.
+- **Use your system's keyring:** For the most secure storage, use your operating
+  system's secret management tool (like macOS Keychain, Windows Credential
+  Manager, or a secret manager on Linux). You can then have your scripts or
+  environment load the key from the secure storage at runtime.
 
-### Gemini CLI 配置和设置文件存储在哪里？
+### Where are the Gemini CLI configuration and settings files stored?
 
-Gemini CLI 配置存储在两个 `settings.json` 文件中：
+The Gemini CLI configuration is stored in two `settings.json` files:
 
-1.  在您的主目录中：`~/.gemini/settings.json`。
-2.  在您的项目根目录中：`./.gemini/settings.json`。
+1.  In your home directory: `~/.gemini/settings.json`.
+2.  In your project's root directory: `./.gemini/settings.json`.
 
-有关更多详细信息，请参阅 [Gemini CLI 配置](./get-started/configuration.md)。
+Refer to [Gemini CLI Configuration](./get-started/configuration.md) for more
+details.
 
-## Google AI Pro/Ultra 和订阅常见问题解答
+## Google AI Pro/Ultra and subscription FAQs
 
-### 我可以在哪里了解有关我的 Google AI Pro 或 Google AI Ultra 订阅的更多信息？
+### Where can I learn more about my Google AI Pro or Google AI Ultra subscription?
 
-要了解有关您的 Google AI Pro 或 Google AI Ultra 订阅的更多信息，请访问
-[订阅设置](https://one.google.com) 中的 **管理订阅**。
+To learn more about your Google AI Pro or Google AI Ultra subscription, visit
+**Manage subscription** in your [subscription settings](https://one.google.com).
 
-### 我如何知道我是否拥有 Google AI Pro 或 Ultra 的更高限制？
+### How do I know if I have higher limits for Google AI Pro or Ultra?
 
-如果您订阅了 Google AI Pro 或 Ultra，您将自动拥有更高的 Gemini Code
-Assist 和 Gemini CLI 限制。这些限制在 Gemini
-CLI 和 IDE 中的代理模式之间共享。您可以通过在 [订阅设置](https://one.google.com)
-中检查您是否仍订阅了 Google AI Pro 或 Ultra 来确认您拥有更高的限制。
+If you're subscribed to Google AI Pro or Ultra, you automatically have higher
+limits to Gemini Code Assist and Gemini CLI. These are shared across Gemini CLI
+and agent mode in the IDE. You can confirm you have higher limits by checking if
+you are still subscribed to Google AI Pro or Ultra in your
+[subscription settings](https://one.google.com).
 
-### 如果我订阅了 Google AI Pro 或 Ultra，使用 Gemini Code Assist 或 Gemini CLI 的隐私政策是什么？
+### What is the privacy policy for using Gemini Code Assist or Gemini CLI if I've subscribed to Google AI Pro or Ultra?
 
-要了解有关由您的订阅管辖的隐私政策和服务条款的更多信息，请访问
-[Gemini Code Assist：服务条款和隐私政策](https://developers.google.com/gemini-code-assist/resources/privacy-notices)。
+To learn more about your privacy policy and terms of service governed by your
+subscription, visit
+[Gemini Code Assist: Terms of Service and Privacy Policies](https://developers.google.com/gemini-code-assist/resources/privacy-notices).
 
-### 我已升级到 Google AI Pro 或 Ultra，但它仍然说我达到了配额限制。这是一个 bug 吗？
+### I've upgraded to Google AI Pro or Ultra but it still says I am hitting quota limits. Is this a bug?
 
-您的 Google AI Pro 或 Ultra 订阅中的更高限制适用于 Gemini 2.5
-Pro 和 Flash 上的 Gemini 2.5。它们是 Gemini CLI 和 Gemini Code Assist
-IDE 扩展中的代理模式之间的共享配额。您可以在
-[配额和限制](https://developers.google.com/gemini-code-assist/resources/quotas)
-中了解有关 Gemini CLI、Gemini Code Assist 和 Gemini Code
-Assist 中的代理模式的配额限制的更多信息。
+The higher limits in your Google AI Pro or Ultra subscription are for Gemini 2.5
+across both Gemini 2.5 Pro and Flash. They are shared quota across Gemini CLI
+and agent mode in Gemini Code Assist IDE extensions. You can learn more about
+quota limits for Gemini CLI, Gemini Code Assist and agent mode in Gemini Code
+Assist at
+[Quotas and limits](https://developers.google.com/gemini-code-assist/resources/quotas).
 
-### 如果我通过购买 Google AI Pro 或 Ultra 订阅升级到 Gemini CLI 和 Gemini Code Assist 的更高限制，Gemini 会开始使用我的数据来改进其机器学习模型吗？
+### If I upgrade to higher limits for Gemini CLI and Gemini Code Assist by purchasing a Google AI Pro or Ultra subscription, will Gemini start using my data to improve its machine learning models?
 
-如果您购买了付费计划，Google 不会使用您的数据来改进 Google 的机器学习模型。注意：如果您决定保留使用 Gemini
-Code Assist 免费版本（Gemini Code
-Assist 个人版），您也可以选择退出使用您的数据来改进 Google 的机器学习模型。有关更多信息，请参阅
-[Gemini Code Assist 个人版隐私声明](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals)。
+Google does not use your data to improve Google's machine learning models if you
+purchase a paid plan. Note: If you decide to remain on the free version of
+Gemini Code Assist, Gemini Code Assist for individuals, you can also opt out of
+using your data to improve Google's machine learning models. See the
+[Gemini Code Assist for individuals privacy notice](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals)
+for more information.
 
-## 没有看到您的问题？
+## Not seeing your question?
 
-搜索
-[GitHub 上的 Gemini CLI 问答讨论](https://github.com/google-gemini/gemini-cli/discussions/categories/q-a)
-或
-[在 GitHub 上发起新讨论](https://github.com/google-gemini/gemini-cli/discussions/new?category=q-a)
+Search the
+[Gemini CLI Q&A discussions on GitHub](https://github.com/google-gemini/gemini-cli/discussions/categories/q-a)
+or
+[start a new discussion on GitHub](https://github.com/google-gemini/gemini-cli/discussions/new?category=q-a)

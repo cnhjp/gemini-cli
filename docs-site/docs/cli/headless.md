@@ -1,149 +1,152 @@
-# 无头模式 (Headless mode)
+# Headless mode
 
-无头模式允许您从命令行脚本和自动化工具以编程方式运行 Gemini
-CLI，而无需任何交互式 UI。这对于脚本编写、自动化、CI/CD 管道和构建 AI 驱动的工具非常理想。
+Headless mode allows you to run Gemini CLI programmatically from command line
+scripts and automation tools without any interactive UI. This is ideal for
+scripting, automation, CI/CD pipelines, and building AI-powered tools.
 
-- [无头模式](#headless-mode)
-  - [概览](#overview)
-  - [基本用法](#basic-usage)
-    - [直接提示](#direct-prompts)
-    - [Stdin 输入](#stdin-input)
-    - [结合文件输入](#combining-with-file-input)
-  - [输出格式](#output-formats)
-    - [文本输出（默认）](#text-output-default)
-    - [JSON 输出](#json-output)
-      - [响应 Schema](#response-schema)
-      - [用法示例](#example-usage)
-    - [流式 JSON 输出](#streaming-json-output)
-      - [何时使用流式 JSON](#when-to-use-streaming-json)
-      - [事件类型](#event-types)
-      - [基本用法](#basic-usage-1)
-      - [输出示例](#example-output)
-      - [处理流事件](#processing-stream-events)
-      - [实际示例](#real-world-examples)
-    - [文件重定向](#file-redirection)
-  - [配置选项](#configuration-options)
-  - [示例](#examples)
-    - [代码审查](#code-review)
-    - [生成提交消息](#generate-commit-messages)
-    - [API 文档](#api-documentation)
-    - [批量代码分析](#batch-code-analysis)
-    - [日志分析](#log-analysis)
-    - [发布说明生成](#release-notes-generation)
-    - [模型和工具使用情况跟踪](#model-and-tool-usage-tracking)
-  - [资源](#resources)
+- [Headless Mode](#headless-mode)
+  - [Overview](#overview)
+  - [Basic Usage](#basic-usage)
+    - [Direct Prompts](#direct-prompts)
+    - [Stdin Input](#stdin-input)
+    - [Combining with File Input](#combining-with-file-input)
+  - [Output Formats](#output-formats)
+    - [Text Output (Default)](#text-output-default)
+    - [JSON Output](#json-output)
+      - [Response Schema](#response-schema)
+      - [Example Usage](#example-usage)
+    - [Streaming JSON Output](#streaming-json-output)
+      - [When to Use Streaming JSON](#when-to-use-streaming-json)
+      - [Event Types](#event-types)
+      - [Basic Usage](#basic-usage)
+      - [Example Output](#example-output)
+      - [Processing Stream Events](#processing-stream-events)
+      - [Real-World Examples](#real-world-examples)
+    - [File Redirection](#file-redirection)
+  - [Configuration Options](#configuration-options)
+  - [Examples](#examples)
+    - [Code review](#code-review)
+    - [Generate commit messages](#generate-commit-messages)
+    - [API documentation](#api-documentation)
+    - [Batch code analysis](#batch-code-analysis)
+    - [Code review](#code-review-1)
+    - [Log analysis](#log-analysis)
+    - [Release notes generation](#release-notes-generation)
+    - [Model and tool usage tracking](#model-and-tool-usage-tracking)
+  - [Resources](#resources)
 
-## 概览
+## Overview
 
-无头模式为 Gemini CLI 提供了一个无头接口，该接口：
+The headless mode provides a headless interface to Gemini CLI that:
 
-- 通过命令行参数或 stdin 接受提示词
-- 返回结构化输出（文本或 JSON）
-- 支持文件重定向和管道
-- 启用自动化和脚本工作流
-- 为错误处理提供一致的退出代码
+- Accepts prompts via command line arguments or stdin
+- Returns structured output (text or JSON)
+- Supports file redirection and piping
+- Enables automation and scripting workflows
+- Provides consistent exit codes for error handling
 
-## 基本用法
+## Basic usage
 
-### 直接提示
+### Direct prompts
 
-使用 `--prompt` (或 `-p`) 标志以无头模式运行：
+Use the `--prompt` (or `-p`) flag to run in headless mode:
 
 ```bash
 gemini --prompt "What is machine learning?"
 ```
 
-### Stdin 输入
+### Stdin input
 
-从终端将输入通过管道传输到 Gemini CLI：
+Pipe input to Gemini CLI from your terminal:
 
 ```bash
 echo "Explain this code" | gemini
 ```
 
-### 结合文件输入
+### Combining with file input
 
-从文件读取并使用 Gemini 处理：
+Read from files and process with Gemini:
 
 ```bash
 cat README.md | gemini --prompt "Summarize this documentation"
 ```
 
-## 输出格式
+## Output formats
 
-### 文本输出（默认）
+### Text output (default)
 
-标准的人类可读输出：
+Standard human-readable output:
 
 ```bash
 gemini -p "What is the capital of France?"
 ```
 
-响应格式：
+Response format:
 
 ```
 The capital of France is Paris.
 ```
 
-### JSON 输出
+### JSON output
 
-返回包括响应、统计信息和元数据在内的结构化数据。此格式非常适合程序化处理和自动化脚本。
+Returns structured data including response, statistics, and metadata. This
+format is ideal for programmatic processing and automation scripts.
 
-#### 响应 Schema
+#### Response schema
 
-JSON 输出遵循以下高级结构：
+The JSON output follows this high-level structure:
 
 ```json
 {
-  "response": "string", // AI 生成的回答您提示的主要内容
+  "response": "string", // The main AI-generated content answering your prompt
   "stats": {
-    // 使用指标和性能数据
+    // Usage metrics and performance data
     "models": {
-      // 每个模型的 API 和 token 使用统计
+      // Per-model API and token usage statistics
       "[model-name]": {
         "api": {
-          /* 请求计数、错误、延迟 */
+          /* request counts, errors, latency */
         },
         "tokens": {
-          /* 提示词、响应、缓存、总计数 */
+          /* prompt, response, cached, total counts */
         }
       }
     },
     "tools": {
-      // 工具执行统计
+      // Tool execution statistics
       "totalCalls": "number",
       "totalSuccess": "number",
       "totalFail": "number",
       "totalDurationMs": "number",
       "totalDecisions": {
-        /* 接受、拒绝、修改、自动接受计数 */
+        /* accept, reject, modify, auto_accept counts */
       },
       "byName": {
-        /* 每个工具的详细统计 */
+        /* per-tool detailed stats */
       }
     },
     "files": {
-      // 文件修改统计
+      // File modification statistics
       "totalLinesAdded": "number",
       "totalLinesRemoved": "number"
     }
   },
   "error": {
-    // 仅当发生错误时出现
-    "type": "string", // 错误类型 (例如 "ApiError", "AuthError")
-    "message": "string", // 人类可读的错误描述
-    "code": "number" // 可选的错误代码
+    // Present only when an error occurred
+    "type": "string", // Error type (e.g., "ApiError", "AuthError")
+    "message": "string", // Human-readable error description
+    "code": "number" // Optional error code
   }
 }
 ```
 
-#### 用法示例
+#### Example usage
 
 ```bash
 gemini -p "What is the capital of France?" --output-format json
 ```
 
-响应：
+Response:
 
 ```json
 {
@@ -215,48 +218,52 @@ gemini -p "What is the capital of France?" --output-format json
 }
 ```
 
-### 流式 JSON 输出
+### Streaming JSON output
 
-以换行符分隔的 JSON
-(JSONL) 形式返回实时事件。每个重要的动作（初始化、消息、工具调用、结果）在发生时立即发出。此格式非常适合监控长时间运行的操作、构建具有实时进度的 UI 以及创建对事件做出反应的自动化管道。
+Returns real-time events as newline-delimited JSON (JSONL). Each significant
+action (initialization, messages, tool calls, results) emits immediately as it
+occurs. This format is ideal for monitoring long-running operations, building
+UIs with live progress, and creating automation pipelines that react to events.
 
-#### 何时使用流式 JSON
+#### When to use streaming JSON
 
-在以下情况下使用 `--output-format stream-json`：
+Use `--output-format stream-json` when you need:
 
-- **实时进度监控** - 在工具调用和响应发生时查看它们
-- **事件驱动的自动化** - 对特定事件（例如工具故障）做出反应
-- **实时 UI 更新** - 构建实时显示 AI 代理活动的界面
-- **详细的执行日志** - 捕获带有时间戳的完整交互历史记录
-- **管道集成** - 将事件流式传输到日志记录/监控系统
+- **Real-time progress monitoring** - See tool calls and responses as they
+  happen
+- **Event-driven automation** - React to specific events (e.g., tool failures)
+- **Live UI updates** - Build interfaces showing AI agent activity in real-time
+- **Detailed execution logs** - Capture complete interaction history with
+  timestamps
+- **Pipeline integration** - Stream events to logging/monitoring systems
 
-#### 事件类型
+#### Event types
 
-流式格式发出 6 种事件类型：
+The streaming format emits 6 event types:
 
-1. **`init`** - 会话开始（包括 session_id, model）
-2. **`message`** - 用户提示词和助手响应
-3. **`tool_use`** - 带有参数的工具调用请求
-4. **`tool_result`** - 工具执行结果（成功/错误）
-5. **`error`** - 非致命错误和警告
-6. **`result`** - 带有聚合统计信息的最终会话结果
+1. **`init`** - Session starts (includes session_id, model)
+2. **`message`** - User prompts and assistant responses
+3. **`tool_use`** - Tool call requests with parameters
+4. **`tool_result`** - Tool execution results (success/error)
+5. **`error`** - Non-fatal errors and warnings
+6. **`result`** - Final session outcome with aggregated stats
 
-#### 基本用法
+#### Basic usage
 
 ```bash
-# 将事件流式传输到控制台
+# Stream events to console
 gemini --output-format stream-json --prompt "What is 2+2?"
 
-# 将事件流保存到文件
+# Save event stream to file
 gemini --output-format stream-json --prompt "Analyze this code" > events.jsonl
 
-# 使用 jq 解析
+# Parse with jq
 gemini --output-format stream-json --prompt "List files" | jq -r '.type'
 ```
 
-#### 输出示例
+#### Example output
 
-每一行都是一个完整的 JSON 事件：
+Each line is a complete JSON event:
 
 ```jsonl
 {"type":"init","timestamp":"2025-10-10T12:00:00.000Z","session_id":"abc123","model":"gemini-2.0-flash-exp"}
@@ -267,64 +274,65 @@ gemini --output-format stream-json --prompt "List files" | jq -r '.type'
 {"type":"result","status":"success","stats":{"total_tokens":250,"input_tokens":50,"output_tokens":200,"duration_ms":3000,"tool_calls":1},"timestamp":"2025-10-10T12:00:05.000Z"}
 ```
 
-### 文件重定向
+### File redirection
 
-将输出保存到文件或通过管道传输到其他命令：
+Save output to files or pipe to other commands:
 
 ```bash
-# 保存到文件
+# Save to file
 gemini -p "Explain Docker" > docker-explanation.txt
 gemini -p "Explain Docker" --output-format json > docker-explanation.json
 
-# 追加到文件
+# Append to file
 gemini -p "Add more details" >> docker-explanation.txt
 
-# 管道传输到其他工具
+# Pipe to other tools
 gemini -p "What is Kubernetes?" --output-format json | jq '.response'
 gemini -p "Explain microservices" | wc -w
 gemini -p "List programming languages" | grep -i "python"
 ```
 
-## 配置选项
+## Configuration options
 
-无头使用的关键命令行选项：
+Key command-line options for headless usage:
 
-| 选项                    | 描述                      | 示例                                               |
-| :---------------------- | :------------------------ | :------------------------------------------------- |
-| `--prompt`, `-p`        | 以无头模式运行            | `gemini -p "query"`                                |
-| `--output-format`       | 指定输出格式 (text, json) | `gemini -p "query" --output-format json`           |
-| `--model`, `-m`         | 指定 Gemini 模型          | `gemini -p "query" -m gemini-2.5-flash`            |
-| `--debug`, `-d`         | 启用调试模式              | `gemini -p "query" --debug`                        |
-| `--include-directories` | 包含其他目录              | `gemini -p "query" --include-directories src,docs` |
-| `--yolo`, `-y`          | 自动批准所有操作          | `gemini -p "query" --yolo`                         |
-| `--approval-mode`       | 设置批准模式              | `gemini -p "query" --approval-mode auto_edit`      |
+| Option                  | Description                        | Example                                            |
+| ----------------------- | ---------------------------------- | -------------------------------------------------- |
+| `--prompt`, `-p`        | Run in headless mode               | `gemini -p "query"`                                |
+| `--output-format`       | Specify output format (text, json) | `gemini -p "query" --output-format json`           |
+| `--model`, `-m`         | Specify the Gemini model           | `gemini -p "query" -m gemini-2.5-flash`            |
+| `--debug`, `-d`         | Enable debug mode                  | `gemini -p "query" --debug`                        |
+| `--include-directories` | Include additional directories     | `gemini -p "query" --include-directories src,docs` |
+| `--yolo`, `-y`          | Auto-approve all actions           | `gemini -p "query" --yolo`                         |
+| `--approval-mode`       | Set approval mode                  | `gemini -p "query" --approval-mode auto_edit`      |
 
-有关所有可用配置选项、设置文件和环境变量的完整详细信息，请参阅
-[配置指南](../get-started/configuration.md)。
+For complete details on all available configuration options, settings files, and
+environment variables, see the
+[Configuration Guide](../get-started/configuration.md).
 
-## 示例
+## Examples
 
-#### 代码审查
+#### Code review
 
 ```bash
 cat src/auth.py | gemini -p "Review this authentication code for security issues" > security-review.txt
 ```
 
-#### 生成提交消息
+#### Generate commit messages
 
 ```bash
 result=$(git diff --cached | gemini -p "Write a concise commit message for these changes" --output-format json)
 echo "$result" | jq -r '.response'
 ```
 
-#### API 文档
+#### API documentation
 
 ```bash
 result=$(cat api/routes.js | gemini -p "Generate OpenAPI spec for these routes" --output-format json)
 echo "$result" | jq -r '.response' > openapi.json
 ```
 
-#### 批量代码分析
+#### Batch code analysis
 
 ```bash
 for file in src/*.py; do
@@ -335,13 +343,20 @@ for file in src/*.py; do
 done
 ```
 
-#### 日志分析
+#### Code review
+
+```bash
+result=$(git diff origin/main...HEAD | gemini -p "Review these changes for bugs, security issues, and code quality" --output-format json)
+echo "$result" | jq -r '.response' > pr-review.json
+```
+
+#### Log analysis
 
 ```bash
 grep "ERROR" /var/log/app.log | tail -20 | gemini -p "Analyze these errors and suggest root cause and fixes" > error-analysis.txt
 ```
 
-#### 发布说明生成
+#### Release notes generation
 
 ```bash
 result=$(git log --oneline v1.0.0..HEAD | gemini -p "Generate release notes from these commits" --output-format json)
@@ -350,7 +365,7 @@ echo "$response"
 echo "$response" >> CHANGELOG.md
 ```
 
-#### 模型和工具使用情况跟踪
+#### Model and tool usage tracking
 
 ```bash
 result=$(gemini -p "Explain this database schema" --include-directories db --output-format json)
@@ -364,9 +379,10 @@ echo "Recent usage trends:"
 tail -5 usage.log
 ```
 
-## 资源
+## Resources
 
-- [CLI 配置](../get-started/configuration.md) - 完整配置指南
-- [身份验证](../get-started/authentication.md) - 设置身份验证
-- [命令](./commands.md) - 交互式命令参考
-- [教程](./tutorials.md) - 分步自动化指南
+- [CLI Configuration](../get-started/configuration.md) - Complete configuration
+  guide
+- [Authentication](../get-started/authentication.md) - Setup authentication
+- [Commands](./commands.md) - Interactive commands reference
+- [Tutorials](./tutorials.md) - Step-by-step automation guides

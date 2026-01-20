@@ -1,19 +1,21 @@
-# 策略引擎 (Policy engine)
+# Policy engine
 
-Gemini
-CLI 包含一个强大的策略引擎，可对工具执行进行细粒度控制。它允许用户和管理员定义规则，以确定工具调用应该是允许、拒绝还是需要用户确认。
+The Gemini CLI includes a powerful policy engine that provides fine-grained
+control over tool execution. It allows users and administrators to define rules
+that determine whether a tool call should be allowed, denied, or require user
+confirmation.
 
-## 快速入门
+## Quick start
 
-要创建您的第一个策略：
+To create your first policy:
 
-1.  **创建策略目录**（如果不存在）：
+1.  **Create the policy directory** if it doesn't exist:
     ```bash
     mkdir -p ~/.gemini/policies
     ```
-2.  **创建一个新的策略文件**（例如
-    `~/.gemini/policies/my-rules.toml`）。您可以使用任何以 `.toml`
-    结尾的文件名；此目录中的所有此类文件都将被加载并组合：
+2.  **Create a new policy file** (e.g., `~/.gemini/policies/my-rules.toml`). You
+    can use any filename ending in `.toml`; all such files in this directory
+    will be loaded and combined:
     ```toml
     [[rule]]
     toolName = "run_shell_command"
@@ -21,21 +23,29 @@ CLI 包含一个强大的策略引擎，可对工具执行进行细粒度控制�
     decision = "allow"
     priority = 100
     ```
-3.  **运行触发策略的命令**（例如，要求 Gemini CLI 执行
-    `git status`）。该工具现在将自动执行，无需提示确认。
+3.  **Run a command** that triggers the policy (e.g., ask Gemini CLI to
+    `git status`). The tool will now execute automatically without prompting for
+    confirmation.
 
-## 核心概念
+## Core concepts
 
-策略引擎基于一组规则运行。每条规则都是条件和结果决策的组合。当大型语言模型想要执行工具时，策略引擎会评估所有规则，以找到与工具调用匹配的最高优先级规则。
+The policy engine operates on a set of rules. Each rule is a combination of
+conditions and a resulting decision. When a large language model wants to
+execute a tool, the policy engine evaluates all rules to find the
+highest-priority rule that matches the tool call.
 
-一条规则由以下主要组件组成：
+A rule consists of the following main components:
 
-- **条件 (Conditions)**: 工具调用必须满足的标准，以便规则适用。这可以包括工具的名称、提供给它的参数或当前的批准模式。
-- **决策 (Decision)**: 如果规则匹配要采取的操作（`allow` (允许)、`deny`
-  (拒绝) 或 `ask_user` (询问用户)）。
-- **优先级 (Priority)**: 决定规则优先级的数字。数字越高优先级越高。
+- **Conditions**: Criteria that a tool call must meet for the rule to apply.
+  This can include the tool's name, the arguments provided to it, or the current
+  approval mode.
+- **Decision**: The action to take if the rule matches (`allow`, `deny`, or
+  `ask_user`).
+- **Priority**: A number that determines the rule's precedence. Higher numbers
+  win.
 
-例如，此规则将在执行任何 `git` 命令之前要求用户确认。
+For example, this rule will ask for user confirmation before executing any `git`
+command.
 
 ```toml
 [[rule]]
@@ -45,126 +55,141 @@ decision = "ask_user"
 priority = 100
 ```
 
-### 条件
+### Conditions
 
-条件是工具调用必须满足的标准，以便规则适用。主要条件是工具的名称及其参数。
+Conditions are the criteria that a tool call must meet for a rule to apply. The
+primary conditions are the tool's name and its arguments.
 
-#### 工具名称 (Tool Name)
+#### Tool Name
 
-规则中的 `toolName` 必须与被调用的工具名称匹配。
+The `toolName` in the rule must match the name of the tool being called.
 
-- **通配符**: 对于模型托管协议 (MCP) 服务器，您可以使用通配符。`toolName` 为
-  `my-server__*` 将匹配来自 `my-server` MCP 的任何工具。
+- **Wildcards**: For Model-hosting-protocol (MCP) servers, you can use a
+  wildcard. A `toolName` of `my-server__*` will match any tool from the
+  `my-server` MCP.
 
-#### 参数模式 (Arguments pattern)
+#### Arguments pattern
 
-如果指定了
-`argsPattern`，则工具的参数将转换为稳定的 JSON 字符串，然后针对提供的正则表达式进行测试。如果参数与模式不匹配，则规则不适用。
+If `argsPattern` is specified, the tool's arguments are converted to a stable
+JSON string, which is then tested against the provided regular expression. If
+the arguments don't match the pattern, the rule does not apply.
 
-### 决策
+### Decisions
 
-规则可以强制执行三种可能的决策：
+There are three possible decisions a rule can enforce:
 
-- `allow`: 工具调用自动执行，无需用户交互。
-- `deny`: 工具调用被阻止且不执行。
-- `ask_user`: 提示用户批准或拒绝工具调用。（在非交互模式下，这被视为 `deny`。）
+- `allow`: The tool call is executed automatically without user interaction.
+- `deny`: The tool call is blocked and is not executed.
+- `ask_user`: The user is prompted to approve or deny the tool call. (In
+  non-interactive mode, this is treated as `deny`.)
 
-### 优先级系统和层级
+### Priority system and tiers
 
-当多个规则匹配单个工具调用时，策略引擎使用复杂的优先级系统来解决冲突。核心原则很简单：**具有最高优先级的规则获胜**。
+The policy engine uses a sophisticated priority system to resolve conflicts when
+multiple rules match a single tool call. The core principle is simple: **the
+rule with the highest priority wins**.
 
-为了提供清晰的层级结构，策略分为三个层级。每个层级都有一个指定的数字，构成最终优先级计算的基础。
+To provide a clear hierarchy, policies are organized into three tiers. Each tier
+has a designated number that forms the base of the final priority calculation.
 
-| 层级           | 基数 | 描述                                     |
-| :------------- | :--- | :--------------------------------------- |
-| Default (默认) | 1    | Gemini CLI 附带的内置策略。              |
-| User (用户)    | 2    | 用户定义的自定义策略。                   |
-| Admin (管理员) | 3    | 管理员管理的策略（例如，在企业环境中）。 |
+| Tier    | Base | Description                                                                |
+| :------ | :--- | :------------------------------------------------------------------------- |
+| Default | 1    | Built-in policies that ship with the Gemini CLI.                           |
+| User    | 2    | Custom policies defined by the user.                                       |
+| Admin   | 3    | Policies managed by an administrator (e.g., in an enterprise environment). |
 
-在 TOML 策略文件中，您分配一个从 **0 到 999**
-的优先级值。引擎使用以下公式将其转换为最终优先级：
+Within a TOML policy file, you assign a priority value from **0 to 999**. The
+engine transforms this into a final priority using the following formula:
 
 `final_priority = tier_base + (toml_priority / 1000)`
 
-该系统保证：
+This system guarantees that:
 
-- Admin 策略始终覆盖 User 和 Default 策略。
-- User 策略始终覆盖 Default 策略。
-- 您仍然可以在单个层级内对规则进行排序，并进行细粒度控制。
+- Admin policies always override User and Default policies.
+- User policies always override Default policies.
+- You can still order rules within a single tier with fine-grained control.
 
-例如：
+For example:
 
-- Default 策略文件中的 `priority: 50` 规则变为 `1.050`。
-- User 策略文件中的 `priority: 100` 规则变为 `2.100`。
-- Admin 策略文件中的 `priority: 20` 规则变为 `3.020`。
+- A `priority: 50` rule in a Default policy file becomes `1.050`.
+- A `priority: 100` rule in a User policy file becomes `2.100`.
+- A `priority: 20` rule in an Admin policy file becomes `3.020`.
 
-### 批准模式
+### Approval modes
 
-批准模式允许策略引擎根据 CLI 的操作模式应用不同的规则集。规则可以与一种或多种模式相关联（例如
-`yolo`,
-`autoEdit`）。只有当 CLI 在其指定模式之一中运行时，该规则才会处于活动状态。如果规则没有指定模式，则它始终处于活动状态。
+Approval modes allow the policy engine to apply different sets of rules based on
+the CLI's operational mode. A rule can be associated with one or more modes
+(e.g., `yolo`, `autoEdit`). The rule will only be active if the CLI is running
+in one of its specified modes. If a rule has no modes specified, it is always
+active.
 
-## 规则匹配
+## Rule matching
 
-当进行工具调用时，引擎会针对所有活动规则进行检查，从最高优先级开始。第一个匹配的规则决定结果。
+When a tool call is made, the engine checks it against all active rules,
+starting from the highest priority. The first rule that matches determines the
+outcome.
 
-如果满足所有条件，则规则与工具调用匹配：
+A rule matches a tool call if all of its conditions are met:
 
-1.  **工具名称**: 规则中的 `toolName` 必须与被调用的工具名称匹配。
-    - **通配符**: 对于模型托管协议 (MCP) 服务器，您可以使用通配符。`toolName` 为
-      `my-server__*` 将匹配来自 `my-server` MCP 的任何工具。
-2.  **参数模式**: 如果指定了
-    `argsPattern`，则工具的参数将转换为稳定的 JSON 字符串，然后针对提供的正则表达式进行测试。如果参数与模式不匹配，则规则不适用。
+1.  **Tool name**: The `toolName` in the rule must match the name of the tool
+    being called.
+    - **Wildcards**: For Model-hosting-protocol (MCP) servers, you can use a
+      wildcard. A `toolName` of `my-server__*` will match any tool from the
+      `my-server` MCP.
+2.  **Arguments pattern**: If `argsPattern` is specified, the tool's arguments
+    are converted to a stable JSON string, which is then tested against the
+    provided regular expression. If the arguments don't match the pattern, the
+    rule does not apply.
 
-## 配置
+## Configuration
 
-策略在 `.toml`
-文件中定义。CLI 从 Default、User 和（如果已配置）Admin 目录加载这些文件。
+Policies are defined in `.toml` files. The CLI loads these files from Default,
+User, and (if configured) Admin directories.
 
-### TOML 规则 Schema
+### TOML rule schema
 
-这是 TOML 策略规则中可用字段的细分：
+Here is a breakdown of the fields available in a TOML policy rule:
 
 ```toml
 [[rule]]
-# 工具的唯一名称，或名称数组。
+# A unique name for the tool, or an array of names.
 toolName = "run_shell_command"
 
-# (可选) MCP 服务器的名称。可以与 toolName 结合
-# 形成复合名称，如 "mcpName__toolName"。
+# (Optional) The name of an MCP server. Can be combined with toolName
+# to form a composite name like "mcpName__toolName".
 mcpName = "my-custom-server"
 
-# (可选) 针对工具参数进行匹配的正则表达式。
+# (Optional) A regex to match against the tool's arguments.
 argsPattern = '"command":"(git|npm)'
 
-# (可选) shell 命令必须以其开头的字符串或字符串数组。
-# 这是 `toolName = "run_shell_command"` 和 `argsPattern` 的语法糖。
+# (Optional) A string or array of strings that a shell command must start with.
+# This is syntactic sugar for `toolName = "run_shell_command"` and an `argsPattern`.
 commandPrefix = "git "
 
-# (可选) 针对整个 shell 命令进行匹配的正则表达式。
-# 这也是 `toolName = "run_shell_command"` 的语法糖。
-# 注意：此模式针对参数的 JSON 表示（例如 `{"command":"<your_command>"}`）进行测试，因此像 `^` 或 `$` 这样的锚点将应用于完整的 JSON 字符串，而不仅仅是命令文本。
-# 您不能在同一规则中使用 commandPrefix 和 commandRegex。
+# (Optional) A regex to match against the entire shell command.
+# This is also syntactic sugar for `toolName = "run_shell_command"`.
+# Note: This pattern is tested against the JSON representation of the arguments (e.g., `{"command":"<your_command>"}`), so anchors like `^` or `$` will apply to the full JSON string, not just the command text.
+# You cannot use commandPrefix and commandRegex in the same rule.
 commandRegex = "^git (commit|push)"
 
-# 要采取的决策。必须是 "allow", "deny", 或 "ask_user"。
+# The decision to take. Must be "allow", "deny", or "ask_user".
 decision = "ask_user"
 
-# 规则的优先级，从 0 到 999。
+# The priority of the rule, from 0 to 999.
 priority = 10
 
-# (可选) 此规则处于活动状态的批准模式数组。
+# (Optional) An array of approval modes where this rule is active.
 modes = ["autoEdit"]
 ```
 
-### 使用数组（列表）
+### Using arrays (lists)
 
-要将同一规则应用于多个工具或命令前缀，您可以为 `toolName` 和 `commandPrefix`
-字段提供字符串数组。
+To apply the same rule to multiple tools or command prefixes, you can provide an
+array of strings for the `toolName` and `commandPrefix` fields.
 
-**示例:**
+**Example:**
 
-此单条规则将同时应用于 `write_file` 和 `replace` 工具。
+This single rule will apply to both the `write_file` and `replace` tools.
 
 ```toml
 [[rule]]
@@ -173,17 +198,19 @@ decision = "ask_user"
 priority = 10
 ```
 
-### `run_shell_command` 的特殊语法
+### Special syntax for `run_shell_command`
 
-为了简化 `run_shell_command` 的策略编写，您可以使用 `commandPrefix` 或
-`commandRegex` 代替更复杂的 `argsPattern`。
+To simplify writing policies for `run_shell_command`, you can use
+`commandPrefix` or `commandRegex` instead of the more complex `argsPattern`.
 
-- `commandPrefix`: 如果 `command` 参数以给定字符串开头，则匹配。
-- `commandRegex`: 如果 `command` 参数与给定的正则表达式匹配，则匹配。
+- `commandPrefix`: Matches if the `command` argument starts with the given
+  string.
+- `commandRegex`: Matches if the `command` argument matches the given regular
+  expression.
 
-**示例:**
+**Example:**
 
-此规则将在执行任何 `git` 命令之前要求用户确认。
+This rule will ask for user confirmation before executing any `git` command.
 
 ```toml
 [[rule]]
@@ -193,17 +220,18 @@ decision = "ask_user"
 priority = 100
 ```
 
-### MCP 工具的特殊语法
+### Special syntax for MCP tools
 
-您可以使用 `mcpName`
-字段或通配符模式创建针对模型托管协议 (MCP) 服务器工具的规则。
+You can create rules that target tools from Model-hosting-protocol (MCP) servers
+using the `mcpName` field or a wildcard pattern.
 
-**1. 使用 `mcpName`**
+**1. Using `mcpName`**
 
-要针对特定服务器中的特定工具，请组合 `mcpName` 和 `toolName`。
+To target a specific tool from a specific server, combine `mcpName` and
+`toolName`.
 
 ```toml
-# 允许 `my-jira-server` MCP 上的 `search` 工具
+# Allows the `search` tool on the `my-jira-server` MCP
 [[rule]]
 mcpName = "my-jira-server"
 toolName = "search"
@@ -211,25 +239,30 @@ decision = "allow"
 priority = 200
 ```
 
-**2. 使用通配符**
+**2. Using a wildcard**
 
-要创建适用于特定 MCP 服务器上 _所有_ 工具的规则，请仅指定 `mcpName`。
+To create a rule that applies to _all_ tools on a specific MCP server, specify
+only the `mcpName`.
 
 ```toml
-# 拒绝来自 `untrusted-server` MCP 的所有工具
+# Denies all tools from the `untrusted-server` MCP
 [[rule]]
 mcpName = "untrusted-server"
 decision = "deny"
 priority = 500
 ```
 
-## 默认策略
+## Default policies
 
-Gemini CLI 附带一套默认策略，以提供开箱即用的安全体验。
+The Gemini CLI ships with a set of default policies to provide a safe
+out-of-the-box experience.
 
-- **只读工具**（如 `read_file`, `glob`）通常 **允许 (allowed)**。
-- **代理委派**（如 `delegate_to_agent`）默认为
-  **`ask_user`**，以确保远程代理可以提示确认，但本地子代理操作以静默方式执行并单独检查。
-- **写入工具**（如 `write_file`, `run_shell_command`）默认为 **`ask_user`**。
-- 在 **`yolo`** 模式下，一条高优先级规则允许所有工具。
-- 在 **`autoEdit`** 模式下，规则允许某些写入操作在不提示的情况下发生。
+- **Read-only tools** (like `read_file`, `glob`) are generally **allowed**.
+- **Agent delegation** (like `delegate_to_agent`) defaults to **`ask_user`** to
+  ensure remote agents can prompt for confirmation, but local sub-agent actions
+  are executed silently and checked individually.
+- **Write tools** (like `write_file`, `run_shell_command`) default to
+  **`ask_user`**.
+- In **`yolo`** mode, a high-priority rule allows all tools.
+- In **`autoEdit`** mode, rules allow certain write operations to happen without
+  prompting.

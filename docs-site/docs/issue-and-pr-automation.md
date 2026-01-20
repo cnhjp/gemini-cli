@@ -1,102 +1,134 @@
-# 自动化和分类流程
+# Automation and triage processes
 
-本文档详细概述了我们用于管理和分类 Issue (问题) 和 Pull Request
-(PR) 的自动化流程。我们的目标是提供及时的反馈，并确保贡献得到有效的审查和整合。了解此自动化将有助于您作为贡献者知道该期待什么，以及如何最好地与我们的仓库机器人互动。
+This document provides a detailed overview of the automated processes we use to
+manage and triage issues and pull requests. Our goal is to provide prompt
+feedback and ensure that contributions are reviewed and integrated efficiently.
+Understanding this automation will help you as a contributor know what to expect
+and how to best interact with our repository bots.
 
-## 指导原则：Issue 和 Pull Request
+## Guiding principle: Issues and pull requests
 
-首先也是最重要的是，几乎每个 Pull Request
-(PR) 都应该链接到相应的 Issue。Issue 描述“什么”和“为什么”（错误或功能），而 PR 是“如何”（实现）。这种分离有助于我们跟踪工作、确定功能的优先级并保持清晰的历史背景。我们的自动化是围绕这一原则建立的。
+First and foremost, almost every Pull Request (PR) should be linked to a
+corresponding Issue. The issue describes the "what" and the "why" (the bug or
+feature), while the PR is the "how" (the implementation). This separation helps
+us track work, prioritize features, and maintain clear historical context. Our
+automation is built around this principle.
 
-> **注意:** 标记为 "🔒Maintainers
-> only" 的 Issue 仅供项目维护者使用。我们将不接受与这些 Issue 相关的 Pull
-> Request。
+> **Note:** Issues tagged as "🔒Maintainers only" are reserved for project
+> maintainers. We will not accept pull requests related to these issues.
 
 ---
 
-## 详细的自动化工作流
+## Detailed automation workflows
 
-以下是在我们的仓库中运行的具体自动化工作流的细分。
+Here is a breakdown of the specific automation workflows that run in our
+repository.
 
-### 1. 当您打开一个 Issue 时：`Automated Issue Triage` (自动化 Issue 分类)
+### 1. When you open an issue: `Automated Issue Triage`
 
-这是您创建 Issue 时与之交互的第一个机器人。它的工作是执行初步分析并应用正确的标签。
+This is the first bot you will interact with when you create an issue. Its job
+is to perform an initial analysis and apply the correct labels.
 
-- **工作流文件**: `.github/workflows/gemini-automated-issue-triage.yml`
-- **运行时机**: 创建或重新打开 Issue 后立即运行。
-- **它做什么**:
-  - 它使用 Gemini 模型根据一套详细的指导方针分析 Issue 的标题和正文。
-  - **应用一个 `area/*` 标签**: 将 Issue 分类到项目的功能区域（例如 `area/ux`,
-    `area/models`, `area/platform`）。
-  - **应用一个 `kind/*` 标签**: 识别 Issue 的类型（例如 `kind/bug`,
-    `kind/enhancement`, `kind/question`）。
-  - **应用一个 `priority/*`
-    标签**: 根据描述的影响分配从 P0（严重）到 P3（低）的优先级。
-  - **可能应用
-    `status/need-information`**: 如果 Issue 缺少关键细节（如日志或复现步骤），它将被标记以获取更多信息。
-  - **可能应用
-    `status/need-retesting`**: 如果 Issue 引用了超过六个版本之前的 CLI 版本，它将被标记以在当前版本上重新测试。
-- **您应该做什么**:
-  - 尽可能完整地填写 Issue 模板。您提供的细节越多，分类就越准确。
-  - 如果添加了 `status/need-information` 标签，请在评论中提供请求的详细信息。
+- **Workflow File**: `.github/workflows/gemini-automated-issue-triage.yml`
+- **When it runs**: Immediately after an issue is created or reopened.
+- **What it does**:
+  - It uses a Gemini model to analyze the issue's title and body against a
+    detailed set of guidelines.
+  - **Applies one `area/*` label**: Categorizes the issue into a functional area
+    of the project (e.g., `area/ux`, `area/models`, `area/platform`).
+  - **Applies one `kind/*` label**: Identifies the type of issue (e.g.,
+    `kind/bug`, `kind/enhancement`, `kind/question`).
+  - **Applies one `priority/*` label**: Assigns a priority from P0 (critical) to
+    P3 (low) based on the described impact.
+  - **May apply `status/need-information`**: If the issue lacks critical details
+    (like logs or reproduction steps), it will be flagged for more information.
+  - **May apply `status/need-retesting`**: If the issue references a CLI version
+    that is more than six versions old, it will be flagged for retesting on a
+    current version.
+- **What you should do**:
+  - Fill out the issue template as completely as possible. The more detail you
+    provide, the more accurate the triage will be.
+  - If the `status/need-information` label is added, please provide the
+    requested details in a comment.
 
-### 2. 当您打开一个 Pull Request 时：`Continuous Integration (CI)` (持续集成)
+### 2. When you open a pull request: `Continuous Integration (CI)`
 
-此工作流确保所有更改在合并之前符合我们的质量标准。
+This workflow ensures that all changes meet our quality standards before they
+can be merged.
 
-- **工作流文件**: `.github/workflows/ci.yml`
-- **运行时机**: 对 Pull Request 的每次推送。
-- **它做什么**:
-  - **Lint**: 检查您的代码是否符合我们项目的格式和样式规则。
-  - **Test**: 在 macOS、Windows 和 Linux 以及多个 Node.js 版本上运行我们的全套自动化测试。这是 CI 过程中最耗时的部分。
-  - **发布覆盖率评论**: 所有测试成功通过后，机器人将在您的 PR 上发布评论。此评论提供了您的更改被测试覆盖程度的摘要。
-- **您应该做什么**:
-  - 确保所有 CI 检查通过。一切成功时，您的提交旁边会出现一个绿色的对勾 ✅。
-  - 如果检查失败（红色的 "X"
-    ❌），请点击失败检查旁边的 "Details" 链接查看日志，找出问题并推送修复。
+- **Workflow File**: `.github/workflows/ci.yml`
+- **When it runs**: On every push to a pull request.
+- **What it does**:
+  - **Lint**: Checks that your code adheres to our project's formatting and
+    style rules.
+  - **Test**: Runs our full suite of automated tests across macOS, Windows, and
+    Linux, and on multiple Node.js versions. This is the most time-consuming
+    part of the CI process.
+  - **Post Coverage Comment**: After all tests have successfully passed, a bot
+    will post a comment on your PR. This comment provides a summary of how well
+    your changes are covered by tests.
+- **What you should do**:
+  - Ensure all CI checks pass. A green checkmark ✅ will appear next to your
+    commit when everything is successful.
+  - If a check fails (a red "X" ❌), click the "Details" link next to the failed
+    check to view the logs, identify the problem, and push a fix.
 
-### 3. Pull Request 的持续分类：`PR Auditing and Label Sync` (PR 审计和标签同步)
+### 3. Ongoing triage for pull requests: `PR Auditing and Label Sync`
 
-此工作流定期运行，以确保所有打开的 PR 都正确链接到 Issue 并具有一致的标签。
+This workflow runs periodically to ensure all open PRs are correctly linked to
+issues and have consistent labels.
 
-- **工作流文件**: `.github/workflows/gemini-scheduled-pr-triage.yml`
-- **运行时机**: 每 15 分钟对所有打开的 Pull Request 运行一次。
-- **它做什么**:
-  - **检查链接的 Issue**: 机器人扫描您的 PR 描述，查找将其链接到 Issue 的关键字（例如
-    `Fixes #123`, `Closes #456`）。
-  - **添加 `status/need-issue`**: 如果未找到链接的 Issue，机器人将向您的 PR 添加
-    `status/need-issue` 标签。这是一个明确的信号，表明需要创建并链接 Issue。
-  - **同步标签**: 如果 _确实_
-    链接了 Issue，机器人会确保 PR 的标签与 Issue 的标签完全匹配。它将添加任何缺失的标签并删除任何不属于的标签，如果存在
-    `status/need-issue` 标签，它将将其删除。
-- **您应该做什么**:
-  - **始终将您的 PR 链接到 Issue。**
-    这是最重要的一步。在您的 PR 描述中添加一行，如 `Resolves #<issue-number>`。
-  - 这将确保您的 PR 被正确分类并在审查过程中顺利进行。
+- **Workflow File**: `.github/workflows/gemini-scheduled-pr-triage.yml`
+- **When it runs**: Every 15 minutes on all open pull requests.
+- **What it does**:
+  - **Checks for a linked issue**: The bot scans your PR description for a
+    keyword that links it to an issue (e.g., `Fixes #123`, `Closes #456`).
+  - **Adds `status/need-issue`**: If no linked issue is found, the bot will add
+    the `status/need-issue` label to your PR. This is a clear signal that an
+    issue needs to be created and linked.
+  - **Synchronizes labels**: If an issue _is_ linked, the bot ensures the PR's
+    labels perfectly match the issue's labels. It will add any missing labels
+    and remove any that don't belong, and it will remove the `status/need-issue`
+    label if it was present.
+- **What you should do**:
+  - **Always link your PR to an issue.** This is the most important step. Add a
+    line like `Resolves #<issue-number>` to your PR description.
+  - This will ensure your PR is correctly categorized and moves through the
+    review process smoothly.
 
-### 4. Issue 的持续分类：`Scheduled Issue Triage` (计划 Issue 分类)
+### 4. Ongoing triage for issues: `Scheduled Issue Triage`
 
-这是一个回退工作流，以确保分类过程不会遗漏任何 Issue。
+This is a fallback workflow to ensure that no issue gets missed by the triage
+process.
 
-- **工作流文件**: `.github/workflows/gemini-scheduled-issue-triage.yml`
-- **运行时机**: 每小时对所有打开的 Issue 运行一次。
-- **它做什么**:
-  - 它主动寻找完全没有标签或仍有 `status/need-triage` 标签的 Issue。
-  - 然后，它触发与初始分类机器人相同的强大的基于 Gemini 的分析，以应用正确的标签。
-- **您应该做什么**:
-  - 您通常不需要做任何事情。此工作流是一个安全网，确保即使初始分类失败，每个 Issue 最终也会被分类。
+- **Workflow File**: `.github/workflows/gemini-scheduled-issue-triage.yml`
+- **When it runs**: Every hour on all open issues.
+- **What it does**:
+  - It actively seeks out issues that either have no labels at all or still have
+    the `status/need-triage` label.
+  - It then triggers the same powerful Gemini-based analysis as the initial
+    triage bot to apply the correct labels.
+- **What you should do**:
+  - You typically don't need to do anything. This workflow is a safety net to
+    ensure every issue is eventually categorized, even if the initial triage
+    fails.
 
-### 5. 发布自动化
+### 5. Release automation
 
-此工作流处理打包和发布新版本 Gemini CLI 的过程。
+This workflow handles the process of packaging and publishing new versions of
+the Gemini CLI.
 
-- **工作流文件**: `.github/workflows/release-manual.yml`
-- **运行时机**: 按每日计划进行“每夜版 (nightly)”发布，并针对正式的补丁/次要版本进行手动发布。
-- **它做什么**:
-  - 自动构建项目，提升版本号，并将包发布到 npm。
-  - 在 GitHub 上创建相应的发布版本并生成发布说明。
-- **您应该做什么**:
-  - 作为贡献者，您不需要为此过程做任何事情。您可以确信，一旦您的 PR 合并到
-    `main` 分支，您的更改将包含在下一个每夜版中。
+- **Workflow File**: `.github/workflows/release-manual.yml`
+- **When it runs**: On a daily schedule for "nightly" releases, and manually for
+  official patch/minor releases.
+- **What it does**:
+  - Automatically builds the project, bumps the version numbers, and publishes
+    the packages to npm.
+  - Creates a corresponding release on GitHub with generated release notes.
+- **What you should do**:
+  - As a contributor, you don't need to do anything for this process. You can be
+    confident that once your PR is merged into the `main` branch, your changes
+    will be included in the very next nightly release.
 
-我们希望这个详细的概述对您有所帮助。如果您对我们的自动化或流程有任何疑问，请随时提问！
+We hope this detailed overview is helpful. If you have any questions about our
+automation or processes, please don't hesitate to ask!
