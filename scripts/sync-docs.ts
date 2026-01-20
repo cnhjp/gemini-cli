@@ -16,6 +16,8 @@ const DOCS_TARGET_DIR = 'docs-site/docs'; // Local docs location
 const SYNC_STATE_FILE = '.last-sync-rev'; // File to store the last synced commit hash
 const TARGET_LANG = 'Chinese (Simplified)';
 const GEMINI_MODEL = 'gemini-2.0-flash';
+const REQUEST_DELAY_MS = 4000; // 4 seconds delay between requests
+const MAX_RETRIES = 5;
 
 // --- Setup ---
 const __filename = fileURLToPath(import.meta.url);
@@ -35,8 +37,10 @@ if (!apiKey) {
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 const model = genAI ? genAI.getGenerativeModel({ model: GEMINI_MODEL }) : null;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * Translates content using Gemini API.
+ * Translates content using Gemini API with retry logic.
  */
 async function translateContent(
   content: string,
@@ -66,14 +70,32 @@ Content to translate:
 ${content}
 `;
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error(`Failed to translate ${filePath}:`, error);
-    return content;
+  let attempt = 0;
+  while (attempt < MAX_RETRIES) {
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err.status === 429 || err.message?.includes('429')) {
+        attempt++;
+        const waitTime = Math.pow(2, attempt) * 2000; // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+        console.warn(
+          `Rate limit exceeded for ${filePath}. Retrying in ${waitTime / 1000}s (Attempt ${attempt}/${MAX_RETRIES})...`,
+        );
+        await sleep(waitTime);
+      } else {
+        console.error(`Failed to translate ${filePath}:`, error);
+        return content; // Return original on non-retriable error
+      }
+    }
   }
+
+  console.error(
+    `Max retries exceeded for ${filePath}. Returning original content.`,
+  );
+  return content;
 }
 
 /**
@@ -224,6 +246,9 @@ async function syncDocs() {
         // Write to file
         await fs.writeFile(localPath, translatedContent, 'utf-8');
         processedCount++;
+
+        // Add delay to respect rate limits
+        await sleep(REQUEST_DELAY_MS);
       }
     }
 
