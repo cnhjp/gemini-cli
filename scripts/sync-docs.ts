@@ -152,10 +152,24 @@ async function syncDocs() {
     let processedCount = 0;
 
     for (const line of filesChanged) {
-      const [status, upstreamFilePath] = line.split('\t');
+      const parts = line.split('\t');
+      const status = parts[0];
 
+      let upstreamFilePath = '';
+      let oldUpstreamFilePath = '';
+
+      if (status.startsWith('R')) {
+        // Rename: R100 \t oldPath \t newPath
+        oldUpstreamFilePath = parts[1];
+        upstreamFilePath = parts[2];
+      } else {
+        upstreamFilePath = parts[1];
+      }
+
+      if (!upstreamFilePath) continue;
+
+      // Filter: only process .md files in docs directory
       if (
-        !upstreamFilePath ||
         !upstreamFilePath.startsWith(DOCS_SRC_DIR) ||
         !upstreamFilePath.endsWith('.md')
       ) {
@@ -165,19 +179,34 @@ async function syncDocs() {
       const relativePath = path.relative(DOCS_SRC_DIR, upstreamFilePath);
       const localPath = path.join(DOCS_TARGET_DIR, relativePath);
 
-      console.log(`Processing [${status}] ${upstreamFilePath} -> ${localPath}`);
+      // Handle deletion or old file removal in case of rename
+      if (status.startsWith('D') || status.startsWith('R')) {
+        const pathToRemove = status.startsWith('R')
+          ? path.join(
+              DOCS_TARGET_DIR,
+              path.relative(DOCS_SRC_DIR, oldUpstreamFilePath),
+            )
+          : localPath;
 
-      if (status.startsWith('D')) {
-        // Deleted
         try {
-          await fs.unlink(localPath);
-          console.log(`Deleted: ${localPath}`);
-          processedCount++;
+          await fs.unlink(pathToRemove);
+          console.log(`Deleted: ${pathToRemove}`);
+          if (status.startsWith('D')) processedCount++;
         } catch {
           // Ignore if file doesn't exist
         }
-      } else if (status.startsWith('A') || status.startsWith('M')) {
-        // Added or Modified
+      }
+
+      // Handle addition or modification
+      if (
+        status.startsWith('A') ||
+        status.startsWith('M') ||
+        status.startsWith('R')
+      ) {
+        console.log(
+          `Processing [${status}] ${upstreamFilePath} -> ${localPath}`,
+        );
+
         // Get upstream content
         const upstreamContent = await git.show([
           `upstream/main:${upstreamFilePath}`,
