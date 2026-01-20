@@ -1,47 +1,49 @@
-# 为 Gemini CLI 编写 Hooks
+# Writing hooks for Gemini CLI
 
-本指南将指导您为 Gemini
-CLI 创建 Hooks，从简单的日志 Hook 到演示所有 Hook 事件协同工作的综合工作流助手。
+This guide will walk you through creating hooks for Gemini CLI, from a simple
+logging hook to a comprehensive workflow assistant that demonstrates all hook
+events working together.
 
-## 先决条件
+## Prerequisites
 
-在开始之前，请确保您拥有：
+Before you start, make sure you have:
 
-- 已安装并配置 Gemini CLI
-- 对 Shell 脚本或 JavaScript/Node.js 的基本了解
-- 熟悉用于 Hook 输入/输出的 JSON
+- Gemini CLI installed and configured
+- Basic understanding of shell scripting or JavaScript/Node.js
+- Familiarity with JSON for hook input/output
 
-## 快速入门
+## Quick start
 
-让我们创建一个简单的 Hook 来记录所有工具执行，以了解基础知识。
+Let's create a simple hook that logs all tool executions to understand the
+basics.
 
-### 步骤 1: 创建您的 Hook 脚本
+### Step 1: Create your hook script
 
-创建一个用于 Hooks 的目录和一个简单的日志脚本：
+Create a directory for hooks and a simple logging script:
 
 ```bash
 mkdir -p .gemini/hooks
 cat > .gemini/hooks/log-tools.sh << 'EOF'
 #!/usr/bin/env bash
-# 从 stdin 读取 Hook 输入
+# Read hook input from stdin
 input=$(cat)
 
-# 提取工具名称
+# Extract tool name
 tool_name=$(echo "$input" | jq -r '.tool_name')
 
-# 记录到文件
+# Log to file
 echo "[$(date)] Tool executed: $tool_name" >> .gemini/tool-log.txt
 
-# 返回成功 (exit 0) - 输出在记录模式下显示给用户
+# Return success (exit 0) - output goes to user in transcript mode
 echo "Logged: $tool_name"
 EOF
 
 chmod +x .gemini/hooks/log-tools.sh
 ```
 
-### 步骤 2: 配置 Hook
+### Step 2: Configure the hook
 
-将 Hook 配置添加到 `.gemini/settings.json`：
+Add the hook configuration to `.gemini/settings.json`:
 
 ```json
 {
@@ -63,9 +65,9 @@ chmod +x .gemini/hooks/log-tools.sh
 }
 ```
 
-### 步骤 3: 测试您的 Hook
+### Step 3: Test your hook
 
-运行 Gemini CLI 并执行任何使用工具的命令：
+Run Gemini CLI and execute any command that uses tools:
 
 ```
 > Read the README.md file
@@ -75,13 +77,13 @@ chmod +x .gemini/hooks/log-tools.sh
 Logged: read_file
 ```
 
-检查 `.gemini/tool-log.txt` 以查看记录的工具执行。
+Check `.gemini/tool-log.txt` to see the logged tool executions.
 
-## 实际示例
+## Practical examples
 
-### 安全：阻止提交中的秘密
+### Security: Block secrets in commits
 
-防止提交包含 API 密钥或密码的文件。
+Prevent committing files containing API keys or passwords.
 
 **`.gemini/hooks/block-secrets.sh`:**
 
@@ -89,10 +91,10 @@ Logged: read_file
 #!/usr/bin/env bash
 input=$(cat)
 
-# 提取正在写入的内容
+# Extract content being written
 content=$(echo "$input" | jq -r '.tool_input.content // .tool_input.new_string // ""')
 
-# 检查秘密
+# Check for secrets
 if echo "$content" | grep -qE 'api[_-]?key|password|secret'; then
   echo '{"decision":"deny","reason":"Potential secret detected"}' >&2
   exit 2
@@ -123,9 +125,9 @@ exit 0
 }
 ```
 
-### 代码更改后自动测试
+### Auto-testing after code changes
 
-当代码文件被修改时自动运行测试。
+Automatically run tests when code files are modified.
 
 **`.gemini/hooks/auto-test.sh`:**
 
@@ -135,12 +137,12 @@ input=$(cat)
 
 file_path=$(echo "$input" | jq -r '.tool_input.file_path')
 
-# 仅测试 .ts 文件
+# Only test .ts files
 if [[ ! "$file_path" =~ \.ts$ ]]; then
   exit 0
 fi
 
-# 查找相应的测试文件
+# Find corresponding test file
 test_file="${file_path%.ts}.test.ts"
 
 if [ ! -f "$test_file" ]; then
@@ -148,7 +150,7 @@ if [ ! -f "$test_file" ]; then
   exit 0
 fi
 
-# 运行测试
+# Run tests
 if npx vitest run "$test_file" --silent 2>&1 | head -20; then
   echo "✅ Tests passed"
 else
@@ -180,19 +182,19 @@ exit 0
 }
 ```
 
-### 动态上下文注入
+### Dynamic context injection
 
-在每次代理交互之前添加相关的项目上下文。
+Add relevant project context before each agent interaction.
 
 **`.gemini/hooks/inject-context.sh`:**
 
 ```bash
 #!/usr/bin/env bash
 
-# 获取最近的 git 提交作为上下文
+# Get recent git commits for context
 context=$(git log -5 --oneline 2>/dev/null || echo "No git history")
 
-# 作为 JSON 返回
+# Return as JSON
 cat <<EOF
 {
   "hookSpecificOutput": {
@@ -225,32 +227,36 @@ EOF
 }
 ```
 
-## 高级功能
+## Advanced features
 
-### 基于 RAG 的工具过滤
+### RAG-based tool filtering
 
-使用 `BeforeToolSelection`
-根据当前任务智能减少工具空间。不要将所有 100+ 个工具发送给模型，而是使用语义搜索或关键字匹配过滤到最相关的约 15 个工具。
+Use `BeforeToolSelection` to intelligently reduce the tool space based on the
+current task. Instead of sending all 100+ tools to the model, filter to the most
+relevant ~15 tools using semantic search or keyword matching.
 
-这改进了：
+This improves:
 
-- **模型准确性:** 较少的相似工具减少混淆
-- **响应速度:** 较小的工具空间处理速度更快
-- **成本效率:** 每个请求使用的 token 更少
+- **Model accuracy:** Fewer similar tools reduce confusion
+- **Response speed:** Smaller tool space is faster to process
+- **Cost efficiency:** Less tokens used per request
 
-### 跨会话记忆
+### Cross-session memory
 
-使用 `SessionStart` 和 `SessionEnd` Hooks 在会话之间维护持久知识：
+Use `SessionStart` and `SessionEnd` hooks to maintain persistent knowledge
+across sessions:
 
-- **SessionStart:** 加载以前会话的相关记忆
-- **AfterModel:** 记录会话期间的重要交互
-- **SessionEnd:** 提取学习内容并存储以备将来使用
+- **SessionStart:** Load relevant memories from previous sessions
+- **AfterModel:** Record important interactions during the session
+- **SessionEnd:** Extract learnings and store for future use
 
-这使助手能够学习项目约定、记住重要决策并在团队成员之间共享知识。
+This enables the assistant to learn project conventions, remember important
+decisions, and share knowledge across team members.
 
-### Hook 链
+### Hook chaining
 
-同一事件的多个 Hooks 按声明的顺序运行。每个 Hook 都可以建立在先前 Hooks 的输出之上：
+Multiple hooks for the same event run in the order declared. Each hook can build
+upon previous hooks' outputs:
 
 ```json
 {
@@ -276,55 +282,56 @@ EOF
 }
 ```
 
-## 完整示例：智能开发工作流助手
+## Complete example: Smart Development Workflow Assistant
 
-这个综合示例演示了所有 Hook 事件如何与两个高级功能协同工作：
+This comprehensive example demonstrates all hook events working together with
+two advanced features:
 
-- **基于 RAG 的工具选择:** 每个任务将 100+ 个工具减少到约 15 个相关工具
-- **跨会话记忆:** 学习并持久化项目知识
+- **RAG-based tool selection:** Reduces 100+ tools to ~15 relevant ones per task
+- **Cross-session memory:** Learns and persists project knowledge
 
-### 架构
+### Architecture
 
 ```
-SessionStart → 初始化记忆 & 索引工具
+SessionStart → Initialize memory & index tools
      ↓
-BeforeAgent → 注入相关记忆
+BeforeAgent → Inject relevant memories
      ↓
-BeforeModel → 添加系统说明
+BeforeModel → Add system instructions
      ↓
-BeforeToolSelection → 通过 RAG 过滤工具
+BeforeToolSelection → Filter tools via RAG
      ↓
-BeforeTool → 验证安全性
+BeforeTool → Validate security
      ↓
-AfterTool → 运行自动测试
+AfterTool → Run auto-tests
      ↓
-AfterModel → 记录交互
+AfterModel → Record interaction
      ↓
-SessionEnd → 提取并存储记忆
+SessionEnd → Extract and store memories
 ```
 
-### 安装
+### Installation
 
-**先决条件:**
+**Prerequisites:**
 
 - Node.js 18+
-- 已安装 Gemini CLI
+- Gemini CLI installed
 
-**设置:**
+**Setup:**
 
 ```bash
-# 创建 hooks 目录
+# Create hooks directory
 mkdir -p .gemini/hooks .gemini/memory
 
-# 安装依赖项
+# Install dependencies
 npm install --save-dev chromadb @google/generative-ai
 
-# 复制 Hook 脚本（如下所示）
-# 使它们可执行
+# Copy hook scripts (shown below)
+# Make them executable
 chmod +x .gemini/hooks/*.js
 ```
 
-### 配置
+### Configuration
 
 **`.gemini/settings.json`:**
 
@@ -426,9 +433,9 @@ chmod +x .gemini/hooks/*.js
 }
 ```
 
-### Hook 脚本
+### Hook scripts
 
-#### 1. 初始化 (SessionStart)
+#### 1. Initialize (SessionStart)
 
 **`.gemini/hooks/init.js`:**
 
@@ -442,18 +449,18 @@ async function main() {
   const projectDir = process.env.GEMINI_PROJECT_DIR;
   const chromaPath = path.join(projectDir, '.gemini', 'chroma');
 
-  // 确保 chroma 目录存在
+  // Ensure chroma directory exists
   fs.mkdirSync(chromaPath, { recursive: true });
 
   const client = new ChromaClient({ path: chromaPath });
 
-  // 初始化记忆集合
+  // Initialize memory collection
   await client.getOrCreateCollection({
     name: 'project_memories',
     metadata: { 'hnsw:space': 'cosine' },
   });
 
-  // 计数现有记忆
+  // Count existing memories
   const collection = await client.getCollection({ name: 'project_memories' });
   const memoryCount = await collection.count();
 
@@ -479,7 +486,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 2. 注入记忆 (BeforeAgent)
+#### 2. Inject memories (BeforeAgent)
 
 **`.gemini/hooks/inject-memories.js`:**
 
@@ -498,12 +505,12 @@ async function main() {
     return;
   }
 
-  // 嵌入提示词
+  // Embed the prompt
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({ model: 'text-embedding-004' });
   const result = await model.embedContent(prompt);
 
-  // 搜索记忆
+  // Search memories
   const projectDir = process.env.GEMINI_PROJECT_DIR;
   const client = new ChromaClient({
     path: path.join(projectDir, '.gemini', 'chroma'),
@@ -552,7 +559,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 3. RAG 工具过滤器 (BeforeToolSelection)
+#### 3. RAG tool filter (BeforeToolSelection)
 
 **`.gemini/hooks/rag-filter.js`:**
 
@@ -566,20 +573,20 @@ async function main() {
   const candidateTools =
     llm_request.toolConfig?.functionCallingConfig?.allowedFunctionNames || [];
 
-  // 如果已过滤则跳过
+  // Skip if already filtered
   if (candidateTools.length <= 20) {
     console.log(JSON.stringify({}));
     return;
   }
 
-  // 提取最近的用户消息
+  // Extract recent user messages
   const recentMessages = llm_request.messages
     .slice(-3)
     .filter((m) => m.role === 'user')
     .map((m) => m.content)
     .join('\n');
 
-  // 使用快速模型提取任务关键字
+  // Use fast model to extract task keywords
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
@@ -593,7 +600,7 @@ async function main() {
     .split(',')
     .map((k) => k.trim());
 
-  // 基于关键字的简单过滤 + 核心工具
+  // Simple keyword-based filtering + core tools
   const coreTools = ['read_file', 'write_file', 'replace', 'run_shell_command'];
   const filtered = candidateTools.filter((tool) => {
     if (coreTools.includes(tool)) return true;
@@ -630,7 +637,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 4. 安全验证 (BeforeTool)
+#### 4. Security validation (BeforeTool)
 
 **`.gemini/hooks/security.js`:**
 
@@ -679,7 +686,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 5. 自动测试 (AfterTool)
+#### 5. Auto-test (AfterTool)
 
 **`.gemini/hooks/auto-test.js`:**
 
@@ -699,7 +706,7 @@ async function main() {
     return;
   }
 
-  // 查找测试文件
+  // Find test file
   const ext = path.extname(filePath);
   const base = filePath.slice(0, -ext.length);
   const testFile = `${base}.test${ext}`;
@@ -713,7 +720,7 @@ async function main() {
     return;
   }
 
-  // 运行测试
+  // Run tests
   try {
     execSync(`npx vitest run ${testFile} --silent`, {
       encoding: 'utf8',
@@ -746,7 +753,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 6. 记录交互 (AfterModel)
+#### 6. Record interaction (AfterModel)
 
 **`.gemini/hooks/record.js`:**
 
@@ -770,7 +777,7 @@ async function main() {
 
   fs.mkdirSync(path.dirname(tempFile), { recursive: true });
 
-  // 提取用户消息和模型响应
+  // Extract user message and model response
   const userMsg = llm_request.messages
     ?.filter((m) => m.role === 'user')
     .slice(-1)[0]?.content;
@@ -784,7 +791,7 @@ async function main() {
     const interaction = {
       timestamp: new Date().toISOString(),
       user: process.env.USER || 'unknown',
-      request: userMsg.slice(0, 500), // 为存储截断
+      request: userMsg.slice(0, 500), // Truncate for storage
       response: modelMsg.slice(0, 500),
     };
 
@@ -805,7 +812,9 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ```
 
-#### 7. 巩固记忆 (SessionEnd)
+#### 7. Consolidate memories (SessionEnd)
+
+**`.gemini/hooks/consolidate.js`:**
 
 ````javascript
 #!/usr/bin/env node
@@ -831,7 +840,7 @@ async function main() {
     return;
   }
 
-  // 读取交互
+  // Read interactions
   const interactions = fs
     .readFileSync(tempFile, 'utf8')
     .trim()
@@ -845,7 +854,7 @@ async function main() {
     return;
   }
 
-  // 使用 LLM 提取记忆
+  // Extract memories using LLM
   const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
@@ -863,7 +872,7 @@ JSON:`;
     const text = result.response.text().replace(/```json\n?|\n?```/g, '');
     const memories = JSON.parse(text);
 
-    // 存储在 ChromaDB 中
+    // Store in ChromaDB
     const client = new ChromaClient({
       path: path.join(projectDir, '.gemini', 'chroma'),
     });
@@ -917,7 +926,7 @@ function readStdin() {
 readStdin().then(main).catch(console.error);
 ````
 
-### 会话示例
+### Example session
 
 ```
 > gemini
@@ -954,79 +963,82 @@ readStdin().then(main).catch(console.error);
 🧠 2 new learnings saved for future sessions
 ```
 
-### 为什么这个例子很特别
+### What makes this example special
 
-**基于 RAG 的工具选择:**
+**RAG-based tool selection:**
 
-- 传统: 发送所有 100+ 个工具，导致混淆和上下文溢出
-- 此示例: 提取意图，过滤到约 15 个相关工具
-- 优势: 响应更快，选择更好，成本更低
+- Traditional: Send all 100+ tools causing confusion and context overflow
+- This example: Extract intent, filter to ~15 relevant tools
+- Benefits: Faster responses, better selection, lower costs
 
-**跨会话记忆:**
+**Cross-session memory:**
 
-- 传统: 每个会话重新开始
-- 此示例: 学习约定、决策、陷阱、模式
-- 优势: 团队成员共享知识，持久学习
+- Traditional: Each session starts fresh
+- This example: Learns conventions, decisions, gotchas, patterns
+- Benefits: Shared knowledge across team members, persistent learnings
 
-**所有 Hook 事件集成:**
+**All hook events integrated:**
 
-在统一的工作流中演示每个 Hook 事件及其具体用例。
+Demonstrates every hook event with practical use cases in a cohesive workflow.
 
-### 成本效率
+### Cost efficiency
 
-- 使用 `gemini-2.0-flash-exp` 进行意图提取（快速，便宜）
-- 使用 `text-embedding-004` 进行 RAG（便宜）
-- 缓存工具描述（一次性成本）
-- 每个请求的开销极小（通常 <500ms）
+- Uses `gemini-2.0-flash-exp` for intent extraction (fast, cheap)
+- Uses `text-embedding-004` for RAG (inexpensive)
+- Caches tool descriptions (one-time cost)
+- Minimal overhead per request (<500ms typically)
 
-### 自定义
+### Customization
 
-**调整记忆相关性:**
+**Adjust memory relevance:**
 
 ```javascript
-// 在 inject-memories.js 中，更改 nResults
+// In inject-memories.js, change nResults
 const results = await collection.query({
   queryEmbeddings: [result.embedding.values],
-  nResults: 5, // 更多记忆
+  nResults: 5, // More memories
 });
 ```
 
-**修改工具过滤计数:**
+**Modify tool filter count:**
 
 ```javascript
-// 在 rag-filter.js 中，调整限制
-allowedFunctionNames: filtered.slice(0, 30), // 更多工具
+// In rag-filter.js, adjust the limit
+allowedFunctionNames: filtered.slice(0, 30), // More tools
 ```
 
-**添加自定义安全模式:**
+**Add custom security patterns:**
 
 ```javascript
-// 在 security.js 中，添加模式
+// In security.js, add patterns
 const SECRET_PATTERNS = [
-  // ... 现有模式
+  // ... existing patterns
   /private[_-]?key/i,
   /auth[_-]?token/i,
 ];
 ```
 
-## 打包为扩展
+## Packaging as an extension
 
-虽然项目级 Hooks 非常适合特定仓库，但您可能希望跨多个项目或其他用户共享您的 Hooks。您可以通过将 Hooks 打包为
-[Gemini CLI 扩展](../extensions/index.md) 来实现这一点。
+While project-level hooks are great for specific repositories, you might want to
+share your hooks across multiple projects or with other users. You can do this
+by packaging your hooks as a [Gemini CLI extension](../extensions/index.md).
 
-打包为扩展提供：
+Packaging as an extension provides:
 
-- **轻松分发:** 通过 git 仓库或 GitHub Release 共享 Hooks。
-- **集中管理:** 使用 `gemini extensions` 命令安装、更新和禁用 Hooks。
-- **版本控制:** 独立于项目代码管理 Hook 版本。
-- **变量替换:** 使用 `${extensionPath}` 和 `${process.execPath}`
-  实现可移植的跨平台脚本。
+- **Easy distribution:** Share hooks via a git repository or GitHub release.
+- **Centralized management:** Install, update, and disable hooks using
+  `gemini extensions` commands.
+- **Version control:** Manage hook versions separately from your project code.
+- **Variable substitution:** Use `${extensionPath}` and `${process.execPath}`
+  for portable, cross-platform scripts.
 
-要将 Hooks 打包为扩展，请遵循 [扩展 Hook 文档](../extensions/index.md#hooks)。
+To package hooks as an extension, follow the
+[extensions hook documentation](../extensions/index.md#hooks).
 
-## 了解更多
+## Learn more
 
-- [Hooks 参考](index.md) - 完整 API 参考和配置
-- [最佳实践](best-practices.md) - 安全性、性能和调试
-- [配置](../get-started/configuration.md) - Gemini CLI 设置
-- [自定义命令](../cli/custom-commands.md) - 创建自定义命令
+- [Hooks Reference](index.md) - Complete API reference and configuration
+- [Best Practices](best-practices.md) - Security, performance, and debugging
+- [Configuration](../get-started/configuration.md) - Gemini CLI settings
+- [Custom Commands](../cli/custom-commands.md) - Create custom commands

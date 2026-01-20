@@ -1,3 +1,3 @@
-# 身份验证设置
+# Authentication setup
 
-请参阅：[入门 - 身份验证设置](../get-started/authentication.md)。
+See: [Getting Started - Authentication Setup](../get-started/authentication.md).

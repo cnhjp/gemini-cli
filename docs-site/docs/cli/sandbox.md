@@ -1,60 +1,66 @@
-# Gemini CLI 中的沙盒
+# Sandboxing in the Gemini CLI
 
-本文档提供了 Gemini CLI 中沙盒的指南，包括先决条件、快速入门和配置。
+This document provides a guide to sandboxing in the Gemini CLI, including
+prerequisites, quickstart, and configuration.
 
-## 先决条件
+## Prerequisites
 
-在使用沙盒之前，您需要安装并设置 Gemini CLI：
+Before using sandboxing, you need to install and set up the Gemini CLI:
 
 ```bash
 npm install -g @google/gemini-cli
 ```
 
-要验证安装：
+To verify the installation:
 
 ```bash
 gemini --version
 ```
 
-## 沙盒概览
+## Overview of sandboxing
 
-沙盒将潜在危险的操作（如 shell 命令或文件修改）与您的主机系统隔离，在 AI 操作和您的环境之间提供安全屏障。
+Sandboxing isolates potentially dangerous operations (such as shell commands or
+file modifications) from your host system, providing a security barrier between
+AI operations and your environment.
 
-沙盒的好处包括：
+The benefits of sandboxing include:
 
-- **安全性**: 防止意外的系统损坏或数据丢失。
-- **隔离性**: 将文件系统访问限制在项目目录中。
-- **一致性**: 确保跨不同系统的可重现环境。
-- **安全性**: 在处理不受信任的代码或实验性命令时降低风险。
+- **Security**: Prevent accidental system damage or data loss.
+- **Isolation**: Limit file system access to project directory.
+- **Consistency**: Ensure reproducible environments across different systems.
+- **Safety**: Reduce risk when working with untrusted code or experimental
+  commands.
 
-## 沙盒方法
+## Sandboxing methods
 
-您理想的沙盒方法可能会因您的平台和首选容器解决方案而异。
+Your ideal method of sandboxing may differ depending on your platform and your
+preferred container solution.
 
-### 1. macOS Seatbelt (仅限 macOS)
+### 1. macOS Seatbelt (macOS only)
 
-使用 `sandbox-exec` 的轻量级内置沙盒。
+Lightweight, built-in sandboxing using `sandbox-exec`.
 
-**默认配置文件**:
-`permissive-open` - 限制在项目目录之外写入，但允许大多数其他操作。
+**Default profile**: `permissive-open` - restricts writes outside project
+directory but allows most other operations.
 
-### 2. 基于容器 (Docker/Podman)
+### 2. Container-based (Docker/Podman)
 
-具有完全进程隔离的跨平台沙盒。
+Cross-platform sandboxing with complete process isolation.
 
-**注意**: 需要在本地构建沙盒镜像或使用组织注册表中的已发布镜像。
+**Note**: Requires building the sandbox image locally or using a published image
+from your organization's registry.
 
-## 快速入门
+## Quickstart
 
 ```bash
-# 使用命令标志启用沙盒
+# Enable sandboxing with command flag
 gemini -s -p "analyze the code structure"
 
-# 使用环境变量
+# Use environment variable
 export GEMINI_SANDBOX=true
 gemini -p "run the test suite"
 
-# 在 settings.json 中配置
+# Configure in settings.json
 {
   "tools": {
     "sandbox": "docker"
@@ -62,101 +68,104 @@ gemini -p "run the test suite"
 }
 ```
 
-## 配置
+## Configuration
 
-### 启用沙盒（按优先级顺序）
+### Enable sandboxing (in order of precedence)
 
-1. **命令标志**: `-s` 或 `--sandbox`
-2. **环境变量**: `GEMINI_SANDBOX=true|docker|podman|sandbox-exec`
-3. **设置文件**: `settings.json` 文件 `tools` 对象中的
-   `"sandbox": true`（例如，`{"tools": {"sandbox": true}}`）。
+1. **Command flag**: `-s` or `--sandbox`
+2. **Environment variable**: `GEMINI_SANDBOX=true|docker|podman|sandbox-exec`
+3. **Settings file**: `"sandbox": true` in the `tools` object of your
+   `settings.json` file (e.g., `{"tools": {"sandbox": true}}`).
 
-### macOS Seatbelt 配置文件
+### macOS Seatbelt profiles
 
-内置配置文件（通过 `SEATBELT_PROFILE` 环境变量设置）：
+Built-in profiles (set via `SEATBELT_PROFILE` env var):
 
-- `permissive-open` (默认): 写入限制，允许网络
-- `permissive-closed`: 写入限制，无网络
-- `permissive-proxied`: 写入限制，通过代理的网络
-- `restrictive-open`: 严格限制，允许网络
-- `restrictive-closed`: 最大限制
+- `permissive-open` (default): Write restrictions, network allowed
+- `permissive-closed`: Write restrictions, no network
+- `permissive-proxied`: Write restrictions, network via proxy
+- `restrictive-open`: Strict restrictions, network allowed
+- `restrictive-closed`: Maximum restrictions
 
-### 自定义沙盒标志
+### Custom sandbox flags
 
-对于基于容器的沙盒，您可以使用 `SANDBOX_FLAGS` 环境变量将自定义标志注入 `docker`
-或 `podman` 命令。这对于高级配置非常有用，例如针对特定用例禁用安全功能。
+For container-based sandboxing, you can inject custom flags into the `docker` or
+`podman` command using the `SANDBOX_FLAGS` environment variable. This is useful
+for advanced configurations, such as disabling security features for specific
+use cases.
 
-**示例 (Podman)**:
+**Example (Podman)**:
 
-要禁用卷挂载的 SELinux 标签，您可以设置以下内容：
+To disable SELinux labeling for volume mounts, you can set the following:
 
 ```bash
 export SANDBOX_FLAGS="--security-opt label=disable"
 ```
 
-可以作为空格分隔的字符串提供多个标志：
+Multiple flags can be provided as a space-separated string:
 
 ```bash
 export SANDBOX_FLAGS="--flag1 --flag2=value"
 ```
 
-## Linux UID/GID 处理
+## Linux UID/GID handling
 
-沙盒自动处理 Linux 上的用户权限。使用以下命令覆盖这些权限：
+The sandbox automatically handles user permissions on Linux. Override these
+permissions with:
 
 ```bash
-export SANDBOX_SET_UID_GID=true   # 强制主机 UID/GID
-export SANDBOX_SET_UID_GID=false  # 禁用 UID/GID 映射
+export SANDBOX_SET_UID_GID=true   # Force host UID/GID
+export SANDBOX_SET_UID_GID=false  # Disable UID/GID mapping
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common issues
 
 **"Operation not permitted"**
 
-- 操作需要访问沙盒外部。
-- 尝试更宽松的配置文件或添加挂载点。
+- Operation requires access outside sandbox.
+- Try more permissive profile or add mount points.
 
-**缺少命令**
+**Missing commands**
 
-- 添加到自定义 Dockerfile。
-- 通过 `sandbox.bashrc` 安装。
+- Add to custom Dockerfile.
+- Install via `sandbox.bashrc`.
 
-**网络问题**
+**Network issues**
 
-- 检查沙盒配置文件是否允许网络。
-- 验证代理配置。
+- Check sandbox profile allows network.
+- Verify proxy configuration.
 
-### 调试模式
+### Debug mode
 
 ```bash
 DEBUG=1 gemini -s -p "debug command"
 ```
 
-**注意:** 如果您在项目的 `.env` 文件中有
-`DEBUG=true`，由于自动排除，它不会影响 gemini-cli。使用 `.gemini/.env`
-文件进行 gemini-cli 特定的调试设置。
+**Note:** If you have `DEBUG=true` in a project's `.env` file, it won't affect
+gemini-cli due to automatic exclusion. Use `.gemini/.env` files for gemini-cli
+specific debug settings.
 
-### 检查沙盒
+### Inspect sandbox
 
 ```bash
-# 检查环境
+# Check environment
 gemini -s -p "run shell command: env | grep SANDBOX"
 
-# 列出挂载
+# List mounts
 gemini -s -p "run shell command: mount | grep workspace"
 ```
 
-## 安全说明
+## Security notes
 
-- 沙盒减少但不能消除所有风险。
-- 使用允许您工作的最严格的配置文件。
-- 首次构建后容器开销极小。
-- GUI 应用程序可能无法在沙盒中工作。
+- Sandboxing reduces but doesn't eliminate all risks.
+- Use the most restrictive profile that allows your work.
+- Container overhead is minimal after first build.
+- GUI applications may not work in sandboxes.
 
-## 相关文档
+## Related documentation
 
-- [配置](../get-started/configuration.md): 完整配置选项。
-- [命令](./commands.md): 可用命令。
-- [故障排除](../troubleshooting.md): 一般故障排除。
+- [Configuration](../get-started/configuration.md): Full configuration options.
+- [Commands](./commands.md): Available commands.
+- [Troubleshooting](../troubleshooting.md): General troubleshooting.

@@ -1,33 +1,35 @@
-# Gemini CLI 上的 Hooks: 最佳实践
+# Hooks on Gemini CLI: Best practices
 
-本指南涵盖了在 Gemini
-CLI 中开发和部署 Hooks 的安全注意事项、性能优化、调试技术和隐私注意事项。
+This guide covers security considerations, performance optimization, debugging
+techniques, and privacy considerations for developing and deploying hooks in
+Gemini CLI.
 
-## 性能
+## Performance
 
-### 保持 Hooks 快速
+### Keep hooks fast
 
-Hooks 是同步运行的——慢的 Hooks 会延迟代理循环。通过使用并行操作来优化速度：
+Hooks run synchronously—slow hooks delay the agent loop. Optimize for speed by
+using parallel operations:
 
 ```javascript
-// 顺序操作较慢
+// Sequential operations are slower
 const data1 = await fetch(url1).then((r) => r.json());
 const data2 = await fetch(url2).then((r) => r.json());
 const data3 = await fetch(url3).then((r) => r.json());
 
-// 首选并行操作以获得更好的性能
-// 并发启动请求
+// Prefer parallel operations for better performance
+// Start requests concurrently
 const p1 = fetch(url1).then((r) => r.json());
 const p2 = fetch(url2).then((r) => r.json());
 const p3 = fetch(url3).then((r) => r.json());
 
-// 等待所有结果
+// Wait for all results
 const [data1, data2, data3] = await Promise.all([p1, p2, p3]);
 ```
 
-### 缓存昂贵操作
+### Cache expensive operations
 
-在调用之间存储结果以避免重复计算：
+Store results between invocations to avoid repeated computation:
 
 ```javascript
 const fs = require('fs');
@@ -49,14 +51,14 @@ function writeCache(data) {
 
 async function main() {
   const cache = readCache();
-  const cacheKey = `tool-list-${(Date.now() / 3600000) | 0}`; // 每小时缓存
+  const cacheKey = `tool-list-${(Date.now() / 3600000) | 0}`; // Hourly cache
 
   if (cache[cacheKey]) {
     console.log(JSON.stringify(cache[cacheKey]));
     return;
   }
 
-  // 昂贵操作
+  // Expensive operation
   const result = await computeExpensiveResult();
   cache[cacheKey] = result;
   writeCache(cache);
@@ -65,14 +67,14 @@ async function main() {
 }
 ```
 
-### 使用适当的事件
+### Use appropriate events
 
-选择与您的用例匹配的 Hook 事件，以避免不必要的执行。`AfterAgent`
-每次代理循环完成触发一次，而 `AfterModel`
-每次 LLM 调用触发一次（每次循环可能多次）：
+Choose hook events that match your use case to avoid unnecessary execution.
+`AfterAgent` fires once per agent loop completion, while `AfterModel` fires
+after every LLM call (potentially multiple times per loop):
 
 ```json
-// 如果检查最终完成，使用 AfterAgent 而不是 AfterModel
+// If checking final completion, use AfterAgent instead of AfterModel
 {
   "hooks": {
     "AfterAgent": [
@@ -90,10 +92,10 @@ async function main() {
 }
 ```
 
-### 使用匹配器过滤
+### Filter with matchers
 
-使用特定的匹配器来避免不必要的 Hook 执行。不要用 `*`
-匹配所有工具，而是仅指定您需要的工具：
+Use specific matchers to avoid unnecessary hook execution. Instead of matching
+all tools with `*`, specify only the tools you need:
 
 ```json
 {
@@ -107,16 +109,17 @@ async function main() {
 }
 ```
 
-### 优化 JSON 解析
+### Optimize JSON parsing
 
-对于大型输入，使用流式 JSON 解析器以避免将所有内容加载到内存中：
+For large inputs, use streaming JSON parsers to avoid loading everything into
+memory:
 
 ```javascript
-// 标准方法：解析整个输入
+// Standard approach: parse entire input
 const input = JSON.parse(await readStdin());
 const content = input.tool_input.content;
 
-// 对于非常大的输入：流式传输并仅提取所需字段
+// For very large inputs: stream and extract only needed fields
 const { createReadStream } = require('fs');
 const JSONStream = require('JSONStream');
 
@@ -127,17 +130,17 @@ stream.on('data', (chunk) => {
 });
 ```
 
-## 调试
+## Debugging
 
-### 记录到文件
+### Log to files
 
-将调试信息写入专用日志文件：
+Write debug information to dedicated log files:
 
 ```bash
 #!/usr/bin/env bash
 LOG_FILE=".gemini/hooks/debug.log"
 
-// 带时间戳记录
+# Log with timestamp
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
 }
@@ -145,14 +148,14 @@ log() {
 input=$(cat)
 log "Received input: ${input:0:100}..."
 
-# Hook 逻辑在这里
+# Hook logic here
 
 log "Hook completed successfully"
 ```
 
-### 使用 stderr 进行错误处理
+### Use stderr for errors
 
-stderr 上的错误消息会根据退出代码适当地显示：
+Error messages on stderr are surfaced appropriately based on exit codes:
 
 ```javascript
 try {
@@ -160,16 +163,16 @@ try {
   console.log(JSON.stringify({ result }));
 } catch (error) {
   console.error(`Hook error: ${error.message}`);
-  process.exit(2); // 阻塞性错误
+  process.exit(2); // Blocking error
 }
 ```
 
-### 独立测试 Hooks
+### Test hooks independently
 
-使用示例 JSON 输入手动运行 Hook 脚本：
+Run hook scripts manually with sample JSON input:
 
 ```bash
-# 创建测试输入
+# Create test input
 cat > test-input.json << 'EOF'
 {
   "session_id": "test-123",
@@ -183,22 +186,22 @@ cat > test-input.json << 'EOF'
 }
 EOF
 
-# 测试 Hook
+# Test the hook
 cat test-input.json | .gemini/hooks/my-hook.sh
 
-# 检查退出代码
+# Check exit code
 echo "Exit code: $?"
 ```
 
-### 检查退出代码
+### Check exit codes
 
-确保您的脚本返回正确的退出代码：
+Ensure your script returns the correct exit code:
 
 ```bash
 #!/usr/bin/env bash
-set -e  # 出错时退出
+set -e  # Exit on error
 
-# Hook 逻辑
+# Hook logic
 process_input() {
   # ...
 }
@@ -212,9 +215,9 @@ else
 fi
 ```
 
-### 启用遥测
+### Enable telemetry
 
-当启用 `telemetry.logPrompts` 时，Hook 执行会被记录：
+Hook execution is logged when `telemetry.logPrompts` is enabled:
 
 ```json
 {
@@ -224,67 +227,67 @@ fi
 }
 ```
 
-在日志中查看 Hook 遥测以调试执行问题。
+View hook telemetry in logs to debug execution issues.
 
-### 使用 Hook 面板
+### Use hook panel
 
-`/hooks panel` 命令显示执行状态和最近的输出：
+The `/hooks panel` command shows execution status and recent output:
 
 ```bash
 /hooks panel
 ```
 
-检查：
+Check for:
 
-- Hook 执行计数
-- 最近的成功/失败
-- 错误消息
-- 执行时间
+- Hook execution counts
+- Recent successes/failures
+- Error messages
+- Execution timing
 
-## 开发
+## Development
 
-### 从简单开始
+### Start simple
 
-在实施复杂逻辑之前，先从基本的日志 Hook 开始：
+Begin with basic logging hooks before implementing complex logic:
 
 ```bash
 #!/usr/bin/env bash
-# 用于理解输入结构的简单日志 Hook
+# Simple logging hook to understand input structure
 input=$(cat)
 echo "$input" >> .gemini/hook-inputs.log
 echo "Logged input"
 ```
 
-### 使用 JSON 库
+### Use JSON libraries
 
-使用适当的库而不是文本处理来解析 JSON：
+Parse JSON with proper libraries instead of text processing:
 
-**坏:**
+**Bad:**
 
 ```bash
-# 脆弱的文本解析
+# Fragile text parsing
 tool_name=$(echo "$input" | grep -oP '"tool_name":\s*"\K[^"]+')
 ```
 
-**好:**
+**Good:**
 
 ```bash
-# 健壮的 JSON 解析
+# Robust JSON parsing
 tool_name=$(echo "$input" | jq -r '.tool_name')
 ```
 
-### 使脚本可执行
+### Make scripts executable
 
-始终使 Hook 脚本可执行：
+Always make hook scripts executable:
 
 ```bash
 chmod +x .gemini/hooks/*.sh
 chmod +x .gemini/hooks/*.js
 ```
 
-### 版本控制
+### Version control
 
-提交 Hooks 以与您的团队共享：
+Commit hooks to share with your team:
 
 ```bash
 git add .gemini/hooks/
@@ -292,22 +295,22 @@ git add .gemini/settings.json
 git commit -m "Add project hooks for security and testing"
 ```
 
-**`.gitignore` 注意事项:**
+**`.gitignore` considerations:**
 
 ```gitignore
-# 忽略 Hook 缓存和日志
+# Ignore hook cache and logs
 .gemini/hook-cache.json
 .gemini/hook-debug.log
 .gemini/memory/session-*.jsonl
 
-# 保留 Hook 脚本
+# Keep hook scripts
 !.gemini/hooks/*.sh
 !.gemini/hooks/*.js
 ```
 
-### 记录行为
+### Document behavior
 
-添加描述以帮助他人理解您的 Hooks：
+Add descriptions to help others understand your hooks:
 
 ```json
 {
@@ -329,7 +332,7 @@ git commit -m "Add project hooks for security and testing"
 }
 ```
 
-在 Hook 脚本中添加注释：
+Add comments in hook scripts:
 
 ```javascript
 #!/usr/bin/env node
@@ -345,26 +348,26 @@ git commit -m "Add project hooks for security and testing"
  */
 ```
 
-## 故障排除
+## Troubleshooting
 
-### Hook 未执行
+### Hook not executing
 
-**在 `/hooks panel` 中检查 Hook 名称:**
+**Check hook name in `/hooks panel`:**
 
 ```bash
 /hooks panel
 ```
 
-验证 Hook 是否出现在列表中且已启用。
+Verify the hook appears in the list and is enabled.
 
-**验证匹配器模式:**
+**Verify matcher pattern:**
 
 ```bash
-# 测试正则表达式模式
+# Test regex pattern
 echo "write_file|replace" | grep -E "write_.*|replace"
 ```
 
-**检查禁用列表:**
+**Check disabled list:**
 
 ```json
 {
@@ -374,26 +377,26 @@ echo "write_file|replace" | grep -E "write_.*|replace"
 }
 ```
 
-**确保脚本可执行:**
+**Ensure script is executable:**
 
 ```bash
 ls -la .gemini/hooks/my-hook.sh
 chmod +x .gemini/hooks/my-hook.sh
 ```
 
-**验证脚本路径:**
+**Verify script path:**
 
 ```bash
-# 检查路径扩展
+# Check path expansion
 echo "$GEMINI_PROJECT_DIR/.gemini/hooks/my-hook.sh"
 
-# 验证文件是否存在
+# Verify file exists
 test -f "$GEMINI_PROJECT_DIR/.gemini/hooks/my-hook.sh" && echo "File exists"
 ```
 
-### Hook 超时
+### Hook timing out
 
-**检查配置的超时:**
+**Check configured timeout:**
 
 ```json
 {
@@ -402,19 +405,19 @@ test -f "$GEMINI_PROJECT_DIR/.gemini/hooks/my-hook.sh" && echo "File exists"
 }
 ```
 
-**优化慢速操作:**
+**Optimize slow operations:**
 
 ```javascript
-// Before: 顺序操作（慢）
+// Before: Sequential operations (slow)
 for (const item of items) {
   await processItem(item);
 }
 
-// After: 并行操作（快）
+// After: Parallel operations (fast)
 await Promise.all(items.map((item) => processItem(item)));
 ```
 
-**使用缓存:**
+**Use caching:**
 
 ```javascript
 const cache = new Map();
@@ -429,7 +432,7 @@ async function getCachedData(key) {
 }
 ```
 
-**考虑拆分为多个更快的 Hooks:**
+**Consider splitting into multiple faster hooks:**
 
 ```json
 {
@@ -460,15 +463,15 @@ async function getCachedData(key) {
 }
 ```
 
-### 无效的 JSON 输出
+### Invalid JSON output
 
-**在输出前验证 JSON:**
+**Validate JSON before outputting:**
 
 ```bash
 #!/usr/bin/env bash
 output='{"decision": "allow"}'
 
-# 验证 JSON
+# Validate JSON
 if echo "$output" | jq empty 2>/dev/null; then
   echo "$output"
 else
@@ -477,37 +480,37 @@ else
 fi
 ```
 
-**确保正确的引用和转义:**
+**Ensure proper quoting and escaping:**
 
 ```javascript
-// Bad: 未转义的字符串插值
+// Bad: Unescaped string interpolation
 const message = `User said: ${userInput}`;
 console.log(JSON.stringify({ message }));
 
-// Good: 自动转义
+// Good: Automatic escaping
 console.log(JSON.stringify({ message: `User said: ${userInput}` }));
 ```
 
-**检查二进制数据或控制字符:**
+**Check for binary data or control characters:**
 
 ```javascript
 function sanitizeForJSON(str) {
-  return str.replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // 删除控制字符
+  return str.replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove control chars
 }
 
 const cleanContent = sanitizeForJSON(content);
 console.log(JSON.stringify({ content: cleanContent }));
 ```
 
-### 退出代码问题
+### Exit code issues
 
-**验证脚本返回正确的代码:**
+**Verify script returns correct codes:**
 
 ```bash
 #!/usr/bin/env bash
-set -e  # 出错时退出
+set -e  # Exit on error
 
-# 处理逻辑
+# Processing logic
 if validate_input; then
   echo "Success"
   exit 0
@@ -517,40 +520,40 @@ else
 fi
 ```
 
-**检查意外错误:**
+**Check for unintended errors:**
 
 ```bash
 #!/usr/bin/env bash
-# 如果您想显式处理错误，请不要使用 'set -e'
+# Don't use 'set -e' if you want to handle errors explicitly
 # set -e
 
 if ! command_that_might_fail; then
-  # 处理错误
+  # Handle error
   echo "Command failed but continuing" >&2
 fi
 
-# 始终显式退出
+# Always exit explicitly
 exit 0
 ```
 
-**使用 trap 进行清理:**
+**Use trap for cleanup:**
 
 ```bash
 #!/usr/bin/env bash
 
 cleanup() {
-  # 清理逻辑
+  # Cleanup logic
   rm -f /tmp/hook-temp-*
 }
 
 trap cleanup EXIT
 
-# Hook 逻辑在这里
+# Hook logic here
 ```
 
-### 环境变量不可用
+### Environment variables not available
 
-**检查变量是否设置:**
+**Check if variable is set:**
 
 ```bash
 #!/usr/bin/env bash
@@ -566,86 +569,95 @@ if [ -z "$CUSTOM_VAR" ]; then
 fi
 ```
 
-**调试可用变量:**
+**Debug available variables:**
 
 ```bash
 #!/usr/bin/env bash
 
-# 列出所有环境变量
+# List all environment variables
 env > .gemini/hook-env.log
 
-# 检查特定变量
+# Check specific variables
 echo "GEMINI_PROJECT_DIR: $GEMINI_PROJECT_DIR" >> .gemini/hook-env.log
 echo "GEMINI_SESSION_ID: $GEMINI_SESSION_ID" >> .gemini/hook-env.log
 echo "GEMINI_API_KEY: ${GEMINI_API_KEY:+<set>}" >> .gemini/hook-env.log
 ```
 
-**使用 .env 文件:**
+**Use .env files:**
 
 ```bash
 #!/usr/bin/env bash
 
-# 如果存在 .env 文件，加载它
+# Load .env file if it exists
 if [ -f "$GEMINI_PROJECT_DIR/.env" ]; then
   source "$GEMINI_PROJECT_DIR/.env"
 fi
 ```
 
-## 安全地使用 Hooks
+## Using Hooks Securely
 
-### 威胁模型
+### Threat Model
 
-了解 Hooks 来自何处以及它们能做什么对于安全使用至关重要。
+Understanding where hooks come from and what they can do is critical for secure
+usage.
 
-| Hook 来源                            | 描述                                                                                            |
-| :----------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **系统 (System)**                    | 由系统管理员配置（例如 `/etc/gemini-cli/settings.json`, `/Library/...`）。假定是 **最安全的**。 |
-| **用户 (User)** (`~/.gemini/...`)    | 由您配置。您负责确保它们是安全的。                                                              |
-| **扩展 (Extensions)**                | 您明确批准并安装这些。安全性取决于扩展来源（完整性）。                                          |
-| **项目 (Project)** (`./.gemini/...`) | **默认不受信任。** 在受信任的内部仓库中最安全；在第三方/公共仓库中风险较高。                    |
+| Hook Source                   | Description                                                                                                                |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| **System**                    | Configured by system administrators (e.g., `/etc/gemini-cli/settings.json`, `/Library/...`). Assumed to be the **safest**. |
+| **User** (`~/.gemini/...`)    | Configured by you. You are responsible for ensuring they are safe.                                                         |
+| **Extensions**                | You explicitly approve and install these. Security depends on the extension source (integrity).                            |
+| **Project** (`./.gemini/...`) | **Untrusted by default.** Safest in trusted internal repos; higher risk in third-party/public repos.                       |
 
-#### 项目 Hook 安全性
+#### Project Hook Security
 
-当您打开一个在 `.gemini/settings.json` 中定义了 Hooks 的项目时：
+When you open a project with hooks defined in `.gemini/settings.json`:
 
-1. **检测**: Gemini CLI 检测到 Hooks。
-2. **识别**: 根据其 `name` 和 `command` 为每个 Hook 生成唯一身份。
-3. **警告**: 如果以前从未见过此特定 Hook 身份，则会显示 **警告**。
-4. **执行**: 执行 Hook（除非特定安全设置阻止它）。
-5. **信任**: 该 Hook 被标记为该项目的“受信任”。
+1. **Detection**: Gemini CLI detects the hooks.
+2. **Identification**: A unique identity is generated for each hook based on its
+   `name` and `command`.
+3. **Warning**: If this specific hook identity has not been seen before, a
+   **warning** is displayed.
+4. **Execution**: The hook is executed (unless specific security settings block
+   it).
+5. **Trust**: The hook is marked as "trusted" for this project.
 
-> [!IMPORTANT] **修改检测**: 如果项目 Hook 的 `command` 字符串被更改（例如，通过
-> `git pull`），其身份也会更改。Gemini CLI 将将其视为 **新的、不受信任的 Hook**
-> 并再次警告您。这可以防止恶意行为者悄悄地用恶意命令替换已验证的命令。
+> [!IMPORTANT] **Modification Detection**: If the `command` string of a project
+> hook is changed (e.g., by a `git pull`), its identity changes. Gemini CLI will
+> treat it as a **new, untrusted hook** and warn you again. This prevents
+> malicious actors from silently swapping a verified command for a malicious
+> one.
 
-### 风险
+### Risks
 
-| 风险             | 描述                                                                                                |
-| :--------------- | :-------------------------------------------------------------------------------------------------- |
-| **任意代码执行** | Hooks 以您的用户身份运行。它们可以做任何您能做的事情（删除文件、安装软件）。                        |
-| **数据泄露**     | Hook 可以读取您的输入（提示词）、输出（代码）或环境变量 (`GEMINI_API_KEY`) 并将其发送到远程服务器。 |
-| **提示词注入**   | 文件或网页中的恶意内容可能会诱骗 LLM 运行以意外方式触发 Hook 的工具。                               |
+| Risk                         | Description                                                                                                                          |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Arbitrary Code Execution** | Hooks run as your user. They can do anything you can do (delete files, install software).                                            |
+| **Data Exfiltration**        | A hook could read your input (prompts), output (code), or environment variables (`GEMINI_API_KEY`) and send them to a remote server. |
+| **Prompt Injection**         | Malicious content in a file or web page could trick an LLM into running a tool that triggers a hook in an unexpected way.            |
 
-### 缓解策略
+### Mitigation Strategies
 
-#### 验证来源
+#### Verify the source
 
-在启用它们之前，**验证**任何项目 Hooks 或扩展的**来源**。
+**Verify the source** of any project hooks or extensions before enabling them.
 
-- 对于开源项目，建议快速审查 Hook 脚本。
-- 对于扩展，确保您信任作者或发布者（例如，经过验证的发布者，知名的社区成员）。
-- 对来自未知来源的混淆脚本或编译二进制文件保持谨慎。
+- For open-source projects, a quick review of the hook scripts is recommended.
+- For extensions, ensure you trust the author or publisher (e.g., verified
+  publishers, well-known community members).
+- Be cautious with obfuscated scripts or compiled binaries from unknown sources.
 
-#### 清理环境
+#### Sanitize Environment
 
-Hooks 继承 Gemini CLI 进程的环境，其中可能包括敏感的 API 密钥。Gemini
-CLI 尝试清理敏感变量，但您应保持谨慎。
+Hooks inherit the environment of the Gemini CLI process, which may include
+sensitive API keys. Gemini CLI attempts to sanitize sensitive variables, but you
+should be cautious.
 
-- **避免将环境变量打印** 到 stdout/stderr，除非必要。
-- **使用 `.env` 文件** 安全地管理敏感变量，确保它们从版本控制中排除。
+- **Avoid printing environment variables** to stdout/stderr unless necessary.
+- **Use `.env` files** to securely manage sensitive variables, ensuring they are
+  excluded from version control.
 
-**系统管理员:** 您可以在系统配置（例如
-`/etc/gemini-cli/settings.json`）中默认强制执行环境变量修订：
+**System Administrators:** You can enforce environment variable redaction by
+default in the system configuration (e.g., `/etc/gemini-cli/settings.json`):
 
 ```json
 {
@@ -659,25 +671,27 @@ CLI 尝试清理敏感变量，但您应保持谨慎。
 }
 ```
 
-## 编写安全的 Hooks
+## Authoring Secure Hooks
 
-在编写自己的 Hooks 时，请遵循这些实践以确保它们健壮且安全。
+When writing your own hooks, follow these practices to ensure they are robust
+and secure.
 
-### 验证所有输入
+### Validate all inputs
 
-永远不要信任来自 Hooks 的数据而不进行验证。Hook 输入通常来自 LLM 或用户提示词，这些可以被操纵。
+Never trust data from hooks without validation. Hook inputs often come from the
+LLM or user prompts, which can be manipulated.
 
 ```bash
 #!/usr/bin/env bash
 input=$(cat)
 
-# 验证 JSON 结构
+# Validate JSON structure
 if ! echo "$input" | jq empty 2>/dev/null; then
   echo "Invalid JSON input" >&2
   exit 1
 fi
 
-# 显式验证 tool_name
+# Validate tool_name explicitly
 tool_name=$(echo "$input" | jq -r '.tool_name // empty')
 if [[ "$tool_name" != "write_file" && "$tool_name" != "read_file" ]]; then
   echo "Unexpected tool: $tool_name" >&2
@@ -685,10 +699,10 @@ if [[ "$tool_name" != "write_file" && "$tool_name" != "read_file" ]]; then
 fi
 ```
 
-### 使用超时
+### Use timeouts
 
-通过强制执行超时来防止拒绝服务（挂起的代理）。Gemini
-CLI 默认为 60 秒，但您应为快速 Hooks 设置更严格的限制。
+Prevent denial-of-service (hanging agents) by enforcing timeouts. Gemini CLI
+defaults to 60 seconds, but you should set stricter limits for fast hooks.
 
 ```json
 {
@@ -709,19 +723,19 @@ CLI 默认为 60 秒，但您应为快速 Hooks 设置更严格的限制。
 }
 ```
 
-### 限制权限
+### Limit permissions
 
-以所需的最低权限运行 Hooks：
+Run hooks with minimal required permissions:
 
 ```bash
 #!/usr/bin/env bash
-# 不要以 root 身份运行
+# Don't run as root
 if [ "$EUID" -eq 0 ]; then
   echo "Hook should not run as root" >&2
   exit 1
 fi
 
-# 写入前检查文件权限
+# Check file permissions before writing
 if [ -w "$file_path" ]; then
   # Safe to write
 else
@@ -730,9 +744,10 @@ else
 fi
 ```
 
-### 示例：秘密扫描器
+### Example: Secret Scanner
 
-使用 `BeforeTool` Hooks 防止提交敏感数据。这是增强工作流安全性的强大模式。
+Use `BeforeTool` hooks to prevent committing sensitive data. This is a powerful
+pattern for enhancing security in your workflow.
 
 ```javascript
 const SECRET_PATTERNS = [
@@ -749,41 +764,42 @@ function containsSecret(content) {
 }
 ```
 
-## 隐私注意事项
+## Privacy considerations
 
-Hook 输入和输出可能包含敏感信息。Gemini CLI 遵守 `telemetry.logPrompts`
-设置以进行 Hook 数据记录。
+Hook inputs and outputs may contain sensitive information. Gemini CLI respects
+the `telemetry.logPrompts` setting for hook data logging.
 
-### 收集什么数据
+### What data is collected
 
-Hook 遥测可能包括：
+Hook telemetry may include:
 
-- **Hook 输入:** 用户提示词、工具参数、文件内容
-- **Hook 输出:** Hook 响应、决策原因、添加的上下文
-- **标准流:** 来自 Hook 进程的 stdout 和 stderr
-- **执行元数据:** Hook 名称、事件类型、持续时间、成功/失败
+- **Hook inputs:** User prompts, tool arguments, file contents
+- **Hook outputs:** Hook responses, decision reasons, added context
+- **Standard streams:** stdout and stderr from hook processes
+- **Execution metadata:** Hook name, event type, duration, success/failure
 
-### 隐私设置
+### Privacy settings
 
-**启用（默认）:**
+**Enabled (default):**
 
-完整的 Hook I/O 被记录到遥测。在以下情况使用：
+Full hook I/O is logged to telemetry. Use this when:
 
-- 开发和调试 Hooks
-- 遥测重定向到受信任的企业系统
-- 您了解并接受隐私影响
+- Developing and debugging hooks
+- Telemetry is redirected to a trusted enterprise system
+- You understand and accept the privacy implications
 
-**禁用:**
+**Disabled:**
 
-仅记录元数据（事件名称、持续时间、成功/失败）。Hook 输入和输出被排除。在以下情况使用：
+Only metadata is logged (event name, duration, success/failure). Hook inputs and
+outputs are excluded. Use this when:
 
-- 发送遥测到第三方系统
-- 处理敏感数据
-- 隐私法规要求最小化数据收集
+- Sending telemetry to third-party systems
+- Working with sensitive data
+- Privacy regulations require minimizing data collection
 
-### 配置
+### Configuration
 
-**在设置中禁用 PII 记录:**
+**Disable PII logging in settings:**
 
 ```json
 {
@@ -793,32 +809,32 @@ Hook 遥测可能包括：
 }
 ```
 
-**通过环境变量禁用:**
+**Disable via environment variable:**
 
 ```bash
 export GEMINI_TELEMETRY_LOG_PROMPTS=false
 ```
 
-### Hooks 中的敏感数据
+### Sensitive data in hooks
 
-如果您的 Hooks 处理敏感数据：
+If your hooks process sensitive data:
 
-1. **最小化日志记录:** 不要将敏感数据写入日志文件
-2. **清理输出:** 输出前删除敏感数据
-3. **使用安全存储:** 静态加密敏感数据
-4. **限制访问:** 限制 Hook 脚本权限
+1. **Minimize logging:** Don't write sensitive data to log files
+2. **Sanitize outputs:** Remove sensitive data before outputting
+3. **Use secure storage:** Encrypt sensitive data at rest
+4. **Limit access:** Restrict hook script permissions
 
-**清理示例:**
+**Example sanitization:**
 
 ```javascript
 function sanitizeOutput(data) {
   const sanitized = { ...data };
 
-  // 删除敏感字段
+  // Remove sensitive fields
   delete sanitized.apiKey;
   delete sanitized.password;
 
-  // 修订敏感字符串
+  // Redact sensitive strings
   if (sanitized.content) {
     sanitized.content = sanitized.content.replace(
       /api[_-]?key\s*[:=]\s*['"]?[a-zA-Z0-9_-]{20,}['"]?/gi,
@@ -832,9 +848,9 @@ function sanitizeOutput(data) {
 console.log(JSON.stringify(sanitizeOutput(hookOutput)));
 ```
 
-## 了解更多
+## Learn more
 
-- [Hooks 参考](index.md) - 完整 API 参考
-- [编写 Hooks](writing-hooks.md) - 教程和示例
-- [配置](../get-started/configuration.md) - Gemini CLI 设置
-- [Hooks 设计文档](../hooks-design.md) - 技术架构
+- [Hooks Reference](index.md) - Complete API reference
+- [Writing Hooks](writing-hooks.md) - Tutorial and examples
+- [Configuration](../get-started/configuration.md) - Gemini CLI settings
+- [Hooks Design Document](../hooks-design.md) - Technical architecture

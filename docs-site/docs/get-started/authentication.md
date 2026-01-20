@@ -1,297 +1,321 @@
-# Gemini CLI 验证设置
+# Gemini CLI authentication setup
 
-要使用 Gemini
-CLI，您需要向 Google 进行验证。本指南帮助您根据您的账号类型和使用 CLI 的方式，快速找到最佳的登录方法。
+To use Gemini CLI, you'll need to authenticate with Google. This guide helps you
+quickly find the best way to sign in based on your account type and how you're
+using the CLI.
 
-对于大多数用户，我们建议启动 Gemini CLI 并使用您的个人 Google 账号登录。
+For most users, we recommend starting Gemini CLI and logging in with your
+personal Google account.
 
-## 选择您的验证方法 <a id="auth-methods"></a>
+## Choose your authentication method <a id="auth-methods"></a>
 
-在下表中选择符合您情况的验证方法：
+Select the authentication method that matches your situation in the table below:
 
-| 用户类型 / 场景                                  | 推荐的验证方法                                                     | 是否需要 Google Cloud 项目                                    |
-| :----------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------------------ |
-| 个人 Google 账号                                 | [使用 Google 登录](#login-google)                                  | 否，有例外                                                    |
-| 拥有公司、学校或 Google Workspace 账号的组织用户 | [使用 Google 登录](#login-google)                                  | [是](#set-gcp)                                                |
-| 拥有 Gemini API 密钥的 AI Studio 用户            | [使用 Gemini API 密钥](#gemini-api)                                | 否                                                            |
-| Google Cloud Vertex AI 用户                      | [Vertex AI](#vertex-ai)                                            | [是](#set-gcp)                                                |
-| [无头模式](#headless)                            | [使用 Gemini API 密钥](#gemini-api) 或<br> [Vertex AI](#vertex-ai) | 否 (对于 Gemini API 密钥)<br> [是](#set-gcp) (对于 Vertex AI) |
+| User Type / Scenario                                                   | Recommended Authentication Method                                | Google Cloud Project Required                               |
+| :--------------------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------- |
+| Individual Google accounts                                             | [Login with Google](#login-google)                               | No, with exceptions                                         |
+| Organization users with a company, school, or Google Workspace account | [Login with Google](#login-google)                               | [Yes](#set-gcp)                                             |
+| AI Studio user with a Gemini API key                                   | [Use Gemini API Key](#gemini-api)                                | No                                                          |
+| Google Cloud Vertex AI user                                            | [Vertex AI](#vertex-ai)                                          | [Yes](#set-gcp)                                             |
+| [Headless mode](#headless)                                             | [Use Gemini API Key](#gemini-api) or<br> [Vertex AI](#vertex-ai) | No (for Gemini API Key)<br> [Yes](#set-gcp) (for Vertex AI) |
 
-### 我的 Google 账号是什么类型？
+### What is my Google account type?
 
-- **个人 Google 账号：** 包括所有
-  [免费层级账号](../quota-and-pricing/#free-usage)（如 Gemini Code
-  Assist 个人版），以及
-  [Google AI Pro 和 Ultra](https://gemini.google/subscriptions/) 的付费订阅。
+- **Individual Google accounts:** Includes all
+  [free tier accounts](../quota-and-pricing/#free-usage) such as Gemini Code
+  Assist for individuals, as well as paid subscriptions for
+  [Google AI Pro and Ultra](https://gemini.google/subscriptions/).
 
-- **组织账号：** 通过公司、学校或
-  [Google Workspace](https://workspace.google.com/)
-  等组织使用付费许可证的账号。包括
-  [Google AI Ultra 商业版](https://support.google.com/a/answer/16345165) 订阅。
+- **Organization accounts:** Accounts using paid licenses through an
+  organization such as a company, school, or
+  [Google Workspace](https://workspace.google.com/). Includes
+  [Google AI Ultra for Business](https://support.google.com/a/answer/16345165)
+  subscriptions.
 
-## (推荐) 使用 Google 登录 <a id="login-google"></a>
+## (Recommended) Login with Google <a id="login-google"></a>
 
-如果您在本地机器上运行 Gemini
-CLI，最简单的验证方法是使用 Google 账号登录。此方法需要在能与运行 Gemini
-CLI 的终端通信的机器（例如您的本地机器）上使用网络浏览器。
+If you run Gemini CLI on your local machine, the simplest authentication method
+is logging in with your Google account. This method requires a web browser on a
+machine that can communicate with the terminal running Gemini CLI (e.g., your
+local machine).
 
-> **重要：** 如果您是 **Google AI Pro** 或 **Google AI Ultra**
-> 订阅者，请使用与您的订阅关联的 Google 账号。
+> **Important:** If you are a **Google AI Pro** or **Google AI Ultra**
+> subscriber, use the Google account associated with your subscription.
 
-要验证并使用 Gemini CLI：
+To authenticate and use Gemini CLI:
 
-1. 启动 CLI：
+1. Start the CLI:
 
    ```bash
    gemini
    ```
 
-2. 选择 **Login with Google**（使用 Google 登录）。Gemini
-   CLI 将使用您的网络浏览器打开登录提示。按照屏幕上的说明操作。您的凭据将在本地缓存以供将来的会话使用。
+2. Select **Login with Google**. Gemini CLI opens a login prompt using your web
+   browser. Follow the on-screen instructions. Your credentials will be cached
+   locally for future sessions.
 
-### 我需要设置我的 Google Cloud 项目吗？
+### Do I need to set my Google Cloud project?
 
-大多数个人 Google 账号（免费和付费）不需要 Google
-Cloud 项目进行验证。但是，如果您满足以下至少一个条件，则需要设置 Google
-Cloud 项目：
+Most individual Google accounts (free and paid) don't require a Google Cloud
+project for authentication. However, you'll need to set a Google Cloud project
+when you meet at least one of the following conditions:
 
-- 您正在使用公司、学校或 Google Workspace 账号。
-- 您正在使用来自 Google Developer Program 的 Gemini Code Assist 许可证。
-- 您正在使用来自 Gemini Code Assist 订阅的许可证。
+- You are using a company, school, or Google Workspace account.
+- You are using a Gemini Code Assist license from the Google Developer Program.
+- You are using a license from a Gemini Code Assist subscription.
 
-有关说明，请参阅 [设置您的 Google Cloud 项目](#set-gcp)。
+For instructions, see [Set your Google Cloud Project](#set-gcp).
 
-## 使用 Gemini API 密钥 <a id="gemini-api"></a>
+## Use Gemini API key <a id="gemini-api"></a>
 
-如果您不想使用 Google 账号进行验证，可以使用来自 Google AI Studio 的 API 密钥。
+If you don't want to authenticate using your Google account, you can use an API
+key from Google AI Studio.
 
-要使用 Gemini API 密钥验证并使用 Gemini CLI：
+To authenticate and use Gemini CLI with a Gemini API key:
 
-1. 从 [Google AI Studio](https://aistudio.google.com/app/apikey)
-   获取您的 API 密钥。
+1. Obtain your API key from
+   [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-2. 将 `GEMINI_API_KEY` 环境变量设置为您的密钥。例如：
+2. Set the `GEMINI_API_KEY` environment variable to your key. For example:
 
    ```bash
-   # 将 YOUR_GEMINI_API_KEY 替换为来自 AI Studio 的密钥
+   # Replace YOUR_GEMINI_API_KEY with the key from AI Studio
    export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
    ```
 
-   要使此设置持久化，请参阅 [持久化环境变量](#persisting-vars)。
+   To make this setting persistent, see
+   [Persisting Environment Variables](#persisting-vars).
 
-3. 启动 CLI：
+3. Start the CLI:
 
    ```bash
    gemini
    ```
 
-4. 选择 **Use Gemini API key**（使用 Gemini API 密钥）。
+4. Select **Use Gemini API key**.
 
-> **警告：**
-> 请将 API 密钥（尤其是针对 Gemini 等服务的密钥）视为敏感凭据。保护它们以防止未经授权的访问以及在您的账号下滥用服务。
+> **Warning:** Treat API keys, especially for services like Gemini, as sensitive
+> credentials. Protect them to prevent unauthorized access and potential misuse
+> of the service under your account.
 
-## 使用 Vertex AI <a id="vertex-ai"></a>
+## Use Vertex AI <a id="vertex-ai"></a>
 
-要将 Gemini CLI 与 Google Cloud 的 Vertex
-AI 平台一起使用，请从以下验证选项中进行选择：
+To use Gemini CLI with Google Cloud's Vertex AI platform, choose from the
+following authentication options:
 
-- A. 使用 `gcloud` 的应用程序默认凭据 (ADC)。
-- B. 服务账号 JSON 密钥。
-- C. Google Cloud API 密钥。
+- A. Application Default Credentials (ADC) using `gcloud`.
+- B. Service account JSON key.
+- C. Google Cloud API key.
 
-无论您使用哪种 Vertex AI 验证方法，都需要将 `GOOGLE_CLOUD_PROJECT`
-设置为您启用了 Vertex AI API 的 Google Cloud 项目 ID，并将
-`GOOGLE_CLOUD_LOCATION` 设置为您的 Vertex
-AI 资源所在的位置或您希望运行作业的位置。
+Regardless of your authentication method for Vertex AI, you'll need to set
+`GOOGLE_CLOUD_PROJECT` to your Google Cloud project ID with the Vertex AI API
+enabled, and `GOOGLE_CLOUD_LOCATION` to the location of your Vertex AI resources
+or the location where you want to run your jobs.
 
-例如：
+For example:
 
 ```bash
-# 替换为您的项目 ID 和所需位置（例如 us-central1）
+# Replace with your project ID and desired location (e.g., us-central1)
 export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
 export GOOGLE_CLOUD_LOCATION="YOUR_PROJECT_LOCATION"
 ```
 
-要使任何 Vertex AI 环境变量设置持久化，请参阅
-[持久化环境变量](#persisting-vars)。
+To make any Vertex AI environment variable settings persistent, see
+[Persisting Environment Variables](#persisting-vars).
 
-#### A. Vertex AI - 使用 `gcloud` 的应用程序默认凭据 (ADC)
+#### A. Vertex AI - application default credentials (ADC) using `gcloud`
 
-如果您安装了 Google Cloud CLI，请考虑使用此验证方法。
+Consider this authentication method if you have Google Cloud CLI installed.
 
-> **注意：** 如果您之前设置了 `GOOGLE_API_KEY` 或
-> `GEMINI_API_KEY`，则必须取消设置它们才能使用 ADC：
+> **Note:** If you have previously set `GOOGLE_API_KEY` or `GEMINI_API_KEY`, you
+> must unset them to use ADC:
 >
 > ```bash
 > unset GOOGLE_API_KEY GEMINI_API_KEY
 > ```
 
-1. 验证您拥有 Google Cloud 项目且已启用 Vertex AI API。
+1. Verify you have a Google Cloud project and Vertex AI API is enabled.
 
-2. 登录 Google Cloud：
+2. Log in to Google Cloud:
 
    ```bash
    gcloud auth application-default login
    ```
 
-3. [配置您的 Google Cloud 项目](#set-gcp)。
+3. [Configure your Google Cloud Project](#set-gcp).
 
-4. 启动 CLI：
+4. Start the CLI:
 
    ```bash
    gemini
    ```
 
-5. 选择 **Vertex AI**。
+5. Select **Vertex AI**.
 
-#### B. Vertex AI - 服务账号 JSON 密钥
+#### B. Vertex AI - service account JSON key
 
-在非交互式环境、CI/CD 管道中，或者如果您的组织限制基于用户的 ADC 或 API 密钥创建，请考虑使用此验证方法。
+Consider this method of authentication in non-interactive environments, CI/CD
+pipelines, or if your organization restricts user-based ADC or API key creation.
 
-> **注意：** 如果您之前设置了 `GOOGLE_API_KEY` 或
-> `GEMINI_API_KEY`，则必须取消设置它们：
+> **Note:** If you have previously set `GOOGLE_API_KEY` or `GEMINI_API_KEY`, you
+> must unset them:
 >
 > ```bash
 > unset GOOGLE_API_KEY GEMINI_API_KEY
 > ```
 
-1.  [创建服务账号和密钥](https://cloud.google.com/iam/docs/keys-create-delete)
-    并下载提供的 JSON 文件。为服务账号分配 "Vertex AI User" 角色。
+1.  [Create a service account and key](https://cloud.google.com/iam/docs/keys-create-delete)
+    and download the provided JSON file. Assign the "Vertex AI User" role to the
+    service account.
 
-2.  将 `GOOGLE_APPLICATION_CREDENTIALS`
-    环境变量设置为 JSON 文件的绝对路径。例如：
+2.  Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to the JSON
+    file's absolute path. For example:
 
     ```bash
-    # 将 /path/to/your/keyfile.json 替换为实际路径
+    # Replace /path/to/your/keyfile.json with the actual path
     export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/keyfile.json"
     ```
 
-3.  [配置您的 Google Cloud 项目](#set-gcp)。
+3.  [Configure your Google Cloud Project](#set-gcp).
 
-4.  启动 CLI：
+4.  Start the CLI:
 
     ```bash
     gemini
     ```
 
-5.  选择 **Vertex AI**。
-    > **警告：** 保护您的服务账号密钥文件，因为它提供对您资源的访问权限。
+5.  Select **Vertex AI**.
+    > **Warning:** Protect your service account key file as it gives access to
+    > your resources.
 
-#### C. Vertex AI - Google Cloud API 密钥
+#### C. Vertex AI - Google Cloud API key
 
-1.  获取 Google Cloud API 密钥：
-    [获取 API 密钥](https://cloud.google.com/vertex-ai/generative-ai/docs/start/api-keys?usertype=newuser)。
+1.  Obtain a Google Cloud API key:
+    [Get an API Key](https://cloud.google.com/vertex-ai/generative-ai/docs/start/api-keys?usertype=newuser).
 
-2.  设置 `GOOGLE_API_KEY` 环境变量：
+2.  Set the `GOOGLE_API_KEY` environment variable:
 
     ```bash
-    # 将 YOUR_GOOGLE_API_KEY 替换为您的 Vertex AI API 密钥
+    # Replace YOUR_GOOGLE_API_KEY with your Vertex AI API key
     export GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY"
     ```
 
-    > **注意：** 如果您看到类似 `"API keys are not supported by this API..."`
-    > 的错误，您的组织可能限制了此服务的 API 密钥使用。请尝试其他 Vertex
-    > AI 验证方法。
+    > **Note:** If you see errors like
+    > `"API keys are not supported by this API..."`, your organization might
+    > restrict API key usage for this service. Try the other Vertex AI
+    > authentication methods instead.
 
-3.  [配置您的 Google Cloud 项目](#set-gcp)。
+3.  [Configure your Google Cloud Project](#set-gcp).
 
-4.  启动 CLI：
+4.  Start the CLI:
 
     ```bash
     gemini
     ```
 
-5.  选择 **Vertex AI**。
+5.  Select **Vertex AI**.
 
-## 设置您的 Google Cloud 项目 <a id="set-gcp"></a>
+## Set your Google Cloud project <a id="set-gcp"></a>
 
-> **重要：** 大多数个人 Google 账号（免费和付费）不需要 Google
-> Cloud 项目进行验证。
+> **Important:** Most individual Google accounts (free and paid) don't require a
+> Google Cloud project for authentication.
 
-当您使用 Google 账号登录时，您可能需要配置 Google Cloud 项目供 Gemini
-CLI 使用。这适用于您满足以下至少一个条件的情况：
+When you sign in using your Google account, you may need to configure a Google
+Cloud project for Gemini CLI to use. This applies when you meet at least one of
+the following conditions:
 
-- 您正在使用公司、学校或 Google Workspace 账号。
-- 您正在使用来自 Google Developer Program 的 Gemini Code Assist 许可证。
-- 您正在使用来自 Gemini Code Assist 订阅的许可证。
+- You are using a Company, School, or Google Workspace account.
+- You are using a Gemini Code Assist license from the Google Developer Program.
+- You are using a license from a Gemini Code Assist subscription.
 
-要配置 Gemini CLI 使用 Google Cloud 项目，请执行以下操作：
+To configure Gemini CLI to use a Google Cloud project, do the following:
 
-1.  [查找您的 Google Cloud 项目 ID](https://support.google.com/googleapi/answer/7014113)。
+1.  [Find your Google Cloud Project ID](https://support.google.com/googleapi/answer/7014113).
 
-2.  [启用 Gemini for Cloud API](https://cloud.google.com/gemini/docs/discover/set-up-gemini#enable-api)。
+2.  [Enable the Gemini for Cloud API](https://cloud.google.com/gemini/docs/discover/set-up-gemini#enable-api).
 
-3.  [配置必要的 IAM 访问权限](https://cloud.google.com/gemini/docs/discover/set-up-gemini#grant-iam)。
+3.  [Configure necessary IAM access permissions](https://cloud.google.com/gemini/docs/discover/set-up-gemini#grant-iam).
 
-4.  配置您的环境变量。设置 `GOOGLE_CLOUD_PROJECT` 或 `GOOGLE_CLOUD_PROJECT_ID`
-    变量为要与 Gemini CLI 一起使用的项目 ID。Gemini CLI 首先检查
-    `GOOGLE_CLOUD_PROJECT`，然后回退到 `GOOGLE_CLOUD_PROJECT_ID`。
+4.  Configure your environment variables. Set either the `GOOGLE_CLOUD_PROJECT`
+    or `GOOGLE_CLOUD_PROJECT_ID` variable to the project ID to use with Gemini
+    CLI. Gemini CLI checks for `GOOGLE_CLOUD_PROJECT` first, then falls back to
+    `GOOGLE_CLOUD_PROJECT_ID`.
 
-    例如，要设置 `GOOGLE_CLOUD_PROJECT_ID` 变量：
+    For example, to set the `GOOGLE_CLOUD_PROJECT_ID` variable:
 
     ```bash
-    # 将 YOUR_PROJECT_ID 替换为您实际的 Google Cloud 项目 ID
+    # Replace YOUR_PROJECT_ID with your actual Google Cloud project ID
     export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
     ```
 
-    要使此设置持久化，请参阅 [持久化环境变量](#persisting-vars)。
+    To make this setting persistent, see
+    [Persisting Environment Variables](#persisting-vars).
 
-## 持久化环境变量 <a id="persisting-vars"></a>
+## Persisting environment variables <a id="persisting-vars"></a>
 
-为避免每次终端会话都设置环境变量，您可以使用以下方法将它们持久化：
+To avoid setting environment variables for every terminal session, you can
+persist them with the following methods:
 
-1.  **将您的环境变量添加到 shell 配置文件：** 将 `export ...`
-    命令追加到 shell 的启动文件（例如 `~/.bashrc`, `~/.zshrc`, 或
-    `~/.profile`）并重新加载 shell（例如 `source ~/.bashrc`）。
+1.  **Add your environment variables to your shell configuration file:** Append
+    the `export ...` commands to your shell's startup file (e.g., `~/.bashrc`,
+    `~/.zshrc`, or `~/.profile`) and reload your shell (e.g.,
+    `source ~/.bashrc`).
 
     ```bash
-    # .bashrc 示例
+    # Example for .bashrc
     echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.bashrc
     source ~/.bashrc
     ```
 
-    > **警告：**
-    > 请注意，当您在 shell 配置文件中导出 API 密钥或服务账号路径时，从该 shell 启动的任何进程都可以读取它们。
+    > **Warning:** Be aware that when you export API keys or service account
+    > paths in your shell configuration file, any process launched from that
+    > shell can read them.
 
-2.  **使用 `.env` 文件：** 在您的项目目录或主目录中创建一个 `.gemini/.env`
-    文件。Gemini CLI 自动从找到的第一个 `.env`
-    文件加载变量，从当前目录向上搜索，然后在 `~/.gemini/.env` 或 `~/.env`
-    中搜索。推荐使用 `.gemini/.env`。
+2.  **Use a `.env` file:** Create a `.gemini/.env` file in your project
+    directory or home directory. Gemini CLI automatically loads variables from
+    the first `.env` file it finds, searching up from the current directory,
+    then in `~/.gemini/.env` or `~/.env`. `.gemini/.env` is recommended.
 
-    用户范围设置示例：
+    Example for user-wide settings:
 
     ```bash
     mkdir -p ~/.gemini
     cat >> ~/.gemini/.env <<'EOF'
     GOOGLE_CLOUD_PROJECT="your-project-id"
-    # 根据需要添加其他变量，如 GEMINI_API_KEY
+    # Add other variables like GEMINI_API_KEY as needed
     EOF
     ```
 
-变量从找到的第一个文件加载，不会合并。
+Variables are loaded from the first file found, not merged.
 
-## 在 Google Cloud 环境中运行 <a id="cloud-env"></a>
+## Running in Google Cloud environments <a id="cloud-env"></a>
 
-在某些 Google Cloud 环境中运行 Gemini CLI 时，验证是自动的。
+When running Gemini CLI within certain Google Cloud environments, authentication
+is automatic.
 
-在 Google Cloud Shell 环境中，Gemini CLI 通常使用您的 Cloud
-Shell 凭据自动进行验证。在 Compute Engine 环境中，Gemini
-CLI 自动使用环境元数据服务器中的应用程序默认凭据 (ADC)。
+In a Google Cloud Shell environment, Gemini CLI typically authenticates
+automatically using your Cloud Shell credentials. In Compute Engine
+environments, Gemini CLI automatically uses Application Default Credentials
+(ADC) from the environment's metadata server.
 
-如果自动验证失败，请使用本页描述的交互式方法之一。
+If automatic authentication fails, use one of the interactive methods described
+on this page.
 
-## 在无头模式下运行 <a id="headless"></a>
+## Running in headless mode <a id="headless"></a>
 
-如果已缓存现有的验证凭据，[无头模式](../cli/headless) 将使用您现有的验证方法。
+[Headless mode](../cli/headless) will use your existing authentication method,
+if an existing authentication credential is cached.
 
-如果您尚未登录验证凭据，必须使用环境变量配置验证：
+If you have not already logged in with an authentication credential, you must
+configure authentication using environment variables:
 
-- [使用 Gemini API 密钥](#gemini-api)
+- [Use Gemini API Key](#gemini-api)
 - [Vertex AI](#vertex-ai)
 
-## 下一步是什么？
+## What's next?
 
-您的验证方法会影响您的配额、定价、服务条款和隐私声明。请查看以下页面以了解更多信息：
+Your authentication method affects your quotas, pricing, Terms of Service, and
+privacy notices. Review the following pages to learn more:
 
-- [Gemini CLI: 配额与定价](../quota-and-pricing.md)。
-- [Gemini CLI: 服务条款与隐私声明](../tos-privacy.md)。
+- [Gemini CLI: Quotas and Pricing](../quota-and-pricing.md).
+- [Gemini CLI: Terms of Service and Privacy Notice](../tos-privacy.md).

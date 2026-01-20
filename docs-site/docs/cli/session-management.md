@@ -1,75 +1,83 @@
-# 会话管理
+# Session Management
 
-Gemini
-CLI 包含强大的会话管理功能，可自动保存您的对话历史记录。这允许您中断工作并准确从离开的地方恢复，回顾过去的交互，并有效地管理您的对话历史记录。
+Gemini CLI includes robust session management features that automatically save
+your conversation history. This allows you to interrupt your work and resume
+exactly where you left off, review past interactions, and manage your
+conversation history effectively.
 
-## 自动保存
+## Automatic Saving
 
-每次与 Gemini CLI 交互时，您的会话都会自动保存。这在后台发生，无需任何手动干预。
+Every time you interact with Gemini CLI, your session is automatically saved.
+This happens in the background without any manual intervention.
 
-- **保存内容:** 完整的对话历史记录，包括：
-  - 您的提示词和模型的响应。
-  - 所有工具执行（输入和输出）。
-  - Token 使用统计信息（输入/输出/缓存等）。
-  - 助手思路/推理摘要（如果可用）。
-- **位置:** 会话存储在 `~/.gemini/tmp/<project_hash>/chats/` 中。
-- **范围:**
-  会话是特定于项目的。将目录切换到不同的项目将切换到该项目的会话历史记录。
+- **What is saved:** The complete conversation history, including:
+  - Your prompts and the model's responses.
+  - All tool executions (inputs and outputs).
+  - Token usage statistics (input/output/cached, etc.).
+  - Assistant thoughts/reasoning summaries (when available).
+- **Location:** Sessions are stored in `~/.gemini/tmp/<project_hash>/chats/`.
+- **Scope:** Sessions are project-specific. Switching directories to a different
+  project will switch to that project's session history.
 
-## 恢复会话
+## Resuming Sessions
 
-您可以恢复以前的会话以继续对话，并恢复所有先前的上下文。
+You can resume a previous session to continue the conversation with all prior
+context restored.
 
-### 从命令行
+### From the Command Line
 
-启动 CLI 时，您可以使用 `--resume` (或 `-r`) 标志：
+When starting the CLI, you can use the `--resume` (or `-r`) flag:
 
-- **恢复最近的:**
+- **Resume latest:**
 
   ```bash
   gemini --resume
   ```
 
-  这会立即加载最近的会话。
+  This immediately loads the most recent session.
 
-- **按索引恢复:** 首先，列出可用会话（请参阅
-  [列出会话](#listing-sessions)），然后使用索引号：
+- **Resume by index:** First, list available sessions (see
+  [Listing Sessions](#listing-sessions)), then use the index number:
 
   ```bash
   gemini --resume 1
   ```
 
-- **按 ID 恢复:** 您也可以提供完整的会话 UUID：
+- **Resume by ID:** You can also provide the full session UUID:
   ```bash
   gemini --resume a1b2c3d4-e5f6-7890-abcd-ef1234567890
   ```
 
-### 从交互式界面
+### From the Interactive Interface
 
-当 CLI 运行时，您可以使用 `/resume` 斜杠命令打开 **会话浏览器**：
+While the CLI is running, you can use the `/resume` slash command to open the
+**Session Browser**:
 
 ```text
 /resume
 ```
 
-这将打开一个交互式界面，您可以在其中：
+This opens an interactive interface where you can:
 
-- **浏览:** 滚动浏览您过去的会话列表。
-- **预览:** 查看详细信息，如会话日期、消息计数和第一个用户提示词。
-- **搜索:** 按 `/` 进入搜索模式，然后输入以按 ID 或内容过滤会话。
-- **选择:** 按 `Enter` 恢复所选会话。
+- **Browse:** Scroll through a list of your past sessions.
+- **Preview:** See details like the session date, message count, and the first
+  user prompt.
+- **Search:** Press `/` to enter search mode, then type to filter sessions by ID
+  or content.
+- **Select:** Press `Enter` to resume the selected session.
 
-## 管理会话
+## Managing Sessions
 
-### 列出会话
+### Listing Sessions
 
-要从命令行查看当前项目的所有可用会话列表：
+To see a list of all available sessions for the current project from the command
+line:
 
 ```bash
 gemini --list-sessions
 ```
 
-输出示例：
+Output example:
 
 ```text
 Available sessions for this project (3):
@@ -79,52 +87,59 @@ Available sessions for this project (3):
   3. Update documentation (Just now) [abcd1234]
 ```
 
-### 删除会话
+### Deleting Sessions
 
-您可以删除旧的或不需要的会话以释放空间或整理历史记录。
+You can remove old or unwanted sessions to free up space or declutter your
+history.
 
-**从命令行:** 使用 `--delete-session` 标志加上索引或 ID：
+**From the Command Line:** Use the `--delete-session` flag with an index or ID:
 
 ```bash
 gemini --delete-session 2
 ```
 
-**从会话浏览器:**
+**From the Session Browser:**
 
-1.  使用 `/resume` 打开浏览器。
-2.  导航到您要删除的会话。
-3.  按 `x`。
+1.  Open the browser with `/resume`.
+2.  Navigate to the session you want to remove.
+3.  Press `x`.
 
-## 配置
+## Configuration
 
-您可以在 `settings.json` 文件中配置 Gemini CLI 如何管理您的会话历史记录。
+You can configure how Gemini CLI manages your session history in your
+`settings.json` file.
 
-### 会话保留
+### Session Retention
 
-为了防止您的历史记录无限增长，您可以启用自动清理策略。
+To prevent your history from growing indefinitely, you can enable automatic
+cleanup policies.
 
 ```json
 {
   "general": {
     "sessionRetention": {
       "enabled": true,
-      "maxAge": "30d", // 保留会话 30 天
-      "maxCount": 50 // 保留最近的 50 个会话
+      "maxAge": "30d", // Keep sessions for 30 days
+      "maxCount": 50 // Keep the 50 most recent sessions
     }
   }
 }
 ```
 
-- **`enabled`**: (boolean) 会话清理的总开关。默认为 `false`。
-- **`maxAge`**: (string) 保留会话的时长（例如 "24h", "7d",
-  "4w"）。早于此时间的会话将被删除。
-- **`maxCount`**: (number) 要保留的最大会话数。超过此计数的最旧会话将被删除。
-- **`minRetention`**: (string) 最小保留期（安全限制）。默认为
-  `"1d"`；在此期间内的新会话永远不会被自动清理删除。
+- **`enabled`**: (boolean) Master switch for session cleanup. Default is
+  `false`.
+- **`maxAge`**: (string) Duration to keep sessions (e.g., "24h", "7d", "4w").
+  Sessions older than this will be deleted.
+- **`maxCount`**: (number) Maximum number of sessions to retain. The oldest
+  sessions exceeding this count will be deleted.
+- **`minRetention`**: (string) Minimum retention period (safety limit). Defaults
+  to `"1d"`; sessions newer than this period are never deleted by automatic
+  cleanup.
 
-### 会话限制
+### Session Limits
 
-您还可以限制单个会话的长度，以防止上下文窗口变得过大和昂贵。
+You can also limit the length of individual sessions to prevent context windows
+from becoming too large and expensive.
 
 ```json
 {
@@ -134,11 +149,10 @@ gemini --delete-session 2
 }
 ```
 
-- **`maxSessionTurns`**:
-  (number) 单个会话中允许的最大轮数（用户 + 模型交换）。设置为 `-1`
-  表示无限制（默认）。
+- **`maxSessionTurns`**: (number) The maximum number of turns (user + model
+  exchanges) allowed in a single session. Set to `-1` for unlimited (default).
 
-  **达到限制时的行为:**
-  - **交互模式:**
-    CLI 显示一条信息性消息并停止向模型发送请求。您必须手动开始新会话。
-  - **非交互模式:** CLI 退出并显示错误。
+  **Behavior when limit is reached:**
+  - **Interactive Mode:** The CLI shows an informational message and stops
+    sending requests to the model. You must manually start a new session.
+  - **Non-Interactive Mode:** The CLI exits with an error.

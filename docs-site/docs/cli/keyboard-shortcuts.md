@@ -1,123 +1,124 @@
-# Gemini CLI 快捷键
+# Gemini CLI keyboard shortcuts
 
-Gemini
-CLI 附带了一组默认的快捷键，用于编辑输入、导航历史记录和控制 UI。使用此参考了解可用的组合。
+Gemini CLI ships with a set of default keyboard shortcuts for editing input,
+navigating history, and controlling the UI. Use this reference to learn the
+available combinations.
 
 <!-- KEYBINDINGS-AUTOGEN:START -->
 
-#### 基本控制
+#### Basic Controls
 
-| 动作                                 | 按键       |
-| :----------------------------------- | :--------- |
-| 确认当前选择或选项。                 | `Enter`    |
-| 关闭对话框或取消当前焦点。           | `Esc`      |
-| 取消当前请求或在输入为空时退出 CLI。 | `Ctrl + C` |
-| 当输入缓冲区为空时退出 CLI。         | `Ctrl + D` |
+| Action                                                          | Keys       |
+| --------------------------------------------------------------- | ---------- |
+| Confirm the current selection or choice.                        | `Enter`    |
+| Dismiss dialogs or cancel the current focus.                    | `Esc`      |
+| Cancel the current request or quit the CLI when input is empty. | `Ctrl + C` |
+| Exit the CLI when the input buffer is empty.                    | `Ctrl + D` |
 
-#### 光标移动
+#### Cursor Movement
 
-| 动作                     | 按键                                                         |
-| :----------------------- | :----------------------------------------------------------- |
-| 将光标移动到行首。       | `Ctrl + A`<br />`Home`                                       |
-| 将光标移动到行尾。       | `Ctrl + E`<br />`End`                                        |
-| 将光标向上移动一行。     | `Up Arrow (无 Ctrl, 无 Cmd)`                                 |
-| 将光标向下移动一行。     | `Down Arrow (无 Ctrl, 无 Cmd)`                               |
-| 将光标向左移动一个字符。 | `Left Arrow (无 Ctrl, 无 Cmd)`<br />`Ctrl + B`               |
-| 将光标向右移动一个字符。 | `Right Arrow (无 Ctrl, 无 Cmd)`<br />`Ctrl + F`              |
-| 将光标向左移动一个单词。 | `Ctrl + Left Arrow`<br />`Cmd + Left Arrow`<br />`Cmd + B`   |
-| 将光标向右移动一个单词。 | `Ctrl + Right Arrow`<br />`Cmd + Right Arrow`<br />`Cmd + F` |
+| Action                                      | Keys                                                         |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| Move the cursor to the start of the line.   | `Ctrl + A`<br />`Home`                                       |
+| Move the cursor to the end of the line.     | `Ctrl + E`<br />`End`                                        |
+| Move the cursor up one line.                | `Up Arrow (no Ctrl, no Cmd)`                                 |
+| Move the cursor down one line.              | `Down Arrow (no Ctrl, no Cmd)`                               |
+| Move the cursor one character to the left.  | `Left Arrow (no Ctrl, no Cmd)`<br />`Ctrl + B`               |
+| Move the cursor one character to the right. | `Right Arrow (no Ctrl, no Cmd)`<br />`Ctrl + F`              |
+| Move the cursor one word to the left.       | `Ctrl + Left Arrow`<br />`Cmd + Left Arrow`<br />`Cmd + B`   |
+| Move the cursor one word to the right.      | `Ctrl + Right Arrow`<br />`Cmd + Right Arrow`<br />`Cmd + F` |
 
-#### 编辑
+#### Editing
 
-| 动作                       | 按键                                                      |
-| :------------------------- | :-------------------------------------------------------- |
-| 从光标处删除到行尾。       | `Ctrl + K`                                                |
-| 从光标处删除到行首。       | `Ctrl + U`                                                |
-| 清除输入字段中的所有文本。 | `Ctrl + C`                                                |
-| 删除前一个单词。           | `Ctrl + Backspace`<br />`Cmd + Backspace`<br />`Ctrl + W` |
-| 删除下一个单词。           | `Ctrl + Delete`<br />`Cmd + Delete`                       |
-| 删除左侧的字符。           | `Backspace`<br />`Ctrl + H`                               |
-| 删除右侧的字符。           | `Delete`<br />`Ctrl + D`                                  |
-| 撤消最近的文本编辑。       | `Ctrl + Z (无 Shift)`                                     |
-| 重做最近撤消的文本编辑。   | `Ctrl + Shift + Z`                                        |
+| Action                                           | Keys                                                      |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| Delete from the cursor to the end of the line.   | `Ctrl + K`                                                |
+| Delete from the cursor to the start of the line. | `Ctrl + U`                                                |
+| Clear all text in the input field.               | `Ctrl + C`                                                |
+| Delete the previous word.                        | `Ctrl + Backspace`<br />`Cmd + Backspace`<br />`Ctrl + W` |
+| Delete the next word.                            | `Ctrl + Delete`<br />`Cmd + Delete`                       |
+| Delete the character to the left.                | `Backspace`<br />`Ctrl + H`                               |
+| Delete the character to the right.               | `Delete`<br />`Ctrl + D`                                  |
+| Undo the most recent text edit.                  | `Ctrl + Z (no Shift)`                                     |
+| Redo the most recent undone text edit.           | `Ctrl + Shift + Z`                                        |
 
-#### 滚动
+#### Scrolling
 
-| 动作           | 按键                 |
-| :------------- | :------------------- |
-| 向上滚动内容。 | `Shift + Up Arrow`   |
-| 向下滚动内容。 | `Shift + Down Arrow` |
-| 滚动到顶部。   | `Home`               |
-| 滚动到底部。   | `End`                |
-| 向上滚动一页。 | `Page Up`            |
-| 向下滚动一页。 | `Page Down`          |
+| Action                   | Keys                 |
+| ------------------------ | -------------------- |
+| Scroll content up.       | `Shift + Up Arrow`   |
+| Scroll content down.     | `Shift + Down Arrow` |
+| Scroll to the top.       | `Home`               |
+| Scroll to the bottom.    | `End`                |
+| Scroll up by one page.   | `Page Up`            |
+| Scroll down by one page. | `Page Down`          |
 
-#### 历史与搜索
+#### History & Search
 
-| 动作                       | 按键                  |
-| :------------------------- | :-------------------- |
-| 显示历史记录中的上一条目。 | `Ctrl + P (无 Shift)` |
-| 显示历史记录中的下一条目。 | `Ctrl + N (无 Shift)` |
-| 开始反向搜索历史记录。     | `Ctrl + R`            |
-| 提交选定的反向搜索匹配项。 | `Enter (无 Ctrl)`     |
-| 在反向搜索时接受建议。     | `Tab`                 |
+| Action                                       | Keys                  |
+| -------------------------------------------- | --------------------- |
+| Show the previous entry in history.          | `Ctrl + P (no Shift)` |
+| Show the next entry in history.              | `Ctrl + N (no Shift)` |
+| Start reverse search through history.        | `Ctrl + R`            |
+| Submit the selected reverse-search match.    | `Enter (no Ctrl)`     |
+| Accept a suggestion while reverse searching. | `Tab`                 |
 
-#### 导航
+#### Navigation
 
-| 动作                     | 按键                                        |
-| :----------------------- | :------------------------------------------ |
-| 在列表中向上移动选择。   | `Up Arrow (无 Shift)`                       |
-| 在列表中向下移动选择。   | `Down Arrow (无 Shift)`                     |
-| 在对话框选项中向上移动。 | `Up Arrow (无 Shift)`<br />`K (无 Shift)`   |
-| 在对话框选项中向下移动。 | `Down Arrow (无 Shift)`<br />`J (无 Shift)` |
+| Action                           | Keys                                        |
+| -------------------------------- | ------------------------------------------- |
+| Move selection up in lists.      | `Up Arrow (no Shift)`                       |
+| Move selection down in lists.    | `Down Arrow (no Shift)`                     |
+| Move up within dialog options.   | `Up Arrow (no Shift)`<br />`K (no Shift)`   |
+| Move down within dialog options. | `Down Arrow (no Shift)`<br />`J (no Shift)` |
 
-#### 建议与补全
+#### Suggestions & Completions
 
-| 动作                   | 按键                                               |
-| :--------------------- | :------------------------------------------------- |
-| 接受内联建议。         | `Tab`<br />`Enter (无 Ctrl)`                       |
-| 移动到上一个补全选项。 | `Up Arrow (无 Shift)`<br />`Ctrl + P (无 Shift)`   |
-| 移动到下一个补全选项。 | `Down Arrow (无 Shift)`<br />`Ctrl + N (无 Shift)` |
-| 展开内联建议。         | `Right Arrow`                                      |
-| 收起内联建议。         | `Left Arrow`                                       |
+| Action                                  | Keys                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| Accept the inline suggestion.           | `Tab`<br />`Enter (no Ctrl)`                       |
+| Move to the previous completion option. | `Up Arrow (no Shift)`<br />`Ctrl + P (no Shift)`   |
+| Move to the next completion option.     | `Down Arrow (no Shift)`<br />`Ctrl + N (no Shift)` |
+| Expand an inline suggestion.            | `Right Arrow`                                      |
+| Collapse an inline suggestion.          | `Left Arrow`                                       |
 
-#### 文本输入
+#### Text Input
 
-| 动作                           | 按键                                                                   |
-| :----------------------------- | :--------------------------------------------------------------------- |
-| 提交当前提示词。               | `Enter (无 Ctrl, 无 Shift, 无 Cmd)`                                    |
-| 插入换行符而不提交。           | `Ctrl + Enter`<br />`Cmd + Enter`<br />`Shift + Enter`<br />`Ctrl + J` |
-| 在外部编辑器中打开当前提示词。 | `Ctrl + X`                                                             |
-| 从剪贴板粘贴。                 | `Ctrl + V`<br />`Cmd + V`                                              |
+| Action                                         | Keys                                                                   |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| Submit the current prompt.                     | `Enter (no Ctrl, no Shift, no Cmd)`                                    |
+| Insert a newline without submitting.           | `Ctrl + Enter`<br />`Cmd + Enter`<br />`Shift + Enter`<br />`Ctrl + J` |
+| Open the current prompt in an external editor. | `Ctrl + X`                                                             |
+| Paste from the clipboard.                      | `Ctrl + V`<br />`Cmd + V`                                              |
 
-#### 应用控制
+#### App Controls
 
-| 动作                                                       | 按键             |
-| :--------------------------------------------------------- | :--------------- |
-| 切换详细错误信息。                                         | `F12`            |
-| 切换完整的 TODO 列表。                                     | `Ctrl + T`       |
-| 显示 IDE 上下文详情。                                      | `Ctrl + G`       |
-| 切换 Markdown 渲染。                                       | `Cmd + M`        |
-| 在备用缓冲区模式下切换复制模式。                           | `Ctrl + S`       |
-| 切换工具调用的 YOLO (自动批准) 模式。                      | `Ctrl + Y`       |
-| 切换自动编辑 (自动接受编辑) 模式。                         | `Shift + Tab`    |
-| 当不在备用缓冲区模式下时，展开高度受限的响应以显示更多行。 | `Ctrl + S`       |
-| 从 Gemini 输入聚焦 shell 输入。                            | `Tab (无 Shift)` |
-| 从 shell 输入聚焦 Gemini 输入。                            | `Tab`            |
-| 清除终端屏幕并重绘 UI。                                    | `Ctrl + L`       |
-| 重启应用程序。                                             | `R`              |
+| Action                                                                                           | Keys             |
+| ------------------------------------------------------------------------------------------------ | ---------------- |
+| Toggle detailed error information.                                                               | `F12`            |
+| Toggle the full TODO list.                                                                       | `Ctrl + T`       |
+| Show IDE context details.                                                                        | `Ctrl + G`       |
+| Toggle Markdown rendering.                                                                       | `Cmd + M`        |
+| Toggle copy mode when in alternate buffer mode.                                                  | `Ctrl + S`       |
+| Toggle YOLO (auto-approval) mode for tool calls.                                                 | `Ctrl + Y`       |
+| Toggle Auto Edit (auto-accept edits) mode.                                                       | `Shift + Tab`    |
+| Expand a height-constrained response to show additional lines when not in alternate buffer mode. | `Ctrl + S`       |
+| Focus the shell input from the gemini input.                                                     | `Tab (no Shift)` |
+| Focus the Gemini input from the shell input.                                                     | `Tab`            |
+| Clear the terminal screen and redraw the UI.                                                     | `Ctrl + L`       |
+| Restart the application.                                                                         | `R`              |
 
 <!-- KEYBINDINGS-AUTOGEN:END -->
 
-## 其他特定于上下文的快捷键
+## Additional context-specific shortcuts
 
-- `Option+B/F/M`
-  (仅限 macOS): 即使您的终端未配置为使用 Option 发送 Meta，也会被解释为
-  `Cmd+B/F/M`。
-- 空提示符上的 `!`: 进入或退出 shell 模式。
-- `\` (在行尾) + `Enter`: 插入换行符而不离开单行模式。
-- 快速按两次 `Esc`: 浏览并回溯之前的交互。
-- `Up Arrow` /
-  `Down Arrow`: 当光标位于单行输入的顶部或底部时，在提示词历史记录中向后或向前导航。
-- 选择对话框内的
-  `数字键 (1-9, 多位数字)`: 直接跳转到编号的单选选项，并在输入完整数字后确认。
+- `Option+B/F/M` (macOS only): Are interpreted as `Cmd+B/F/M` even if your
+  terminal isn't configured to send Meta with Option.
+- `!` on an empty prompt: Enter or exit shell mode.
+- `\` (at end of a line) + `Enter`: Insert a newline without leaving single-line
+  mode.
+- `Esc` pressed twice quickly: Browse and rewind previous interactions.
+- `Up Arrow` / `Down Arrow`: When the cursor is at the top or bottom of a
+  single-line input, navigate backward or forward through prompt history.
+- `Number keys (1-9, multi-digit)` inside selection dialogs: Jump directly to
+  the numbered radio option and confirm when the full number is entered.

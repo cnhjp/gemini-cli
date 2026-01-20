@@ -1,122 +1,149 @@
-# 欢迎使用 Gemini CLI 文档
+# Welcome to Gemini CLI documentation
 
-本文档提供了安装、使用和开发 Gemini CLI 的综合指南。Gemini
-CLI 是一款允许您通过命令行界面与 Gemini 模型进行交互的工具。
+This documentation provides a comprehensive guide to installing, using, and
+developing Gemini CLI, a tool that lets you interact with Gemini models through
+a command-line interface.
 
-## Gemini CLI 概览
+## Gemini CLI overview
 
-Gemini
-CLI 将 Gemini 模型的功能带到了您的终端，提供了一个交互式的“读取-求值-打印”循环（REPL）环境。Gemini
-CLI 由一个客户端应用程序（`packages/cli`）组成，该程序与本地服务器（`packages/core`）通信，而本地服务器负责管理对 Gemini
-API 及其 AI 模型的请求。Gemini
-CLI 还包含各种工具，用于执行文件系统操作、运行 Shell 命令和网页获取等任务，这些工具均由
-`packages/core` 管理。
+Gemini CLI brings the capabilities of Gemini models to your terminal in an
+interactive Read-Eval-Print Loop (REPL) environment. Gemini CLI consists of a
+client-side application (`packages/cli`) that communicates with a local server
+(`packages/core`), which in turn manages requests to the Gemini API and its AI
+models. Gemini CLI also contains a variety of tools for tasks such as performing
+file system operations, running shells, and web fetching, which are managed by
+`packages/core`.
 
-## 浏览文档
+## Navigating the documentation
 
-本文档分为以下几个部分：
+This documentation is organized into the following sections:
 
-### 概览 (Overview)
+### Overview
 
-- **[架构概览](./architecture.md):** 了解 Gemini
-  CLI 的高层设计，包括其组件以及它们如何交互。
-- **[贡献指南](../CONTRIBUTING.md):**
-  针对贡献者和开发者的信息，包括设置、构建、测试和编码规范。
+- **[Architecture overview](./architecture.md):** Understand the high-level
+  design of Gemini CLI, including its components and how they interact.
+- **[Contribution guide](../CONTRIBUTING.md):** Information for contributors and
+  developers, including setup, building, testing, and coding conventions.
 
-### 快速开始 (Get started)
+### Get started
 
-- **[Gemini CLI 快速入门](./get-started/index.md):** 开始使用 Gemini CLI。
-- **[Gemini 3 Pro on Gemini CLI](./get-started/gemini-3.md):**
-  了解如何启用并使用 Gemini 3。
-- **[身份验证](./get-started/authentication.md):** 向 Gemini CLI 进行身份验证。
-- **[配置](./get-started/configuration.md):** 了解如何配置 CLI。
-- **[安装](./get-started/installation.md):** 安装并运行 Gemini CLI。
-- **[示例](./get-started/examples.md):** Gemini CLI 的使用示例。
+- **[Gemini CLI quickstart](./get-started/index.md):** Let's get started with
+  Gemini CLI.
+- **[Gemini 3 Pro on Gemini CLI](./get-started/gemini-3.md):** Learn how to
+  enable and use Gemini 3.
+- **[Authentication](./get-started/authentication.md):** Authenticate to Gemini
+  CLI.
+- **[Configuration](./get-started/configuration.md):** Learn how to configure
+  the CLI.
+- **[Installation](./get-started/installation.md):** Install and run Gemini CLI.
+- **[Examples](./get-started/examples.md):** Example usage of Gemini CLI.
 
 ### CLI
 
-- **[简介: Gemini CLI](./cli/index.md):** 命令行界面概览。
-- **[命令](./cli/commands.md):** 可用 CLI 命令的描述。
-- **[检查点 (Checkpointing)](./cli/checkpointing.md):** 检查点功能的文档。
-- **[自定义命令](./cli/custom-commands.md):**
-  为常用提示词创建您自己的命令和快捷方式。
-- **[企业版](./cli/enterprise.md):** 适用于企业的 Gemini CLI。
-- **[无头模式](./cli/headless.md):** 以编程方式使用 Gemini
-  CLI 进行脚本编写和自动化。
-- **[快捷键](./cli/keyboard-shortcuts.md):**
-  所有快捷键的参考，以提高您的工作效率。
-- **[模型选择](./cli/model.md):** 使用 `/model` 选择用于处理命令的模型。
-- **[沙盒](./cli/sandbox.md):** 在安全、容器化的环境中隔离工具执行。
-- **[Agent 技能](./cli/skills.md):**
-  (实验性) 使用专业知识和流程化工作流扩展 CLI。
-- **[设置](./cli/settings.md):** 使用 `/settings`
-  配置 CLI 行为和外观的各个方面。
-- **[遥测](./cli/telemetry.md):** CLI 中的遥测概览。
-- **[主题](./cli/themes.md):** Gemini CLI 的主题。
-- **[Token 缓存](./cli/token-caching.md):** Token 缓存与优化。
-- **[受信任文件夹](./cli/trusted-folders.md):** 受信任文件夹安全功能的概览。
-- **[教程](./cli/tutorials.md):** Gemini CLI 教程。
-- **[卸载](./cli/uninstall.md):** 卸载 Gemini CLI 的方法。
+- **[Introduction: Gemini CLI](./cli/index.md):** Overview of the command-line
+  interface.
+- **[Commands](./cli/commands.md):** Description of available CLI commands.
+- **[Checkpointing](./cli/checkpointing.md):** Documentation for the
+  checkpointing feature.
+- **[Custom commands](./cli/custom-commands.md):** Create your own commands and
+  shortcuts for frequently used prompts.
+- **[Enterprise](./cli/enterprise.md):** Gemini CLI for enterprise.
+- **[Headless mode](./cli/headless.md):** Use Gemini CLI programmatically for
+  scripting and automation.
+- **[Keyboard shortcuts](./cli/keyboard-shortcuts.md):** A reference for all
+  keyboard shortcuts to improve your workflow.
+- **[Model selection](./cli/model.md):** Select the model used to process your
+  commands with `/model`.
+- **[Sandbox](./cli/sandbox.md):** Isolate tool execution in a secure,
+  containerized environment.
+- **[Agent Skills](./cli/skills.md):** (Experimental) Extend the CLI with
+  specialized expertise and procedural workflows.
+- **[Settings](./cli/settings.md):** Configure various aspects of the CLI's
+  behavior and appearance with `/settings`.
+- **[Telemetry](./cli/telemetry.md):** Overview of telemetry in the CLI.
+- **[Themes](./cli/themes.md):** Themes for Gemini CLI.
+- **[Token caching](./cli/token-caching.md):** Token caching and optimization.
+- **[Trusted Folders](./cli/trusted-folders.md):** An overview of the Trusted
+  Folders security feature.
+- **[Tutorials](./cli/tutorials.md):** Tutorials for Gemini CLI.
+- **[Uninstall](./cli/uninstall.md):** Methods for uninstalling the Gemini CLI.
 
-### 核心 (Core)
+### Core
 
-- **[简介: Gemini CLI Core](./core/index.md):** 关于 Gemini CLI 核心的信息。
-- **[Memport](./core/memport.md):** 使用内存导入处理器 (Memory Import
-  Processor)。
-- **[工具 API](./core/tools-api.md):** 关于核心如何管理和暴露工具的信息。
-- **[系统提示词覆盖](./cli/system-prompt.md):** 使用 `GEMINI_SYSTEM_MD`
-  替换内置系统指令。
-- **[策略引擎](./core/policy-engine.md):**
-  使用策略引擎对工具执行进行细粒度控制。
+- **[Introduction: Gemini CLI core](./core/index.md):** Information about Gemini
+  CLI core.
+- **[Memport](./core/memport.md):** Using the Memory Import Processor.
+- **[Tools API](./core/tools-api.md):** Information on how the core manages and
+  exposes tools.
+- **[System Prompt Override](./cli/system-prompt.md):** Replace built-in system
+  instructions using `GEMINI_SYSTEM_MD`.
 
-### 工具 (Tools)
+- **[Policy Engine](./core/policy-engine.md):** Use the Policy Engine for
+  fine-grained control over tool execution.
 
-- **[简介: Gemini CLI Tools](./tools/index.md):** 关于 Gemini CLI 工具的信息。
-- **[文件系统工具](./tools/file-system.md):** `read_file` 和 `write_file`
-  工具的文档。
-- **[Shell 工具](./tools/shell.md):** `run_shell_command` 工具的文档。
-- **[Web 请求工具](./tools/web-fetch.md):** `web_fetch` 工具的文档。
-- **[Web 搜索工具](./tools/web-search.md):** `google_web_search` 工具的文档。
-- **[记忆工具](./tools/memory.md):** `save_memory` 工具的文档。
-- **[待办工具](./tools/todos.md):** `write_todos` 工具的文档。
-- **[MCP 服务器](./tools/mcp-server.md):** 在 Gemini CLI 中使用 MCP 服务器。
+### Tools
 
-### 扩展 (Extensions)
+- **[Introduction: Gemini CLI tools](./tools/index.md):** Information about
+  Gemini CLI's tools.
+- **[File system tools](./tools/file-system.md):** Documentation for the
+  `read_file` and `write_file` tools.
+- **[Shell tool](./tools/shell.md):** Documentation for the `run_shell_command`
+  tool.
+- **[Web fetch tool](./tools/web-fetch.md):** Documentation for the `web_fetch`
+  tool.
+- **[Web search tool](./tools/web-search.md):** Documentation for the
+  `google_web_search` tool.
+- **[Memory tool](./tools/memory.md):** Documentation for the `save_memory`
+  tool.
+- **[Todo tool](./tools/todos.md):** Documentation for the `write_todos` tool.
+- **[MCP servers](./tools/mcp-server.md):** Using MCP servers with Gemini CLI.
 
-- **[简介: 扩展](./extensions/index.md):** 如何通过新功能扩展 CLI。
-- **[扩展开发入门](./extensions/getting-started-extensions.md):**
-  学习如何构建您自己的扩展。
-- **[发布扩展](./extensions/extension-releasing.md):** 如何发布 Gemini
-  CLI 扩展。
+### Extensions
+
+- **[Introduction: Extensions](./extensions/index.md):** How to extend the CLI
+  with new functionality.
+- **[Get Started with extensions](./extensions/getting-started-extensions.md):**
+  Learn how to build your own extension.
+- **[Extension releasing](./extensions/extension-releasing.md):** How to release
+  Gemini CLI extensions.
 
 ### Hooks
 
-- **[Hooks](./hooks/index.md):** 在关键生命周期点拦截并自定义 Gemini CLI 行为。
-- **[编写 Hooks](./hooks/writing-hooks.md):**
-  通过一个综合示例学习如何创建您的第一个 Hook。
-- **[最佳实践](./hooks/best-practices.md):** Hooks 的安全、性能和调试指南。
+- **[Hooks](./hooks/index.md):** Intercept and customize Gemini CLI behavior at
+  key lifecycle points.
+- **[Writing Hooks](./hooks/writing-hooks.md):** Learn how to create your first
+  hook with a comprehensive example.
+- **[Best Practices](./hooks/best-practices.md):** Security, performance, and
+  debugging guidelines for hooks.
 
-### IDE 集成
+### IDE integration
 
-- **[IDE 集成简介](./ide-integration/index.md):** 将 CLI 连接到您的编辑器。
-- **[IDE 配套扩展规范](./ide-integration/ide-companion-spec.md):**
-  构建 IDE 配套扩展的规范。
+- **[Introduction to IDE integration](./ide-integration/index.md):** Connect the
+  CLI to your editor.
+- **[IDE companion extension spec](./ide-integration/ide-companion-spec.md):**
+  Spec for building IDE companion extensions.
 
-### 开发 (Development)
+### Development
 
-- **[NPM](./npm.md):** 项目包结构的详细信息。
-- **[发布](./releases.md):** 关于项目发布和部署周期的信息。
-- **[更新日志](./changelogs/index.md):** Gemini CLI 的亮点和重要变更。
-- **[集成测试](./integration-tests.md):** 关于本项目中使用的集成测试框架的信息。
-- **[Issue 和 PR 自动化](./issue-and-pr-automation.md):**
-  我们用于管理和分类 Issue 及 Pull Request 的自动化流程的详细概览。
+- **[NPM](./npm.md):** Details on how the project's packages are structured.
+- **[Releases](./releases.md):** Information on the project's releases and
+  deployment cadence.
+- **[Changelog](./changelogs/index.md):** Highlights and notable changes to
+  Gemini CLI.
+- **[Integration tests](./integration-tests.md):** Information about the
+  integration testing framework used in this project.
+- **[Issue and PR automation](./issue-and-pr-automation.md):** A detailed
+  overview of the automated processes we use to manage and triage issues and
+  pull requests.
 
-### 支持 (Support)
+### Support
 
-- **[FAQ](./faq.md):** 常见问题解答。
-- **[故障排除指南](./troubleshooting.md):** 常见问题的解决方案。
-- **[配额与定价](./quota-and-pricing.md):** 了解免费层级和付费选项。
-- **[服务条款与隐私声明](./tos-privacy.md):** 适用于您使用 Gemini
-  CLI 的服务条款和隐私声明信息。
+- **[FAQ](./faq.md):** Frequently asked questions.
+- **[Troubleshooting guide](./troubleshooting.md):** Find solutions to common
+  problems.
+- **[Quota and pricing](./quota-and-pricing.md):** Learn about the free tier and
+  paid options.
+- **[Terms of service and privacy notice](./tos-privacy.md):** Information on
+  the terms of service and privacy notices applicable to your use of Gemini CLI.
 
-希望本文档能帮助您充分利用 Gemini CLI！
+We hope this documentation helps you make the most of Gemini CLI!

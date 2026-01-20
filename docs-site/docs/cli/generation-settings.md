@@ -1,35 +1,48 @@
-# 高级模型配置
+# Advanced Model Configuration
 
-本指南详细介绍了 Gemini
-CLI 中的模型配置系统。该系统专为研究人员、AI 质量工程师和高级用户设计，为管理生成式模型超参数和行为提供了严格的框架。
+This guide details the Model Configuration system within the Gemini CLI.
+Designed for researchers, AI quality engineers, and advanced users, this system
+provides a rigorous framework for managing generative model hyperparameters and
+behaviors.
 
-> **警告**: 这是一项高级用户功能。配置值将以极少的验证直接传递给模型提供商。不正确的设置（例如，不兼容的参数组合）可能会导致 API 运行时错误。
+> **Warning**: This is a power-user feature. Configuration values are passed
+> directly to the model provider with minimal validation. Incorrect settings
+> (e.g., incompatible parameter combinations) may result in runtime errors from
+> the API.
 
-## 1. 系统概览
+## 1. System Overview
 
-模型配置系统 (`ModelConfigService`) 实现了对模型生成的确定性控制。它将请求的模型标识符（例如，CLI 标志或代理请求）与底层的 API 配置解耦。这允许：
+The Model Configuration system (`ModelConfigService`) enables deterministic
+control over model generation. It decouples the requested model identifier
+(e.g., a CLI flag or agent request) from the underlying API configuration. This
+allows for:
 
-- **精确的超参数调整**: 直接控制 `temperature`, `topP`, `thinkingBudget`
-  和其他 SDK 级别的参数。
-- **特定于环境的行为**: 针对不同操作上下文（例如，测试与生产）的不同配置。
-- **代理范围的自定义**: 仅在特定代理处于活动状态时应用特定设置。
+- **Precise Hyperparameter Tuning**: Direct control over `temperature`, `topP`,
+  `thinkingBudget`, and other SDK-level parameters.
+- **Environment-Specific Behavior**: Distinct configurations for different
+  operating contexts (e.g., testing vs. production).
+- **Agent-Scoped Customization**: Applying specific settings only when a
+  particular agent is active.
 
-该系统基于两个核心原语运行：**别名 (Aliases)** 和 **覆盖 (Overrides)**。
+The system operates on two core primitives: **Aliases** and **Overrides**.
 
-## 2. 配置原语
+## 2. Configuration Primitives
 
-这些设置位于配置文件的 `modelConfigs` 键下。
+These settings are located under the `modelConfigs` key in your configuration
+file.
 
-### 别名 (`customAliases`)
+### Aliases (`customAliases`)
 
-别名是命名的、可重用的配置预设。用户应在 `customAliases`
-映射中定义自己的别名（或覆盖系统默认值）。
+Aliases are named, reusable configuration presets. Users should define their own
+aliases (or override system defaults) in the `customAliases` map.
 
-- **继承**: 别名可以 `extends`（继承）另一个别名（包括像 `chat-base`
-  这样的系统默认值），继承其 `modelConfig`。子别名可以覆盖或扩充继承的设置。
-- **抽象别名**: 如果别名仅用作其他别名的基础，则无需指定具体的 `model`。
+- **Inheritance**: An alias can `extends` another alias (including system
+  defaults like `chat-base`), inheriting its `modelConfig`. Child aliases can
+  overwrite or augment inherited settings.
+- **Abstract Aliases**: An alias is not required to specify a concrete `model`
+  if it serves purely as a base for other aliases.
 
-**层级示例**:
+**Example Hierarchy**:
 
 ```json
 "modelConfigs": {
@@ -49,16 +62,18 @@ CLI 中的模型配置系统。该系统专为研究人员、AI 质量工程师�
 }
 ```
 
-### 覆盖 (`overrides`)
+### Overrides (`overrides`)
 
-覆盖是根据运行时上下文注入配置的条件规则。它们针对每个模型请求动态评估。
+Overrides are conditional rules that inject configuration based on the runtime
+context. They are evaluated dynamically for each model request.
 
-- **匹配标准**: 当请求上下文匹配指定的 `match` 属性时，应用覆盖。
-  - `model`: 匹配请求的模型名称或别名。
-  - `overrideScope`: 匹配请求的不同范围（通常是代理名称，例如
-    `codebaseInvestigator`）。
+- **Match Criteria**: Overrides apply when the request context matches the
+  specified `match` properties.
+  - `model`: Matches the requested model name or alias.
+  - `overrideScope`: Matches the distinct scope of the request (typically the
+    agent name, e.g., `codebaseInvestigator`).
 
-**覆盖示例**:
+**Example Override**:
 
 ```json
 "modelConfigs": {
@@ -75,59 +90,66 @@ CLI 中的模型配置系统。该系统专为研究人员、AI 质量工程师�
 }
 ```
 
-## 3. 解析策略
+## 3. Resolution Strategy
 
-`ModelConfigService` 通过两步过程解析最终配置：
+The `ModelConfigService` resolves the final configuration through a two-step
+process:
 
-### 步骤 1: 别名解析
+### Step 1: Alias Resolution
 
-在系统 `aliases` 和用户 `customAliases` 的合并映射中查找请求的模型字符串。
+The requested model string is looked up in the merged map of system `aliases`
+and user `customAliases`.
 
-1.  如果找到，系统递归解析 `extends` 链。
-2.  设置从父级合并到子级（子级胜出）。
-3.  这会产生一个基本的 `ResolvedModelConfig`。
-4.  如果未找到，请求的字符串将被视为原始模型名称。
+1.  If found, the system recursively resolves the `extends` chain.
+2.  Settings are merged from parent to child (child wins).
+3.  This results in a base `ResolvedModelConfig`.
+4.  If not found, the requested string is treated as the raw model name.
 
-### 步骤 2: 覆盖应用
+### Step 2: Override Application
 
-系统根据请求上下文（`model` 和 `overrideScope`）评估 `overrides` 列表。
+The system evaluates the `overrides` list against the request context (`model`
+and `overrideScope`).
 
-1.  **过滤**: 识别所有匹配的覆盖。
-2.  **排序**: 匹配项按 **特异性**（`match` 对象中匹配键的数量）优先排序。
-    - 具体匹配（例如 `model` + `overrideScope`）覆盖广泛匹配（例如仅 `model`）。
-    - 平局决胜：如果特异性相等，则保留 `overrides`
-      数组中的定义顺序（最后一个胜出）。
-3.  **合并**: 来自排序覆盖的配置按顺序合并到基本配置上。
+1.  **Filtering**: All matching overrides are identified.
+2.  **Sorting**: Matches are prioritized by **specificity** (the number of
+    matched keys in the `match` object).
+    - Specific matches (e.g., `model` + `overrideScope`) override broad matches
+      (e.g., `model` only).
+    - Tie-breaking: If specificity is equal, the order of definition in the
+      `overrides` array is preserved (last one wins).
+3.  **Merging**: The configurations from the sorted overrides are merged
+    sequentially onto the base configuration.
 
-## 4. 配置参考
+## 4. Configuration Reference
 
-配置遵循 `ModelConfigServiceConfig` 接口。
+The configuration follows the `ModelConfigServiceConfig` interface.
 
-### `ModelConfig` 对象
+### `ModelConfig` Object
 
-定义模型的实际参数。
+Defines the actual parameters for the model.
 
-| 属性                    | 类型     | 描述                                            |
-| :---------------------- | :------- | :---------------------------------------------- |
-| `model`                 | `string` | 要调用的模型的标识符（例如 `gemini-2.5-pro`）。 |
-| `generateContentConfig` | `object` | 传递给 `@google/genai` SDK 的配置对象。         |
+| Property                | Type     | Description                                                        |
+| :---------------------- | :------- | :----------------------------------------------------------------- |
+| `model`                 | `string` | The identifier of the model to be called (e.g., `gemini-2.5-pro`). |
+| `generateContentConfig` | `object` | The configuration object passed to the `@google/genai` SDK.        |
 
-### `GenerateContentConfig` (通用参数)
+### `GenerateContentConfig` (Common Parameters)
 
-直接映射到 SDK 的 `GenerateContentConfig`。常见参数包括：
+Directly maps to the SDK's `GenerateContentConfig`. Common parameters include:
 
-- **`temperature`**:
-  (`number`) 控制输出的随机性。较低的值 (0.0) 是确定性的；较高的值 (>0.7) 是创造性的。
-- **`topP`**: (`number`) 核采样概率。
-- **`maxOutputTokens`**: (`number`) 生成响应长度的限制。
-- **`thinkingConfig`**: (`object`) 具有推理能力的模型的配置（例如
-  `thinkingBudget`, `includeThoughts`）。
+- **`temperature`**: (`number`) Controls output randomness. Lower values (0.0)
+  are deterministic; higher values (>0.7) are creative.
+- **`topP`**: (`number`) Nucleus sampling probability.
+- **`maxOutputTokens`**: (`number`) Limit on generated response length.
+- **`thinkingConfig`**: (`object`) Configuration for models with reasoning
+  capabilities (e.g., `thinkingBudget`, `includeThoughts`).
 
-## 5. 实际示例
+## 5. Practical Examples
 
-### 定义确定性基线
+### Defining a Deterministic Baseline
 
-为需要高精度的任务创建一个别名，扩展标准聊天配置但强制零温度。
+Create an alias for tasks requiring high precision, extending the standard chat
+configuration but enforcing zero temperature.
 
 ```json
 "modelConfigs": {
@@ -145,10 +167,10 @@ CLI 中的模型配置系统。该系统专为研究人员、AI 质量工程师�
 }
 ```
 
-### 特定于代理的参数注入
+### Agent-Specific Parameter Injection
 
-强制特定代理（例如
-`codebaseInvestigator`）使用扩展的思考预算，而不更改全局默认值。
+Enforce extended thinking budgets for a specific agent without altering the
+global default, e.g. for the `codebaseInvestigator`.
 
 ```json
 "modelConfigs": {
@@ -167,9 +189,10 @@ CLI 中的模型配置系统。该系统专为研究人员、AI 质量工程师�
 }
 ```
 
-### 实验性模型评估
+### Experimental Model Evaluation
 
-将特定别名的流量路由到预览模型以进行 A/B 测试，而无需更改客户端代码。
+Route traffic for a specific alias to a preview model for A/B testing, without
+changing client code.
 
 ```json
 "modelConfigs": {

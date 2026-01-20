@@ -1,81 +1,93 @@
-# 系统提示词覆盖 (GEMINI_SYSTEM_MD)
+# System Prompt Override (GEMINI_SYSTEM_MD)
 
-指导 Gemini CLI 的核心系统指令可以完全替换为您自己的 Markdown 文件。此功能通过
-`GEMINI_SYSTEM_MD` 环境变量控制。
+The core system instructions that guide Gemini CLI can be completely replaced
+with your own Markdown file. This feature is controlled via the
+`GEMINI_SYSTEM_MD` environment variable.
 
-## 概览
+## Overview
 
-`GEMINI_SYSTEM_MD`
-变量指示 CLI 使用外部 Markdown 文件作为其系统提示词，完全覆盖内置默认值。这是完全替换，而不是合并。如果您使用自定义文件，除非您自己包含它们，否则原始核心指令均不适用。
+The `GEMINI_SYSTEM_MD` variable instructs the CLI to use an external Markdown
+file for its system prompt, completely overriding the built-in default. This is
+a full replacement, not a merge. If you use a custom file, none of the original
+core instructions will apply unless you include them yourself.
 
-此功能面向需要强制执行严格的、特定于项目的行为或创建自定义角色的高级用户。
+This feature is intended for advanced users who need to enforce strict,
+project-specific behavior or create a customized persona.
 
-> 提示：您可以先将当前默认系统提示词导出到文件，查看它，然后有选择地修改或替换它（请参阅
-> [“导出默认提示词”](#export-the-default-prompt-recommended)）。
+> Tip: You can export the current default system prompt to a file first, review
+> it, and then selectively modify or replace it (see
+> [“Export the default prompt”](#export-the-default-prompt-recommended)).
 
-## 如何启用
+## How to enable
 
-您可以在 shell 中临时设置环境变量，或通过 `.gemini/.env` 文件持久化它。请参阅
-[持久化环境变量](../get-started/authentication.md#persisting-environment-variables)。
+You can set the environment variable temporarily in your shell, or persist it
+via a `.gemini/.env` file. See
+[Persisting Environment Variables](../get-started/authentication.md#persisting-environment-variables).
 
-- 使用项目默认路径 (`.gemini/system.md`):
-  - `GEMINI_SYSTEM_MD=true` 或 `GEMINI_SYSTEM_MD=1`
-  - CLI 读取 `./.gemini/system.md`（相对于您当前的项目目录）。
+- Use the project default path (`.gemini/system.md`):
+  - `GEMINI_SYSTEM_MD=true` or `GEMINI_SYSTEM_MD=1`
+  - The CLI reads `./.gemini/system.md` (relative to your current project
+    directory).
 
-- 使用自定义文件路径:
+- Use a custom file path:
   - `GEMINI_SYSTEM_MD=/absolute/path/to/my-system.md`
-  - 支持相对路径并从当前工作目录解析。
-  - 支持波浪号扩展（例如 `~/my-system.md`）。
+  - Relative paths are supported and resolved from the current working
+    directory.
+  - Tilde expansion is supported (e.g., `~/my-system.md`).
 
-- 禁用覆盖（使用内置提示词）:
-  - `GEMINI_SYSTEM_MD=false` 或 `GEMINI_SYSTEM_MD=0` 或取消设置变量。
+- Disable the override (use built‑in prompt):
+  - `GEMINI_SYSTEM_MD=false` or `GEMINI_SYSTEM_MD=0` or unset the variable.
 
-如果启用了覆盖但目标文件不存在，CLI 将报错：`missing system prompt file '<path>'`。
+If the override is enabled but the target file does not exist, the CLI will
+error with: `missing system prompt file '<path>'`.
 
-## 快速示例
+## Quick examples
 
-- 使用项目文件的一次性会话:
+- One‑off session using a project file:
   - `GEMINI_SYSTEM_MD=1 gemini`
-- 为项目持久化（使用 `.gemini/.env`）:
-  - 创建 `.gemini/system.md`，然后添加到 `.gemini/.env`:
+- Persist for a project using `.gemini/.env`:
+  - Create `.gemini/system.md`, then add to `.gemini/.env`:
     - `GEMINI_SYSTEM_MD=1`
-- 使用主目录下的自定义文件:
+- Use a custom file under your home directory:
   - `GEMINI_SYSTEM_MD=~/prompts/SYSTEM.md gemini`
 
-## UI 指示器
+## UI indicator
 
-当 `GEMINI_SYSTEM_MD` 处于活动状态时，CLI 在 UI 中显示 `|⌐■_■|`
-指示器以发出自定义系统提示词模式的信号。
+When `GEMINI_SYSTEM_MD` is active, the CLI shows a `|⌐■_■|` indicator in the UI
+to signal custom system‑prompt mode.
 
-## 导出默认提示词（推荐）
+## Export the default prompt (recommended)
 
-在覆盖之前，导出当前默认提示词，以便您可以查看所需的安全和工作流规则。
+Before overriding, export the current default prompt so you can review required
+safety and workflow rules.
 
-- 将内置提示词写入项目默认路径:
+- Write the built‑in prompt to the project default path:
   - `GEMINI_WRITE_SYSTEM_MD=1 gemini`
-- 或写入自定义路径:
+- Or write to a custom path:
   - `GEMINI_WRITE_SYSTEM_MD=~/prompts/DEFAULT_SYSTEM.md gemini`
 
-这将创建文件并将当前内置系统提示词写入其中。
+This creates the file and writes the current built‑in system prompt to it.
 
-## 最佳实践：SYSTEM.md vs GEMINI.md
+## Best practices: SYSTEM.md vs GEMINI.md
 
-- SYSTEM.md (固件):
-  - 不可协商的操作规则：安全性、工具使用协议、批准以及保持 CLI 可靠的机制。
-  - 跨任务和项目稳定（或在需要时按项目）。
-- GEMINI.md (策略):
-  - 角色、目标、方法论和项目/领域上下文。
-  - 随任务演变；依靠 SYSTEM.md 进行安全执行。
+- SYSTEM.md (firmware):
+  - Non‑negotiable operational rules: safety, tool‑use protocols, approvals, and
+    mechanics that keep the CLI reliable.
+  - Stable across tasks and projects (or per project when needed).
+- GEMINI.md (strategy):
+  - Persona, goals, methodologies, and project/domain context.
+  - Evolves per task; relies on SYSTEM.md for safe execution.
 
-保持 SYSTEM.md 最小化但完整，以确保安全和工具操作。保持 GEMINI.md 专注于高级指导和项目细节。
+Keep SYSTEM.md minimal but complete for safety and tool operation. Keep
+GEMINI.md focused on high‑level guidance and project specifics.
 
-## 故障排除
+## Troubleshooting
 
-- 错误: `missing system prompt file '…'`
-  - 确保引用的路径存在且可读。
-  - 对于 `GEMINI_SYSTEM_MD=1|true`，在您的项目中创建 `./.gemini/system.md`。
-- 覆盖未生效
-  - 确认变量已加载（使用 `.gemini/.env` 或在 shell 中导出）。
-  - 路径是从当前工作目录解析的；尝试绝对路径。
-- 恢复默认值
-  - 取消设置 `GEMINI_SYSTEM_MD` 或将其设置为 `0`/`false`。
+- Error: `missing system prompt file '…'`
+  - Ensure the referenced path exists and is readable.
+  - For `GEMINI_SYSTEM_MD=1|true`, create `./.gemini/system.md` in your project.
+- Override not taking effect
+  - Confirm the variable is loaded (use `.gemini/.env` or export in your shell).
+  - Paths are resolved from the current working directory; try an absolute path.
+- Restore defaults
+  - Unset `GEMINI_SYSTEM_MD` or set it to `0`/`false`.

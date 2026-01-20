@@ -1,59 +1,63 @@
-# 记忆导入处理器
+# Memory Import Processor
 
-记忆导入处理器是一项功能，允许您通过使用 `@file.md`
-语法从其他文件导入内容来模块化您的 GEMINI.md 文件。
+The Memory Import Processor is a feature that allows you to modularize your
+GEMINI.md files by importing content from other files using the `@file.md`
+syntax.
 
-## 概览
+## Overview
 
-此功能使您能够将大型 GEMINI.md 文件分解为更小、更易于管理的组件，这些组件可以在不同上下文中重用。导入处理器支持相对路径和绝对路径，并具有内置的安全功能，以防止循环导入并确保文件访问安全。
+This feature enables you to break down large GEMINI.md files into smaller, more
+manageable components that can be reused across different contexts. The import
+processor supports both relative and absolute paths, with built-in safety
+features to prevent circular imports and ensure file access security.
 
-## 语法
+## Syntax
 
-使用 `@` 符号后跟您要导入的文件的路径：
+Use the `@` symbol followed by the path to the file you want to import:
 
 ```markdown
-# 主 GEMINI.md 文件
+# Main GEMINI.md file
 
-这是主要内容。
+This is the main content.
 
 @./components/instructions.md
 
-更多内容在这里。
+More content here.
 
 @./shared/configuration.md
 ```
 
-## 支持的路径格式
+## Supported path formats
 
-### 相对路径
+### Relative paths
 
-- `@./file.md` - 从同一目录导入
-- `@../file.md` - 从父目录导入
-- `@./components/file.md` - 从子目录导入
+- `@./file.md` - Import from the same directory
+- `@../file.md` - Import from parent directory
+- `@./components/file.md` - Import from subdirectory
 
-### 绝对路径
+### Absolute paths
 
-- `@/absolute/path/to/file.md` - 使用绝对路径导入
+- `@/absolute/path/to/file.md` - Import using absolute path
 
-## 示例
+## Examples
 
-### 基本导入
+### Basic import
 
 ```markdown
-# 我的 GEMINI.md
+# My GEMINI.md
 
-欢迎来到我的项目！
+Welcome to my project!
 
 @./get-started.md
 
-## 功能
+## Features
 
 @./features/overview.md
 ```
 
-### 嵌套导入
+### Nested imports
 
-导入的文件本身可以包含导入，从而创建嵌套结构：
+The imported files can themselves contain imports, creating a nested structure:
 
 ```markdown
 # main.md
@@ -64,16 +68,16 @@
 ```markdown
 # header.md
 
-# 项目标题
+# Project Header
 
 @./shared/title.md
 ```
 
-## 安全功能
+## Safety features
 
-### 循环导入检测
+### Circular import detection
 
-处理器自动检测并防止循环导入：
+The processor automatically detects and prevents circular imports:
 
 ```markdown
 # file-a.md
@@ -84,39 +88,47 @@
 ```markdown
 # file-b.md
 
-@./file-a.md <!-- 这将被检测并阻止 -->
+@./file-a.md <!-- This will be detected and prevented -->
 ```
 
-### 文件访问安全
+### File access security
 
-`validateImportPath`
-函数确保仅允许从指定目录导入，防止访问允许范围之外的敏感文件。
+The `validateImportPath` function ensures that imports are only allowed from
+specified directories, preventing access to sensitive files outside the allowed
+scope.
 
-### 最大导入深度
+### Maximum import depth
 
-为了防止无限递归，有一个可配置的最大导入深度（默认：5 层）。
+To prevent infinite recursion, there's a configurable maximum import depth
+(default: 5 levels).
 
-## 错误处理
+## Error handling
 
-### 缺少文件
+### Missing files
 
-如果引用的文件不存在，导入将优雅地失败，并在输出中带有错误注释。
+If a referenced file doesn't exist, the import will fail gracefully with an
+error comment in the output.
 
-### 文件访问错误
+### File access errors
 
-权限问题或其他文件系统错误通过适当的错误消息优雅地处理。
+Permission issues or other file system errors are handled gracefully with
+appropriate error messages.
 
-## 代码区域检测
+## Code region detection
 
-导入处理器使用 `marked` 库来检测代码块和内联代码范围，确保这些区域内的 `@`
-导入被正确忽略。这为嵌套代码块和复杂的 Markdown 结构提供了强大的处理能力。
+The import processor uses the `marked` library to detect code blocks and inline
+code spans, ensuring that `@` imports inside these regions are properly ignored.
+This provides robust handling of nested code blocks and complex Markdown
+structures.
 
-## 导入树结构
+## Import tree structure
 
-处理器返回一个显示导入文件层级的导入树，类似于 Claude 的 `/memory`
-功能。这通过显示哪些文件被读取及其导入关系，帮助用户调试 GEMINI.md 文件的问题。
+The processor returns an import tree that shows the hierarchy of imported files,
+similar to Claude's `/memory` feature. This helps users debug problems with
+their GEMINI.md files by showing which files were read and their import
+relationships.
 
-示例树结构：
+Example tree structure:
 
 ```
 Memory Files
@@ -130,36 +142,44 @@ Memory Files
             L included.md
 ```
 
-该树保留了文件导入的顺序，并显示完整的导入链以进行调试。
+The tree preserves the order that files were imported and shows the complete
+import chain for debugging purposes.
 
-## 与 Claude Code 的 `/memory` (`claude.md`) 方法的比较
+## Comparison to Claude Code's `/memory` (`claude.md`) approach
 
-Claude Code 的 `/memory` 功能（见于
-`claude.md`）通过连接所有包含的文件生成一个平坦的线性文档，始终用清晰的注释和路径名标记文件边界。它没有显式呈现导入层级，但 LLM 接收所有文件内容和路径，这足以在需要时重建层级。
+Claude Code's `/memory` feature (as seen in `claude.md`) produces a flat, linear
+document by concatenating all included files, always marking file boundaries
+with clear comments and path names. It does not explicitly present the import
+hierarchy, but the LLM receives all file contents and paths, which is sufficient
+for reconstructing the hierarchy if needed.
 
-> [!NOTE] 导入树主要是为了开发期间的清晰度，与 LLM 消费的相关性有限。
+> [!NOTE] The import tree is mainly for clarity during development and has
+> limited relevance to LLM consumption.
 
-## API 参考
+## API reference
 
 ### `processImports(content, basePath, debugMode?, importState?)`
 
-处理 GEMINI.md 内容中的导入语句。
+Processes import statements in GEMINI.md content.
 
-**参数:**
+**Parameters:**
 
-- `content` (string): 要处理导入的内容
-- `basePath` (string): 当前文件所在的目录路径
-- `debugMode` (boolean, 可选): 是否启用调试日志记录（默认：false）
-- `importState` (ImportState, 可选): 用于循环导入预防的状态跟踪
+- `content` (string): The content to process for imports
+- `basePath` (string): The directory path where the current file is located
+- `debugMode` (boolean, optional): Whether to enable debug logging (default:
+  false)
+- `importState` (ImportState, optional): State tracking for circular import
+  prevention
 
-**返回:** Promise&lt;ProcessImportsResult&gt; - 包含处理后的内容和导入树的对象
+**Returns:** Promise&lt;ProcessImportsResult&gt; - Object containing processed
+content and import tree
 
 ### `ProcessImportsResult`
 
 ```typescript
 interface ProcessImportsResult {
-  content: string; // 已解析导入的处理后内容
-  importTree: MemoryFile; // 显示导入层级的树结构
+  content: string; // The processed content with imports resolved
+  importTree: MemoryFile; // Tree structure showing the import hierarchy
 }
 ```
 
@@ -167,55 +187,59 @@ interface ProcessImportsResult {
 
 ```typescript
 interface MemoryFile {
-  path: string; // 文件路径
-  imports?: MemoryFile[]; // 直接导入，按导入顺序排列
+  path: string; // The file path
+  imports?: MemoryFile[]; // Direct imports, in the order they were imported
 }
 ```
 
 ### `validateImportPath(importPath, basePath, allowedDirectories)`
 
-验证导入路径以确保它们是安全的并且在允许的目录内。
+Validates import paths to ensure they are safe and within allowed directories.
 
-**参数:**
+**Parameters:**
 
-- `importPath` (string): 要验证的导入路径
-- `basePath` (string): 用于解析相对路径的基本目录
-- `allowedDirectories` (string[]): 允许的目录路径数组
+- `importPath` (string): The import path to validate
+- `basePath` (string): The base directory for resolving relative paths
+- `allowedDirectories` (string[]): Array of allowed directory paths
 
-**返回:** boolean - 导入路径是否有效
+**Returns:** boolean - Whether the import path is valid
 
 ### `findProjectRoot(startDir)`
 
-通过从给定的起始目录向上搜索 `.git`
-目录来查找项目根目录。使用非阻塞文件系统 API 实现为 **async**
-函数，以避免阻塞 Node.js 事件循环。
+Finds the project root by searching for a `.git` directory upwards from the
+given start directory. Implemented as an **async** function using non-blocking
+file system APIs to avoid blocking the Node.js event loop.
 
-**参数:**
+**Parameters:**
 
-- `startDir` (string): 开始搜索的目录
+- `startDir` (string): The directory to start searching from
 
-**返回:** Promise&lt;string&gt; - 项目根目录（如果未找到 `.git`，则为起始目录）
+**Returns:** Promise&lt;string&gt; - The project root directory (or the start
+directory if no `.git` is found)
 
-## 最佳实践
+## Best Practices
 
-1. **使用描述性文件名** 用于导入的组件
-2. **保持导入浅层** - 避免深度嵌套的导入链
-3. **记录您的结构** - 保持清晰的导入文件层级
-4. **测试您的导入** - 确保所有引用的文件都存在且可访问
-5. **尽可能使用相对路径** 以获得更好的可移植性
+1. **Use descriptive file names** for imported components
+2. **Keep imports shallow** - avoid deeply nested import chains
+3. **Document your structure** - maintain a clear hierarchy of imported files
+4. **Test your imports** - ensure all referenced files exist and are accessible
+5. **Use relative paths** when possible for better portability
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common issues
 
-1. **导入不起作用**: 检查文件是否存在且路径正确
-2. **循环导入警告**: 检查您的导入结构是否存在循环引用
-3. **权限错误**: 确保文件可读且在允许的目录内
-4. **路径解析问题**: 如果相对路径无法正确解析，请使用绝对路径
+1. **Import not working**: Check that the file exists and the path is correct
+2. **Circular import warnings**: Review your import structure for circular
+   references
+3. **Permission errors**: Ensure the files are readable and within allowed
+   directories
+4. **Path resolution issues**: Use absolute paths if relative paths aren't
+   resolving correctly
 
-### 调试模式
+### Debug mode
 
-启用调试模式以查看导入过程的详细日志记录：
+Enable debug mode to see detailed logging of the import process:
 
 ```typescript
 const result = await processImports(content, basePath, true);

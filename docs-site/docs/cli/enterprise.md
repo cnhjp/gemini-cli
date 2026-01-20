@@ -1,31 +1,43 @@
-# 企业版 Gemini CLI
+# Gemini CLI for the enterprise
 
-本文档概述了在企业环境中部署和管理 Gemini
-CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可以强制执行安全策略、管理工具访问并确保所有用户的一致体验。
+This document outlines configuration patterns and best practices for deploying
+and managing Gemini CLI in an enterprise environment. By leveraging system-level
+settings, administrators can enforce security policies, manage tool access, and
+ensure a consistent experience for all users.
 
-> **关于安全性的说明：**
-> 本文档中描述的模式旨在帮助管理员创建一个更可控和安全的 Gemini
-> CLI 使用环境。但是，它们不应被视为万无一失的安全边界。拥有足够本地机器权限的坚定用户可能仍然能够规避这些配置。这些措施旨在防止意外滥用并在受管环境中强制执行公司策略，而不是防御具有本地管理权限的恶意行为者。
+> **A note on security:** The patterns described in this document are intended
+> to help administrators create a more controlled and secure environment for
+> using Gemini CLI. However, they should not be considered a foolproof security
+> boundary. A determined user with sufficient privileges on their local machine
+> may still be able to circumvent these configurations. These measures are
+> designed to prevent accidental misuse and enforce corporate policy in a
+> managed environment, not to defend against a malicious actor with local
+> administrative rights.
 
-## 集中配置：系统设置文件
+## Centralized configuration: The system settings file
 
-企业管理最强大的工具是系统范围的设置文件。这些文件允许您定义基线配置 (`system-defaults.json`) 和一组适用于机器上所有用户的覆盖 (`settings.json`)。有关配置选项的完整概述，请参阅
-[配置文档](../get-started/configuration.md)。
+The most powerful tools for enterprise administration are the system-wide
+settings files. These files allow you to define a baseline configuration
+(`system-defaults.json`) and a set of overrides (`settings.json`) that apply to
+all users on a machine. For a complete overview of configuration options, see
+the [Configuration documentation](../get-started/configuration.md).
 
-设置从四个文件合并。单值设置（如 `theme`）的优先级顺序为：
+Settings are merged from four files. The precedence order for single-value
+settings (like `theme`) is:
 
-1. 系统默认值 (`system-defaults.json`)
-2. 用户设置 (`~/.gemini/settings.json`)
-3. 工作区设置 (`<project>/.gemini/settings.json`)
-4. 系统覆盖 (`settings.json`)
+1. System Defaults (`system-defaults.json`)
+2. User Settings (`~/.gemini/settings.json`)
+3. Workspace Settings (`<project>/.gemini/settings.json`)
+4. System Overrides (`settings.json`)
 
-这意味着系统覆盖文件具有最终决定权。对于数组 (`includeDirectories`) 或对象 (`mcpServers`) 设置，值将被合并。
+This means the System Overrides file has the final say. For settings that are
+arrays (`includeDirectories`) or objects (`mcpServers`), the values are merged.
 
-**合并和优先级示例:**
+**Example of merging and precedence:**
 
-以下是来自不同级别的设置如何组合的。
+Here is how settings from different levels are combined.
 
-- **系统默认值 `system-defaults.json`:**
+- **System defaults `system-defaults.json`:**
 
   ```json
   {
@@ -38,7 +50,7 @@ CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可�
   }
   ```
 
-- **用户 `settings.json` (`~/.gemini/settings.json`):**
+- **User `settings.json` (`~/.gemini/settings.json`):**
 
   ```json
   {
@@ -59,7 +71,7 @@ CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可�
   }
   ```
 
-- **工作区 `settings.json` (`<project>/.gemini/settings.json`):**
+- **Workspace `settings.json` (`<project>/.gemini/settings.json`):**
 
   ```json
   {
@@ -77,7 +89,7 @@ CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可�
   }
   ```
 
-- **系统覆盖 `settings.json`:**
+- **System overrides `settings.json`:**
   ```json
   {
     "ui": {
@@ -94,9 +106,9 @@ CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可�
   }
   ```
 
-这将产生以下合并配置：
+This results in the following merged configuration:
 
-- **最终合并配置:**
+- **Final merged configuration:**
   ```json
   {
     "ui": {
@@ -124,43 +136,56 @@ CLI 的配置模式和最佳实践。通过利用系统级设置，管理员可�
   }
   ```
 
-**原因:**
+**Why:**
 
-- **`theme`**: 使用来自系统覆盖的值 (`system-enforced-theme`)，因为它具有最高优先级。
-- **`mcpServers`**: 对象被合并。来自系统覆盖的 `corp-server`
-  定义优先于用户的定义。包含唯一的 `user-tool` 和 `project-tool`。
-- **`includeDirectories`**: 数组按系统默认值、用户、工作区、然后是系统覆盖的顺序连接。
+- **`theme`**: The value from the system overrides (`system-enforced-theme`) is
+  used, as it has the highest precedence.
+- **`mcpServers`**: The objects are merged. The `corp-server` definition from
+  the system overrides takes precedence over the user's definition. The unique
+  `user-tool` and `project-tool` are included.
+- **`includeDirectories`**: The arrays are concatenated in the order of System
+  Defaults, User, Workspace, and then System Overrides.
 
-- **位置**:
+- **Location**:
   - **Linux**: `/etc/gemini-cli/settings.json`
   - **Windows**: `C:\ProgramData\gemini-cli\settings.json`
   - **macOS**: `/Library/Application Support/GeminiCli/settings.json`
-  - 路径可以使用 `GEMINI_CLI_SYSTEM_SETTINGS_PATH` 环境变量覆盖。
-- **控制**: 此文件应由系统管理员管理，并受适当的文件权限保护，以防止用户未经授权的修改。
+  - The path can be overridden using the `GEMINI_CLI_SYSTEM_SETTINGS_PATH`
+    environment variable.
+- **Control**: This file should be managed by system administrators and
+  protected with appropriate file permissions to prevent unauthorized
+  modification by users.
 
-通过使用系统设置文件，您可以强制执行下述安全和配置模式。
+By using the system settings file, you can enforce the security and
+configuration patterns described below.
 
-### 使用包装脚本强制执行系统设置
+### Enforcing system settings with a wrapper script
 
-虽然 `GEMINI_CLI_SYSTEM_SETTINGS_PATH`
-环境变量提供了灵活性，但用户可能会覆盖它以指向不同的设置文件，从而绕过集中管理的配置。为了缓解这种情况，企业可以部署包装脚本或别名，以确保环境变量始终设置为企业控制的路径。
+While the `GEMINI_CLI_SYSTEM_SETTINGS_PATH` environment variable provides
+flexibility, a user could potentially override it to point to a different
+settings file, bypassing the centrally managed configuration. To mitigate this,
+enterprises can deploy a wrapper script or alias that ensures the environment
+variable is always set to the corporate-controlled path.
 
-这种方法确保无论用户如何调用 `gemini` 命令，企业设置始终以最高优先级加载。
+This approach ensures that no matter how the user calls the `gemini` command,
+the enterprise settings are always loaded with the highest precedence.
 
-**示例包装脚本:**
+**Example wrapper script:**
 
-管理员可以创建一个名为 `gemini` 的脚本，并将其放置在用户 `PATH` 中比实际 Gemini
-CLI 二进制文件更早出现的目录中（例如 `/usr/local/bin/gemini`）。
+Administrators can create a script named `gemini` and place it in a directory
+that appears earlier in the user's `PATH` than the actual Gemini CLI binary
+(e.g., `/usr/local/bin/gemini`).
 
 ```bash
 #!/bin/bash
 
-# 强制执行公司系统设置文件的路径。
-# 这确保始终应用公司的配置。
+# Enforce the path to the corporate system settings file.
+# This ensures that the company's configuration is always applied.
 export GEMINI_CLI_SYSTEM_SETTINGS_PATH="/etc/gemini-cli/settings.json"
 
-# 查找原始 gemini 可执行文件。
-# 这是一个简单的示例；根据安装方法，可能需要更强大的解决方案。
+# Find the original gemini executable.
+# This is a simple example; a more robust solution might be needed
+# depending on the installation method.
 REAL_GEMINI_PATH=$(type -aP gemini | grep -v "^$(type -P gemini)$" | head -n 1)
 
 if [ -z "$REAL_GEMINI_PATH" ]; then
@@ -168,25 +193,30 @@ if [ -z "$REAL_GEMINI_PATH" ]; then
   exit 1
 fi
 
-# 将所有参数传递给真正的 Gemini CLI 可执行文件。
+# Pass all arguments to the real Gemini CLI executable.
 exec "$REAL_GEMINI_PATH" "$@"
 ```
 
-通过部署此脚本，`GEMINI_CLI_SYSTEM_SETTINGS_PATH` 在脚本的环境中设置，并且
-`exec` 命令用实际的 Gemini
-CLI 进程替换脚本进程，后者继承了环境变量。这使得用户绕过强制设置变得更加困难。
+By deploying this script, the `GEMINI_CLI_SYSTEM_SETTINGS_PATH` is set within
+the script's environment, and the `exec` command replaces the script process
+with the actual Gemini CLI process, which inherits the environment variable.
+This makes it significantly more difficult for a user to bypass the enforced
+settings.
 
-## 限制工具访问
+## Restricting tool access
 
-通过控制 Gemini 模型可以使用的工具，您可以显着增强安全性。这是通过 `tools.core`
-和 `tools.exclude` 设置实现的。有关可用工具的列表，请参阅
-[工具文档](../tools/index.md)。
+You can significantly enhance security by controlling which tools the Gemini
+model can use. This is achieved through the `tools.core` and `tools.exclude`
+settings. For a list of available tools, see the
+[Tools documentation](../tools/index.md).
 
-### 使用 `coreTools` 进行白名单控制
+### Allowlisting with `coreTools`
 
-最安全的方法是将用户允许执行的工具和命令明确添加到白名单中。这可以防止使用任何不在批准列表中的工具。
+The most secure approach is to explicitly add the tools and commands that users
+are permitted to execute to an allowlist. This prevents the use of any tool not
+on the approved list.
 
-**示例:** 仅允许安全的只读文件操作和列出文件。
+**Example:** Allow only safe, read-only file operations and listing files.
 
 ```json
 {
@@ -196,11 +226,12 @@ CLI 进程替换脚本进程，后者继承了环境变量。这使得用户绕�
 }
 ```
 
-### 使用 `excludeTools` 进行黑名单控制
+### Blocklisting with `excludeTools`
 
-或者，您可以将您环境中被视为危险的特定工具添加到黑名单中。
+Alternatively, you can add specific tools that are considered dangerous in your
+environment to a blocklist.
 
-**示例:** 防止使用 shell 工具删除文件。
+**Example:** Prevent the use of the shell tool for removing files.
 
 ```json
 {
@@ -210,14 +241,19 @@ CLI 进程替换脚本进程，后者继承了环境变量。这使得用户绕�
 }
 ```
 
-**安全说明:** 使用 `excludeTools` 进行黑名单控制不如使用 `coreTools`
-进行白名单控制安全，因为它依赖于阻止已知的恶意命令，聪明的用户可能会找到绕过简单基于字符串的阻止的方法。**推荐使用白名单方法。**
+**Security note:** Blocklisting with `excludeTools` is less secure than
+allowlisting with `coreTools`, as it relies on blocking known-bad commands, and
+clever users may find ways to bypass simple string-based blocks. **Allowlisting
+is the recommended approach.**
 
-### 禁用 YOLO 模式
+### Disabling YOLO mode
 
-为了确保用户无法绕过工具执行的确认提示，您可以在策略级别禁用 YOLO 模式。这增加了一层关键的安全性，因为它可以防止模型在没有用户明确批准的情况下执行工具。
+To ensure that users cannot bypass the confirmation prompt for tool execution,
+you can disable YOLO mode at the policy level. This adds a critical layer of
+safety, as it prevents the model from executing tools without explicit user
+approval.
 
-**示例:** 强制所有工具执行都需要用户确认。
+**Example:** Force all tool executions to require user confirmation.
 
 ```json
 {
@@ -227,40 +263,52 @@ CLI 进程替换脚本进程，后者继承了环境变量。这使得用户绕�
 }
 ```
 
-在企业环境中强烈建议使用此设置，以防止意外的工具执行。
+This setting is highly recommended in an enterprise environment to prevent
+unintended tool execution.
 
-## 管理自定义工具 (MCP 服务器)
+## Managing custom tools (MCP servers)
 
-如果您的组织通过 [模型上下文协议 (MCP) 服务器](../core/tools-api.md)
-使用自定义工具，了解如何管理服务器配置以有效应用安全策略至关重要。
+If your organization uses custom tools via
+[Model-Context Protocol (MCP) servers](../core/tools-api.md), it is crucial to
+understand how server configurations are managed to apply security policies
+effectively.
 
-### MCP 服务器配置如何合并
+### How MCP server configurations are merged
 
-Gemini CLI 从三个级别加载 `settings.json` 文件：系统、工作区和用户。当涉及到
-`mcpServers` 对象时，这些配置是 **合并** 的：
+Gemini CLI loads `settings.json` files from three levels: System, Workspace, and
+User. When it comes to the `mcpServers` object, these configurations are
+**merged**:
 
-1.  **合并:** 来自所有三个级别的服务器列表被组合成一个列表。
-2.  **优先级:** 如果在多个级别定义了具有 **相同名称** 的服务器（例如，名为
-    `corp-api`
-    的服务器同时存在于系统和用户设置中），则使用最高优先级级别的定义。优先级顺序为：**系统 > 工作区 > 用户**。
+1.  **Merging:** The lists of servers from all three levels are combined into a
+    single list.
+2.  **Precedence:** If a server with the **same name** is defined at multiple
+    levels (e.g., a server named `corp-api` exists in both system and user
+    settings), the definition from the highest-precedence level is used. The
+    order of precedence is: **System > Workspace > User**.
 
-这意味着用户 **不能** 覆盖已在系统级设置中定义的服务器的定义。但是，他们
-**可以** 添加具有唯一名称的新服务器。
+This means a user **cannot** override the definition of a server that is already
+defined in the system-level settings. However, they **can** add new servers with
+unique names.
 
-### 强制执行工具目录
+### Enforcing a catalog of tools
 
-您的 MCP 工具生态系统的安全性取决于定义规范服务器并将它们的名称添加到白名单的组合。
+The security of your MCP tool ecosystem depends on a combination of defining the
+canonical servers and adding their names to an allowlist.
 
-### 限制 MCP 服务器内的工具
+### Restricting tools within an MCP server
 
-为了获得更高的安全性，尤其是在处理第三方 MCP 服务器时，您可以限制服务器中的哪些特定工具暴露给模型。这是使用服务器定义中的
-`includeTools` 和 `excludeTools`
-属性完成的。这允许您使用服务器中的一部分工具，而不允许潜在危险的工具。
+For even greater security, especially when dealing with third-party MCP servers,
+you can restrict which specific tools from a server are exposed to the model.
+This is done using the `includeTools` and `excludeTools` properties within a
+server's definition. This allows you to use a subset of tools from a server
+without allowing potentially dangerous ones.
 
-遵循最小特权原则，强烈建议使用 `includeTools` 创建仅包含必要工具的白名单。
+Following the principle of least privilege, it is highly recommended to use
+`includeTools` to create an allowlist of only the necessary tools.
 
-**示例:** 仅允许来自第三方 MCP 服务器的 `code-search` 和 `get-ticket-details`
-工具，即使该服务器提供其他工具（如 `delete-ticket`）。
+**Example:** Only allow the `code-search` and `get-ticket-details` tools from a
+third-party MCP server, even if the server offers other tools like
+`delete-ticket`.
 
 ```json
 {
@@ -276,21 +324,25 @@ Gemini CLI 从三个级别加载 `settings.json` 文件：系统、工作区和�
 }
 ```
 
-#### 更安全的模式：在系统设置中定义并添加到白名单
+#### More secure pattern: Define and add to allowlist in system settings
 
-要创建安全、集中管理的工具目录，系统管理员 **必须** 在系统级 `settings.json`
-文件中执行以下两项操作：
+To create a secure, centrally-managed catalog of tools, the system administrator
+**must** do both of the following in the system-level `settings.json` file:
 
-1.  在 `mcpServers` 对象中为每个批准的服务器
-    **定义完整配置**。这确保即使其实用户定义了同名服务器，安全的系统级定义也将优先。
-2.  使用 `mcp.allowed` 设置将这些服务器的
-    **名称添加到白名单**。这是一个关键的安全步骤，可防止用户运行任何不在此列表中的服务器。如果省略此设置，CLI 将合并并允许用户定义的任何服务器。
+1.  **Define the full configuration** for every approved server in the
+    `mcpServers` object. This ensures that even if a user defines a server with
+    the same name, the secure system-level definition will take precedence.
+2.  **Add the names** of those servers to an allowlist using the `mcp.allowed`
+    setting. This is a critical security step that prevents users from running
+    any servers that are not on this list. If this setting is omitted, the CLI
+    will merge and allow any server defined by the user.
 
-**示例系统 `settings.json`:**
+**Example system `settings.json`:**
 
-1. 将所有批准服务器的 _名称_ 添加到白名单。这将防止用户添加自己的服务器。
+1. Add the _names_ of all approved servers to an allowlist. This will prevent
+   users from adding their own servers.
 
-2. 为白名单上的每个服务器提供规范 _定义_。
+2. Provide the canonical _definition_ for each server on the allowlist.
 
 ```json
 {
@@ -309,17 +361,20 @@ Gemini CLI 从三个级别加载 `settings.json` 文件：系统、工作区和�
 }
 ```
 
-这种模式更安全，因为它同时使用了定义和白名单。用户定义的任何服务器要么被系统定义覆盖（如果名称相同），要么因为其名称不在
-`mcp.allowed` 列表中而被阻止。
+This pattern is more secure because it uses both definition and an allowlist.
+Any server a user defines will either be overridden by the system definition (if
+it has the same name) or blocked because its name is not in the `mcp.allowed`
+list.
 
-### 不太安全的模式：省略白名单
+### Less secure pattern: Omitting the allowlist
 
-如果管理员定义了 `mcpServers` 对象但未同时指定 `mcp.allowed`
-白名单，用户可以添加自己的服务器。
+If the administrator defines the `mcpServers` object but fails to also specify
+the `mcp.allowed` allowlist, users may add their own servers.
 
-**示例系统 `settings.json`:**
+**Example system `settings.json`:**
 
-此配置定义了服务器但未强制执行白名单。管理员未包含 "mcp.allowed" 设置。
+This configuration defines servers but does not enforce the allowlist. The
+administrator has NOT included the "mcp.allowed" setting.
 
 ```json
 {
@@ -331,15 +386,18 @@ Gemini CLI 从三个级别加载 `settings.json` 文件：系统、工作区和�
 }
 ```
 
-在这种情况下，用户可以在其本地 `settings.json` 中添加自己的服务器。因为没有
-`mcp.allowed`
-列表来过滤合并结果，用户的服务器将被添加到可用工具列表中并允许运行。
+In this scenario, a user can add their own server in their local
+`settings.json`. Because there is no `mcp.allowed` list to filter the merged
+results, the user's server will be added to the list of available tools and
+allowed to run.
 
-## 强制执行沙盒以确保安全性
+## Enforcing sandboxing for security
 
-为了减轻潜在有害操作的风险，您可以强制对所有工具执行使用沙盒。沙盒在容器化环境中隔离工具执行。
+To mitigate the risk of potentially harmful operations, you can enforce the use
+of sandboxing for all tool execution. The sandbox isolates tool execution in a
+containerized environment.
 
-**示例:** 强制所有工具执行在 Docker 沙盒内发生。
+**Example:** Force all tool execution to happen within a Docker sandbox.
 
 ```json
 {
@@ -349,16 +407,18 @@ Gemini CLI 从三个级别加载 `settings.json` 文件：系统、工作区和�
 }
 ```
 
-您还可以通过构建自定义 `sandbox.Dockerfile`
-来指定用于沙盒的自定义、强化的 Docker 镜像，如 [沙盒文档](./sandbox.md) 所述。
+You can also specify a custom, hardened Docker image for the sandbox by building
+a custom `sandbox.Dockerfile` as described in the
+[Sandboxing documentation](./sandbox.md).
 
-## 通过代理控制网络访问
+## Controlling network access via proxy
 
-在具有严格网络策略的企业环境中，您可以配置 Gemini
-CLI 以通过企业代理路由所有出站流量。这可以通过环境变量进行设置，也可以通过
-`mcpServers` 配置强制执行自定义工具。
+In corporate environments with strict network policies, you can configure Gemini
+CLI to route all outbound traffic through a corporate proxy. This can be set via
+an environment variable, but it can also be enforced for custom tools via the
+`mcpServers` configuration.
 
-**示例（针对 MCP 服务器）:**
+**Example (for an MCP server):**
 
 ```json
 {
@@ -375,14 +435,15 @@ CLI 以通过企业代理路由所有出站流量。这可以通过环境变量�
 }
 ```
 
-## 遥测和审计
+## Telemetry and auditing
 
-为了审计和监控目的，您可以配置 Gemini
-CLI 将遥测数据发送到中心位置。这允许您跟踪工具使用情况和其他事件。有关更多信息，请参阅
-[遥测文档](./telemetry.md)。
+For auditing and monitoring purposes, you can configure Gemini CLI to send
+telemetry data to a central location. This allows you to track tool usage and
+other events. For more information, see the
+[telemetry documentation](./telemetry.md).
 
-**示例:** 启用遥测并将其发送到本地 OTLP 收集器。如果未指定
-`otlpEndpoint`，它默认为 `http://localhost:4317`。
+**Example:** Enable telemetry and send it to a local OTLP collector. If
+`otlpEndpoint` is not specified, it defaults to `http://localhost:4317`.
 
 ```json
 {
@@ -394,16 +455,17 @@ CLI 将遥测数据发送到中心位置。这允许您跟踪工具使用情况�
 }
 ```
 
-**注意:** 确保在企业设置中将 `logPrompts` 设置为
-`false`，以避免从用户提示词中收集潜在的敏感信息。
+**Note:** Ensure that `logPrompts` is set to `false` in an enterprise setting to
+avoid collecting potentially sensitive information from user prompts.
 
-## 身份验证
+## Authentication
 
-您可以通过在系统级 `settings.json` 文件中设置 `enforcedAuthType`
-来强制所有用户使用特定的身份验证方法。这可以防止用户选择不同的身份验证方法。有关更多详细信息，请参阅
-[身份验证文档](./authentication.md)。
+You can enforce a specific authentication method for all users by setting the
+`enforcedAuthType` in the system-level `settings.json` file. This prevents users
+from choosing a different authentication method. See the
+[Authentication docs](./authentication.md) for more details.
 
-**示例:** 强制所有用户使用 Google 登录。
+**Example:** Enforce the use of Google login for all users.
 
 ```json
 {
@@ -411,38 +473,48 @@ CLI 将遥测数据发送到中心位置。这允许您跟踪工具使用情况�
 }
 ```
 
-如果用户配置了不同的身份验证方法，系统将提示他们切换到强制的方法。在非交互模式下，如果配置的身份验证方法与强制的方法不匹配，CLI 将退出并显示错误。
+If a user has a different authentication method configured, they will be
+prompted to switch to the enforced method. In non-interactive mode, the CLI will
+exit with an error if the configured authentication method does not match the
+enforced one.
 
-### 限制登录到企业域
+### Restricting logins to corporate domains
 
-对于使用 Google
-Workspace 的企业，您可以强制用户仅使用其企业 Google 账号进行身份验证。这是在代理服务器上配置的网络级控制，而不是在 Gemini
-CLI 本身中配置。它的工作原理是拦截对 Google 的身份验证请求并添加特殊的 HTTP 标头。
+For enterprises using Google Workspace, you can enforce that users only
+authenticate with their corporate Google accounts. This is a network-level
+control that is configured on a proxy server, not within Gemini CLI itself. It
+works by intercepting authentication requests to Google and adding a special
+HTTP header.
 
-此策略阻止用户使用个人 Gmail 账号或其他非企业 Google 账号登录。
+This policy prevents users from logging in with personal Gmail accounts or other
+non-corporate Google accounts.
 
-有关详细说明，请参阅 Google Workspace 管理员帮助文章
-[阻止访问消费者账号](https://support.google.com/a/answer/1668854?hl=zh-Hans#zippy=%2C%E6%AD%A5%E9%AA%A4%E9%80%89%E6%8B%A9%E4%B8%80%E4%B8%AA%E7%BD%91%E7%BB%9C%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%2C%E6%AD%A5%E9%AA%A4%E9%85%8D%E7%BD%AE%E7%BD%91%E7%BB%9C%E4%BB%A5%E5%B1%8F%E8%94%BD%E7%89%B9%E5%AE%9A%E8%B4%A6%E5%8F%B7)。
+For detailed instructions, see the Google Workspace Admin Help article on
+[blocking access to consumer accounts](https://support.google.com/a/answer/1668854?hl=en#zippy=%2Cstep-choose-a-web-proxy-server%2Cstep-configure-the-network-to-block-certain-accounts).
 
-一般步骤如下：
+The general steps are as follows:
 
-1.  **拦截请求**: 配置您的 Web 代理以拦截所有对 `google.com` 的请求。
-2.  **添加 HTTP 标头**: 对于每个拦截的请求，添加 `X-GoogApps-Allowed-Domains`
-    HTTP 标头。
-3.  **指定域**: 标头的值应为您批准的 Google Workspace 域名的逗号分隔列表。
+1.  **Intercept Requests**: Configure your web proxy to intercept all requests
+    to `google.com`.
+2.  **Add HTTP Header**: For each intercepted request, add the
+    `X-GoogApps-Allowed-Domains` HTTP header.
+3.  **Specify Domains**: The value of the header should be a comma-separated
+    list of your approved Google Workspace domain names.
 
-**示例标头:**
+**Example header:**
 
 ```
 X-GoogApps-Allowed-Domains: my-corporate-domain.com, secondary-domain.com
 ```
 
-当存在此标头时，Google 的身份验证服务将只允许属于指定域的账号登录。
+When this header is present, Google's authentication service will only allow
+logins from accounts belonging to the specified domains.
 
-## 综合示例：系统 `settings.json`
+## Putting it all together: example system `settings.json`
 
-这是一个系统 `settings.json` 文件的示例，它结合了上面讨论的几种模式，为 Gemini
-CLI 创建了一个安全、受控的环境。
+Here is an example of a system `settings.json` file that combines several of the
+patterns discussed above to create a secure, controlled environment for Gemini
+CLI.
 
 ```json
 {
@@ -482,11 +554,12 @@ CLI 创建了一个安全、受控的环境。
 }
 ```
 
-此配置：
+This configuration:
 
-- 强制所有工具执行进入 Docker 沙盒。
-- 严格使用一小组安全 shell 命令和文件工具的白名单。
-- 为自定义工具定义并允许单个企业 MCP 服务器。
-- 启用遥测以进行审计，但不记录提示词内容。
-- 将 `/bug` 命令重定向到内部票务系统。
-- 禁用一般使用情况统计信息收集。
+- Forces all tool execution into a Docker sandbox.
+- Strictly uses an allowlist for a small set of safe shell commands and file
+  tools.
+- Defines and allows a single corporate MCP server for custom tools.
+- Enables telemetry for auditing, without logging prompt content.
+- Redirects the `/bug` command to an internal ticketing system.
+- Disables general usage statistics collection.

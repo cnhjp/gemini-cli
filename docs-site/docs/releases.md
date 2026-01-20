@@ -1,285 +1,331 @@
-# Gemini CLI 发布
+# Gemini CLI releases
 
-## `dev` vs `prod` 环境
+## `dev` vs `prod` environment
 
-我们的发布流程支持 `dev` 和 `prod` 环境。
+Our release flows support both `dev` and `prod` environments.
 
-`dev` 环境推送到私有的 Github 托管 NPM 仓库，包名以 `@google-gemini/**`
-开头，而不是 `@google/**`。
+The `dev` environment pushes to a private Github-hosted NPM repository, with the
+package names beginning with `@google-gemini/**` instead of `@google/**`.
 
-`prod` 环境通过 Wombat Dressing
-Room 推送到公共全局 NPM 注册表，这是 Google 用于管理 `@google/**`
-命名空间中 NPM 包的系统。所有包都命名为 `@google/**`。
+The `prod` environment pushes to the public global NPM registry via Wombat
+Dressing Room, which is Google's system for managing NPM packages in the
+`@google/**` namespace. The packages are all named `@google/**`.
 
-有关这些系统的更多信息，请参阅 [NPM 包概览](npm.md)。
+More information can be found about these systems in the
+[NPM Package Overview](npm.md)
 
-### 包范围
+### Package scopes
 
-| 包 (Package) | `prod` (Wombat Dressing Room) | `dev` (Github Private NPM Repo)           |
-| ------------ | ----------------------------- | ----------------------------------------- |
-| CLI          | @google/gemini-cli            | @google-gemini/gemini-cli                 |
-| Core         | @google/gemini-cli-core       | @google-gemini/gemini-cli-core A2A Server |
-| A2A Server   | @google/gemini-cli-a2a-server | @google-gemini/gemini-cli-a2a-server      |
+| Package    | `prod` (Wombat Dressing Room) | `dev` (Github Private NPM Repo)           |
+| ---------- | ----------------------------- | ----------------------------------------- |
+| CLI        | @google/gemini-cli            | @google-gemini/gemini-cli                 |
+| Core       | @google/gemini-cli-core       | @google-gemini/gemini-cli-core A2A Server |
+| A2A Server | @google/gemini-cli-a2a-server | @google-gemini/gemini-cli-a2a-server      |
 
-## 发布节奏和标签
+## Release cadence and tags
 
-我们将尽可能紧密地遵循
-https://semver.org/，但会在必须偏离时指出。我们的每周发布将是次要版本增量，发布之间的任何
-bug 或热修复将作为最新发布的补丁版本发布。
+We will follow https://semver.org/ as closely as possible but will call out when
+or if we have to deviate from it. Our weekly releases will be minor version
+increments and any bug or hotfixes between releases will go out as patch
+versions on the most recent release.
 
-每个星期二约 UTC 20:00 将发布新的 Stable 和 Preview 版本。提升流程如下：
+Each Tuesday ~2000 UTC new Stable and Preview releases will be cut. The
+promotion flow is:
 
-- 代码每天晚上提交到 main 并推送到 nightly
-- 在 main 上不超过 1 周后，代码被提升到 `preview` 频道
-- 1 周后，最新的 `preview` 频道被提升到 `stable` 频道
-- 根据需要针对 `preview` 和 `stable`
-  生成补丁修复，每次最终 'patch' 版本号都会增加。
+- Code is committed to main and pushed each night to nightly
+- After no more than 1 week on main, code is promoted to the `preview` channel
+- After 1 week the most recent `preview` channel is promoted to `stable` channel
+- Patch fixes will be produced against both `preview` and `stable` as needed,
+  with the final 'patch' version number incrementing each time.
 
-### Preview (预览版)
+### Preview
 
-这些版本尚未经过全面审查，可能包含回归或其他未解决的问题。请帮助我们使用
-`preview` 标签进行测试和安装。
+These releases will not have been fully vetted and may contain regressions or
+other outstanding issues. Please help us test and install with `preview` tag.
 
 ```bash
 npm install -g @google/gemini-cli@preview
 ```
 
-### Stable (稳定版)
+### Stable
 
-这将是上周发布的全面提升 + 任何 bug 修复和验证。使用 `latest` 标签。
+This will be the full promotion of last week's release + any bug fixes and
+validations. Use `latest` tag.
 
 ```bash
 npm install -g @google/gemini-cli@latest
 ```
 
-### Nightly (每夜版)
+### Nightly
 
-- 新版本将在每天 UTC
-  00:00 发布。这将是发布时 main 分支的所有更改。应假定存在待处理的验证和问题。使用
-  `nightly` 标签。
+- New releases will be published each day at UTC 0000. This will be all changes
+  from the main branch as represented at time of release. It should be assumed
+  there are pending validations and issues. Use `nightly` tag.
 
 ```bash
 npm install -g @google/gemini-cli@nightly
 ```
 
-## 每周发布提升
+## Weekly release promotion
 
-每个星期二，值班工程师将触发 "Promote
-Release" 工作流。这个单一操作自动化了整个每周发布过程：
+Each Tuesday, the on-call engineer will trigger the "Promote Release" workflow.
+This single action automates the entire weekly release process:
 
-1.  **将 preview 提升为 stable:** 工作流识别最新的 `preview` 版本并将其提升为
-    `stable`。这成为 npm 上的新 `latest` 版本。
-2.  **将 nightly 提升为 preview:** 最新的 `nightly` 版本随后被提升为新的
-    `preview` 版本。
-3.  **为下一个 nightly 做准备:** 自动创建并合并 Pull Request 以增加 `main`
-    中的版本号，为下一个 nightly 发布做准备。
+1.  **Promotes preview to stable:** The workflow identifies the latest `preview`
+    release and promotes it to `stable`. This becomes the new `latest` version
+    on npm.
+2.  **Promotes nightly to preview:** The latest `nightly` release is then
+    promoted to become the new `preview` version.
+3.  **Prepares for next nightly:** A pull request is automatically created and
+    merged to bump the version in `main` in preparation for the next nightly
+    release.
 
-此过程确保了一致且可靠的发布节奏，只需最少的手动干预。
+This process ensures a consistent and reliable release cadence with minimal
+manual intervention.
 
-### 版本控制的真实来源
+### Source of truth for versioning
 
-为了确保最高的可靠性，发布提升过程使用 **NPM 注册表作为单一真实来源**
-来确定每个发布频道（`stable`, `preview` 和 `nightly`）的当前版本。
+To ensure the highest reliability, the release promotion process uses the **NPM
+registry as the single source of truth** for determining the current version of
+each release channel (`stable`, `preview`, and `nightly`).
 
-1.  **从 NPM 获取:** 工作流首先查询 NPM 的 `dist-tags` (`latest`, `preview`,
-    `nightly`) 以获取当前可供用户使用的包的确切版本字符串。
-2.  **完整性交叉检查:**
-    对于从 NPM 检索到的每个版本，工作流执行关键的完整性检查：
-    - 它验证仓库中是否存在相应的 **git tag**。
-    - 它验证是否已创建相应的 **GitHub Release**。
-3.  **差异时停止:** 如果 NPM 上列出的版本缺少 git tag 或 GitHub
-    Release，工作流将立即失败。这种严格的检查可以防止从损坏或不完整的先前版本进行提升，并提醒值班工程师需要手动解决的发布状态不一致问题。
-4.  **计算下一个版本:**
-    只有在这些检查通过后，工作流才会继续根据从 NPM 检索到的受信任版本号计算下一个语义版本。
+1.  **Fetch from NPM:** The workflow begins by querying NPM's `dist-tags`
+    (`latest`, `preview`, `nightly`) to get the exact version strings for the
+    packages currently available to users.
+2.  **Cross-check for integrity:** For each version retrieved from NPM, the
+    workflow performs a critical integrity check:
+    - It verifies that a corresponding **git tag** exists in the repository.
+    - It verifies that a corresponding **GitHub release** has been created.
+3.  **Halt on discrepancy:** If either the git tag or the GitHub Release is
+    missing for a version listed on NPM, the workflow will immediately fail.
+    This strict check prevents promotions from a broken or incomplete previous
+    release and alerts the on-call engineer to a release state inconsistency
+    that must be manually resolved.
+4.  **Calculate next version:** Only after these checks pass does the workflow
+    proceed to calculate the next semantic version based on the trusted version
+    numbers retrieved from NPM.
 
-这种以 NPM 为先的方法，辅以完整性检查，使发布过程高度稳健，并防止仅依赖 git 历史记录或 API 输出可能产生的版本差异。
+This NPM-first approach, backed by integrity checks, makes the release process
+highly robust and prevents the kinds of versioning discrepancies that can arise
+from relying solely on git history or API outputs.
 
-## 手动发布
+## Manual releases
 
-对于需要在常规每夜和每周提升计划之外发布，且尚未被补丁流程覆盖的情况，您可以使用
-`Release: Manual`
-工作流。此工作流提供了一种从任何分支、标签或提交 SHA 发布特定版本的直接方式。
+For situations requiring a release outside of the regular nightly and weekly
+promotion schedule, and NOT already covered by patching process, you can use the
+`Release: Manual` workflow. This workflow provides a direct way to publish a
+specific version from any branch, tag, or commit SHA.
 
-### 如何创建手动发布
+### How to create a manual release
 
-1.  导航到仓库的 **Actions** 选项卡。
-2.  从列表中选择 **Release: Manual** 工作流。
-3.  点击 **Run workflow** 下拉按钮。
-4.  填写所需的输入：
-    - **Version**: 要发布的具体版本（例如 `v0.6.1`）。这必须是带有 `v`
-      前缀的有效语义版本。
-    - **Ref**: 要发布的分支、标签或完整提交 SHA。
-    - **NPM Channel**: 要发布到的 npm 频道。选项包括 `preview`, `nightly`,
-      `latest`（用于稳定版）和 `dev`。默认为 `dev`。
-    - **Dry Run**: 保持为 `true` 以运行所有步骤而不发布，或设置为 `false`
-      以执行实时发布。
-    - **Force Skip Tests**: 设置为 `true` 以跳过测试套件。不建议用于生产发布。
-    - **Skip GitHub Release**: 设置为 `true` 以跳过创建 GitHub
-      Release 且仅创建 npm 发布。
-    - **Environment**: 选择适当的环境。`dev` 环境用于测试。`prod`
-      环境用于生产发布。`prod` 是默认值，需要发布管理员的授权。
-5.  点击 **Run workflow**。
+1.  Navigate to the **Actions** tab of the repository.
+2.  Select the **Release: Manual** workflow from the list.
+3.  Click the **Run workflow** dropdown button.
+4.  Fill in the required inputs:
+    - **Version**: The exact version to release (e.g., `v0.6.1`). This must be a
+      valid semantic version with a `v` prefix.
+    - **Ref**: The branch, tag, or full commit SHA to release from.
+    - **NPM Channel**: The npm channel to publish to. The options are `preview`,
+      `nightly`, `latest` (for stable releases), and `dev`. The default is
+      `dev`.
+    - **Dry Run**: Leave as `true` to run all steps without publishing, or set
+      to `false` to perform a live release.
+    - **Force Skip Tests**: Set to `true` to skip the test suite. This is not
+      recommended for production releases.
+    - **Skip GitHub Release**: Set to `true` to skip creating a GitHub release
+      and create an npm release only.
+    - **Environment**: Select the appropriate environment. The `dev` environment
+      is intended for testing. The `prod` environment is intended for production
+      releases. `prod` is the default and will require authorization from a
+      release administrator.
+5.  Click **Run workflow**.
 
-工作流随后将进行测试（如果未跳过）、构建并发布版本。如果在非试运行期间工作流失败，它将自动创建一个包含失败详细信息的 GitHub
-Issue。
+The workflow will then proceed to test (if not skipped), build, and publish the
+release. If the workflow fails during a non-dry run, it will automatically
+create a GitHub issue with the failure details.
 
-## 回滚/前滚
+## Rollback/rollforward
 
-如果发布出现严重回归，您可以通过更改 npm `dist-tag`
-快速回滚到以前的稳定版本或前滚到新补丁。`Release: Change Tags`
-工作流为此提供了一种安全且受控的方式。
+In the event that a release has a critical regression, you can quickly roll back
+to a previous stable version or roll forward to a new patch by changing the npm
+`dist-tag`. The `Release: Change Tags` workflow provides a safe and controlled
+way to do this.
 
-这是回滚和前滚的首选方法，因为它不需要完整的发布周期。
+This is the preferred method for both rollbacks and rollforwards, as it does not
+require a full release cycle.
 
-### 如何更改发布标签
+### How to change a release tag
 
-1.  导航到仓库的 **Actions** 选项卡。
-2.  从列表中选择 **Release: Change Tags** 工作流。
-3.  点击 **Run workflow** 下拉按钮。
-4.  填写所需的输入：
-    - **Version**: 您想要标签指向的现有包版本（例如 `0.5.0-preview-2`）。此版本
-      **必须** 已经发布到 npm 注册表。
-    - **Channel**: 要应用的 npm `dist-tag`（例如 `preview`, `stable`）。
-    - **Dry Run**: 保持为 `true` 以记录操作而不进行更改，或设置为 `false`
-      以执行实时标签更改。
-    - **Environment**: 选择适当的环境。`dev` 环境用于测试。`prod`
-      环境用于生产发布。`prod` 是默认值，需要发布管理员的授权。
-5.  点击 **Run workflow**。
+1.  Navigate to the **Actions** tab of the repository.
+2.  Select the **Release: Change Tags** workflow from the list.
+3.  Click the **Run workflow** dropdown button.
+4.  Fill in the required inputs:
+    - **Version**: The existing package version that you want to point the tag
+      to (e.g., `0.5.0-preview-2`). This version **must** already be published
+      to the npm registry.
+    - **Channel**: The npm `dist-tag` to apply (e.g., `preview`, `stable`).
+    - **Dry Run**: Leave as `true` to log the action without making changes, or
+      set to `false` to perform the live tag change.
+    - **Environment**: Select the appropriate environment. The `dev` environment
+      is intended for testing. The `prod` environment is intended for production
+      releases. `prod` is the default and will require authorization from a
+      release administrator.
+5.  Click **Run workflow**.
 
-工作流随后将为相应的 `gemini-cli`, `gemini-cli-core` 和 `gemini-cli-a2a-server`
-包运行 `npm dist-tag add`，将指定频道指向指定版本。
+The workflow will then run `npm dist-tag add` for the appropriate `gemini-cli`,
+`gemini-cli-core` and `gemini-cli-a2a-server` packages, pointing the specified
+channel to the specified version.
 
-## 补丁 (Patching)
+## Patching
 
-如果需要在 `stable` 或 `preview` 版本上修复已经在 `main`
-上修复的严重错误，该过程现在已高度自动化。
+If a critical bug that is already fixed on `main` needs to be patched on a
+`stable` or `preview` release, the process is now highly automated.
 
-### 如何打补丁
+### How to patch
 
-#### 1. 创建补丁 Pull Request
+#### 1. Create the patch pull request
 
-有两种方法可以创建补丁 Pull Request：
+There are two ways to create a patch pull request:
 
-**选项 A: 从 GitHub 评论（推荐）**
+**Option A: From a GitHub comment (recommended)**
 
-在包含修复的 Pull Request 合并后，维护者可以在同一个 PR 上添加格式如下的评论：
+After a pull request containing the fix has been merged, a maintainer can add a
+comment on that same PR with the following format:
 
 `/patch [channel]`
 
-- **channel** (可选):
-  - _无频道_ - 同时修补 stable 和 preview 频道（默认，推荐用于大多数修复）
-  - `both` - 同时修补 stable 和 preview 频道（同默认）
-  - `stable` - 仅修补 stable 频道
-  - `preview` - 仅修补 preview 频道
+- **channel** (optional):
+  - _no channel_ - patches both stable and preview channels (default,
+    recommended for most fixes)
+  - `both` - patches both stable and preview channels (same as default)
+  - `stable` - patches only the stable channel
+  - `preview` - patches only the preview channel
 
-示例：
+Examples:
 
-- `/patch` (同时修补 stable 和 preview - 默认)
-- `/patch both` (同时修补 stable 和 preview - 显式)
-- `/patch stable` (仅修补 stable)
-- `/patch preview` (仅修补 preview)
+- `/patch` (patches both stable and preview - default)
+- `/patch both` (patches both stable and preview - explicit)
+- `/patch stable` (patches only stable)
+- `/patch preview` (patches only preview)
 
-`Release: Patch from Comment` 工作流将自动找到合并提交 SHA 并触发
-`Release: Patch (1) Create PR` 工作流。如果 PR 尚未合并，它将发布评论指示失败。
+The `Release: Patch from Comment` workflow will automatically find the merge
+commit SHA and trigger the `Release: Patch (1) Create PR` workflow. If the PR is
+not yet merged, it will post a comment indicating the failure.
 
-**选项 B: 手动触发工作流**
+**Option B: Manually triggering the workflow**
 
-导航到 **Actions** 选项卡并运行 **Release: Patch (1) Create PR** 工作流。
+Navigate to the **Actions** tab and run the **Release: Patch (1) Create PR**
+workflow.
 
-- **Commit**: 您想要 cherry-pick 的 `main` 上的提交的完整 SHA。
-- **Channel**: 您想要修补的频道（`stable` 或 `preview`）。
+- **Commit**: The full SHA of the commit on `main` that you want to cherry-pick.
+- **Channel**: The channel you want to patch (`stable` or `preview`).
 
-此工作流将自动：
+This workflow will automatically:
 
-1.  找到该频道的最新发布标签。
-2.  如果不存在，则从该标签创建发布分支（例如 `release/v0.5.1-pr-12345`）。
-3.  从发布分支创建一个新的热修复分支。
-4.  将您指定的提交 cherry-pick 到热修复分支。
-5.  创建从热修复分支回发布分支的 Pull Request。
+1.  Find the latest release tag for the channel.
+2.  Create a release branch from that tag if one doesn't exist (e.g.,
+    `release/v0.5.1-pr-12345`).
+3.  Create a new hotfix branch from the release branch.
+4.  Cherry-pick your specified commit into the hotfix branch.
+5.  Create a pull request from the hotfix branch back to the release branch.
 
-#### 2. 审查并合并
+#### 2. Review and merge
 
-审查自动创建的 Pull Request 以确保 cherry-pick 成功且更改正确。批准后，合并 Pull
-Request。
+Review the automatically created pull request(s) to ensure the cherry-pick was
+successful and the changes are correct. Once approved, merge the pull request.
 
-**安全说明:** `release/*` 分支受分支保护规则保护。对这些分支之一的 Pull
-Request 需要至少一位代码所有者的审查才能合并。这确保不会发布未经授权的代码。
+**Security note:** The `release/*` branches are protected by branch protection
+rules. A pull request to one of these branches requires at least one review from
+a code owner before it can be merged. This ensures that no unauthorized code is
+released.
 
-#### 2.5. 向热修复添加多个提交（高级）
+#### 2.5. Adding multiple commits to a hotfix (advanced)
 
-如果需要在单个补丁发布中包含多个修复，您可以在创建初始补丁 PR 后向热修复分支添加额外的提交：
+If you need to include multiple fixes in a single patch release, you can add
+additional commits to the hotfix branch after the initial patch PR has been
+created:
 
-1. **从主要修复开始**: 在最重要的 PR 上使用 `/patch`（或
-   `/patch both`）来创建初始热修复分支和 PR。
+1. **Start with the primary fix**: Use `/patch` (or `/patch both`) on the most
+   important PR to create the initial hotfix branch and PR.
 
-2. **在本地检出热修复分支**:
+2. **Checkout the hotfix branch locally**:
 
    ```bash
    git fetch origin
-   git checkout hotfix/v0.5.1/stable/cherry-pick-abc1234  # 使用 PR 中的实际分支名称
+   git checkout hotfix/v0.5.1/stable/cherry-pick-abc1234  # Use the actual branch name from the PR
    ```
 
-3. **Cherry-pick 额外的提交**:
+3. **Cherry-pick additional commits**:
 
    ```bash
    git cherry-pick <commit-sha-1>
    git cherry-pick <commit-sha-2>
-   # 根据需要添加任意数量的提交
+   # Add as many commits as needed
    ```
 
-4. **推送更新的分支**:
+4. **Push the updated branch**:
 
    ```bash
    git push origin hotfix/v0.5.1/stable/cherry-pick-abc1234
    ```
 
-5. **测试和审查**: 现有的补丁 PR 将自动使用您的额外提交进行更新。彻底测试，因为您现在正在一起发布多个更改。
+5. **Test and review**: The existing patch PR will automatically update with
+   your additional commits. Test thoroughly since you're now releasing multiple
+   changes together.
 
-6. **更新 PR 描述**: 考虑更新 PR 标题和描述，以反映它包含多个修复。
+6. **Update the PR description**: Consider updating the PR title and description
+   to reflect that it includes multiple fixes.
 
-这种方法允许您将相关修复分组到单个补丁发布中，同时保持对包含内容和如何解决冲突的完全控制。
+This approach allows you to group related fixes into a single patch release
+while maintaining full control over what gets included and how conflicts are
+resolved.
 
-#### 3. 自动发布
+#### 3. Automatic release
 
-合并 Pull Request 后，`Release: Patch (2) Trigger`
-工作流会自动触发。然后它将启动 `Release: Patch (3) Release` 工作流，该工作流将：
+Upon merging the pull request, the `Release: Patch (2) Trigger` workflow is
+automatically triggered. It will then start the `Release: Patch (3) Release`
+workflow, which will:
 
-1.  构建并测试修补后的代码。
-2.  将新的补丁版本发布到 npm。
-3.  创建带有补丁说明的新 GitHub Release。
+1.  Build and test the patched code.
+2.  Publish the new patch version to npm.
+3.  Create a new GitHub release with the patch notes.
 
-这个完全自动化的过程确保补丁被一致且可靠地创建和发布。
+This fully automated process ensures that patches are created and released
+consistently and reliably.
 
-#### 故障排除：旧分支工作流
+#### Troubleshooting: Older branch workflows
 
-**问题**: 如果补丁触发工作流失败，出现类似 "Resource not accessible by
-integration" 的错误或引用不存在的工作流文件（例如
-`patch-release.yml`），这表明热修复分支包含过时版本的工作流文件。
+**Issue**: If the patch trigger workflow fails with errors like "Resource not
+accessible by integration" or references to non-existent workflow files (e.g.,
+`patch-release.yml`), this indicates the hotfix branch contains an outdated
+version of the workflow files.
 
-**根本原因**: 当 PR 合并时，GitHub Actions 运行
-**源分支**（热修复分支）的工作流定义，而不是目标分支（发布分支）。如果热修复分支是从早于工作流改进的旧发布分支创建的，它将使用旧的工作流逻辑。
+**Root cause**: When a PR is merged, GitHub Actions runs the workflow definition
+from the **source branch** (the hotfix branch), not from the target branch (the
+release branch). If the hotfix branch was created from an older release branch
+that predates workflow improvements, it will use the old workflow logic.
 
-**解决方案**:
+**Solutions**:
 
-**选项 1: 手动触发（快速修复）**
-从包含最新工作流代码的分支手动触发更新的工作流：
+**Option 1: Manual trigger (quick fix)** Manually trigger the updated workflow
+from the branch with the latest workflow code:
 
 ```bash
-# 对于跳过测试的 preview 频道补丁
+# For a preview channel patch with tests skipped
 gh workflow run release-patch-2-trigger.yml --ref <branch-with-updated-workflow> \
   --field ref="hotfix/v0.6.0-preview.2/preview/cherry-pick-abc1234" \
   --field workflow_ref=<branch-with-updated-workflow> \
   --field dry_run=false \
   --field force_skip_tests=true
 
-# 对于 stable 频道补丁
+# For a stable channel patch
 gh workflow run release-patch-2-trigger.yml --ref <branch-with-updated-workflow> \
   --field ref="hotfix/v0.5.1/stable/cherry-pick-abc1234" \
   --field workflow_ref=<branch-with-updated-workflow> \
   --field dry_run=false \
   --field force_skip_tests=false
 
-# 使用 main 分支的示例（最常见的情况）
+# Example using main branch (most common case)
 gh workflow run release-patch-2-trigger.yml --ref main \
   --field ref="hotfix/v0.6.0-preview.2/preview/cherry-pick-abc1234" \
   --field workflow_ref=main \
@@ -287,12 +333,12 @@ gh workflow run release-patch-2-trigger.yml --ref main \
   --field force_skip_tests=true
 ```
 
-**注意**: 将 `<branch-with-updated-workflow>`
-替换为包含最新工作流改进的分支（通常是
-`main`，如果是测试更新，也可能是功能分支）。
+**Note**: Replace `<branch-with-updated-workflow>` with the branch containing
+the latest workflow improvements (usually `main`, but could be a feature branch
+if testing updates).
 
-**选项 2: 更新热修复分支**
-将最新的 main 分支合并到您的热修复分支以获取更新的工作流：
+**Option 2: Update the hotfix branch** Merge the latest main branch into your
+hotfix branch to get the updated workflows:
 
 ```bash
 git checkout hotfix/v0.6.0-preview.2/preview/cherry-pick-abc1234
@@ -300,12 +346,13 @@ git merge main
 git push
 ```
 
-然后关闭并重新打开 PR 以使用更新的版本重新触发工作流。
+Then close and reopen the PR to retrigger the workflow with the updated version.
 
-**选项 3: 直接发布触发** 完全跳过触发工作流并直接运行发布工作流：
+**Option 3: Direct release trigger** Skip the trigger workflow entirely and
+directly run the release workflow:
 
 ```bash
-# 将 channel 和 release_ref 替换为适当的值
+# Replace channel and release_ref with appropriate values
 gh workflow run release-patch-3-release.yml --ref main \
   --field type="preview" \
   --field dry_run=false \
@@ -315,134 +362,158 @@ gh workflow run release-patch-3-release.yml --ref main \
 
 ### Docker
 
-我们还运行一个名为 [release-docker.yml](../.gcp/release-docker.yml) 的 Google
-Cloud
-Build。它发布与您的版本匹配的沙盒 Docker。一旦服务账号权限整理好，这也将移至 GH 并与主发布文件结合。
+We also run a Google cloud build called
+[release-docker.yml](../.gcp/release-docker.yml). Which publishes the sandbox
+docker to match your release. This will also be moved to GH and combined with
+the main release file once service account permissions are sorted out.
 
-## 发布验证
+## Release validation
 
-推送新版本后，应执行冒烟测试以确保包按预期工作。这可以通过在本地安装包并运行一组测试来确保它们正常运行来完成。
+After pushing a new release smoke testing should be performed to ensure that the
+packages are working as expected. This can be done by installing the packages
+locally and running a set of tests to ensure that they are functioning
+correctly.
 
-- `npx -y @google/gemini-cli@latest --version`
-  验证推送是否按预期工作（如果您没有做 rc 或 dev 标签）
-- `npx -y @google/gemini-cli@<release tag> --version` 验证标签是否适当地推送
-- _这在本地具有破坏性_
+- `npx -y @google/gemini-cli@latest --version` to validate the push worked as
+  expected if you were not doing a rc or dev tag
+- `npx -y @google/gemini-cli@<release tag> --version` to validate the tag pushed
+  appropriately
+- _This is destructive locally_
   `npm uninstall @google/gemini-cli && npm uninstall -g @google/gemini-cli && npm cache clean --force &&  npm install @google/gemini-cli@<version>`
-- 建议对运行一些 llm 命令和工具进行基本运行的冒烟测试，以确保包按预期工作。以后我们会将其整理成文。
+- Smoke testing a basic run through of exercising a few llm commands and tools
+  is recommended to ensure that the packages are working as expected. We'll
+  codify this more in the future.
 
-## 本地测试和验证：更改打包和发布流程
+## Local testing and validation: Changes to the packaging and publishing process
 
-如果您需要在不实际发布到 NPM 或创建公共 GitHub
-Release 的情况下测试发布流程，可以从 GitHub UI 手动触发工作流。
+If you need to test the release process without actually publishing to NPM or
+creating a public GitHub release, you can trigger the workflow manually from the
+GitHub UI.
 
-1.  转到仓库的
-    [Actions 选项卡](https://github.com/google-gemini/gemini-cli/actions/workflows/release-manual.yml)。
-2.  点击 "Run workflow" 下拉菜单。
-3.  保持 `dry_run` 选项选中 (`true`)。
-4.  点击 "Run workflow" 按钮。
+1.  Go to the
+    [Actions tab](https://github.com/google-gemini/gemini-cli/actions/workflows/release-manual.yml)
+    of the repository.
+2.  Click on the "Run workflow" dropdown.
+3.  Leave the `dry_run` option checked (`true`).
+4.  Click the "Run workflow" button.
 
-这将运行整个发布过程，但会跳过 `npm publish` 和 `gh release create`
-步骤。您可以检查工作流日志以确保一切按预期工作。
+This will run the entire release process but will skip the `npm publish` and
+`gh release create` steps. You can inspect the workflow logs to ensure
+everything is working as expected.
 
-在提交代码之前，务必在本地测试对打包和发布流程的任何更改。这确保了包将被正确发布，并且在用户安装时按预期工作。
+It is crucial to test any changes to the packaging and publishing process
+locally before committing them. This ensures that the packages will be published
+correctly and that they will work as expected when installed by a user.
 
-要验证您的更改，您可以执行发布流程的试运行。这将模拟发布流程，而无需实际将包发布到 npm 注册表。
+To validate your changes, you can perform a dry run of the publishing process.
+This will simulate the publishing process without actually publishing the
+packages to the npm registry.
 
 ```bash
 npm_package_version=9.9.9 SANDBOX_IMAGE_REGISTRY="registry" SANDBOX_IMAGE_NAME="thename" npm run publish:npm --dry-run
 ```
 
-此命令将执行以下操作：
+This command will do the following:
 
-1.  构建所有包。
-2.  运行所有预发布脚本。
-3.  创建将发布到 npm 的包 tarball。
-4.  打印将发布的包的摘要。
+1.  Build all the packages.
+2.  Run all the prepublish scripts.
+3.  Create the package tarballs that would be published to npm.
+4.  Print a summary of the packages that would be published.
 
-然后您可以检查生成的 tarball，以确保它们包含正确的文件，并且 `package.json`
-文件已正确更新。tarball 将在每个包目录的根目录中创建（例如
-`packages/cli/google-gemini-cli-0.1.6.tgz`）。
+You can then inspect the generated tarballs to ensure that they contain the
+correct files and that the `package.json` files have been updated correctly. The
+tarballs will be created in the root of each package's directory (e.g.,
+`packages/cli/google-gemini-cli-0.1.6.tgz`).
 
-通过执行试运行，您可以确信您对打包过程的更改是正确的，并且包将成功发布。
+By performing a dry run, you can be confident that your changes to the packaging
+process are correct and that the packages will be published successfully.
 
-## 发布深入探讨
+## Release deep dive
 
-发布过程为不同的分发渠道创建两种不同类型的工件：用于 NPM 注册表的标准包和用于 GitHub
-Releases 的单一、自包含的可执行文件。
+The release process creates two distinct types of artifacts for different
+distribution channels: standard packages for the NPM registry and a single,
+self-contained executable for GitHub Releases.
 
-以下是关键阶段：
+Here are the key stages:
 
-**阶段 1: 预发布健全性检查和版本控制**
+**Stage 1: Pre-release sanity checks and versioning**
 
-- **发生什么:**
-  在移动任何文件之前，该过程确保项目处于良好状态。这涉及运行测试、linting 和类型检查 (`npm run preflight`)。根目录
-  `package.json` 和 `packages/cli/package.json` 中的版本号更新为新的发布版本。
+- **What happens:** Before any files are moved, the process ensures the project
+  is in a good state. This involves running tests, linting, and type-checking
+  (`npm run preflight`). The version number in the root `package.json` and
+  `packages/cli/package.json` is updated to the new release version.
 
-**阶段 2: 构建 NPM 源代码**
+**Stage 2: Building the source code for NPM**
 
-- **发生什么:** `packages/core/src` 和 `packages/cli/src`
-  中的 TypeScript 源代码被编译成标准 JavaScript。
-- **文件移动:**
-  - `packages/core/src/**/*.ts` -> 编译为 -> `packages/core/dist/`
-  - `packages/cli/src/**/*.ts` -> 编译为 -> `packages/cli/dist/`
-- **原因:**
-  开发期间编写的 TypeScript 代码需要转换为可由 Node.js 运行的普通 JavaScript。由于
-  `cli` 包依赖于它，因此首先构建 `core` 包。
+- **What happens:** The TypeScript source code in `packages/core/src` and
+  `packages/cli/src` is compiled into standard JavaScript.
+- **File movement:**
+  - `packages/core/src/**/*.ts` -> compiled to -> `packages/core/dist/`
+  - `packages/cli/src/**/*.ts` -> compiled to -> `packages/cli/dist/`
+- **Why:** The TypeScript code written during development needs to be converted
+  into plain JavaScript that can be run by Node.js. The `core` package is built
+  first as the `cli` package depends on it.
 
-**阶段 3: 将标准包发布到 NPM**
+**Stage 3: Publishing standard packages to NPM**
 
-- **发生什么:** 为 `@google/gemini-cli-core` 和 `@google/gemini-cli` 包运行
-  `npm publish` 命令。
-- **原因:** 这将它们作为标准 Node.js 包发布。通过
-  `npm install -g @google/gemini-cli` 安装的用户将下载这些包，并且 `npm`
-  将自动处理安装 `@google/gemini-cli-core`
-  依赖项。这些包中的代码不会捆绑到单个文件中。
+- **What happens:** The `npm publish` command is run for the
+  `@google/gemini-cli-core` and `@google/gemini-cli` packages.
+- **Why:** This publishes them as standard Node.js packages. Users installing
+  via `npm install -g @google/gemini-cli` will download these packages, and
+  `npm` will handle installing the `@google/gemini-cli-core` dependency
+  automatically. The code in these packages is not bundled into a single file.
 
-**阶段 4: 组装并创建 GitHub Release 资产**
+**Stage 4: Assembling and creating the GitHub release asset**
 
-此阶段发生在 NPM 发布 _之后_，并创建启用直接从 GitHub 仓库使用 `npx`
-的单文件可执行文件。
+This stage happens _after_ the NPM publish and creates the single-file
+executable that enables `npx` usage directly from the GitHub repository.
 
-1.  **创建 JavaScript 包:**
-    - **发生什么:** 来自 `packages/core/dist` 和 `packages/cli/dist`
-      的构建 JavaScript 以及所有第三方 JavaScript 依赖项，被 `esbuild`
-      捆绑到一个单一的可执行 JavaScript 文件（例如 `gemini.js`）中。`node-pty`
-      库被排除在此捆绑包之外，因为它包含本机二进制文件。
-    - **原因:**
-      这创建了一个包含所有必要应用程序代码的单个优化文件。它简化了不想进行完整
-      `npm install` 的用户的执行，因为所有依赖项（包括 `core`
-      包）都直接包含在内。
+1.  **The JavaScript bundle is created:**
+    - **What happens:** The built JavaScript from both `packages/core/dist` and
+      `packages/cli/dist`, along with all third-party JavaScript dependencies,
+      are bundled by `esbuild` into a single, executable JavaScript file (e.g.,
+      `gemini.js`). The `node-pty` library is excluded from this bundle as it
+      contains native binaries.
+    - **Why:** This creates a single, optimized file that contains all the
+      necessary application code. It simplifies execution for users who want to
+      run the CLI without a full `npm install`, as all dependencies (including
+      the `core` package) are included directly.
 
-2.  **组装 `bundle` 目录:**
-    - **发生什么:** 在项目根目录创建一个临时 `bundle` 文件夹。单个 `gemini.js`
-      可执行文件与其它基本文件一起放置在其中。
-    - **文件移动:**
-      - `gemini.js` (来自 esbuild) -> `bundle/gemini.js`
+2.  **The `bundle` directory is assembled:**
+    - **What happens:** A temporary `bundle` folder is created at the project
+      root. The single `gemini.js` executable is placed inside it, along with
+      other essential files.
+    - **File movement:**
+      - `gemini.js` (from esbuild) -> `bundle/gemini.js`
       - `README.md` -> `bundle/README.md`
       - `LICENSE` -> `bundle/LICENSE`
-      - `packages/cli/src/utils/*.sb` (沙盒配置文件) -> `bundle/`
-    - **原因:**
-      这创建了一个干净、自包含的目录，其中包含运行 CLI 以及了解其许可证和用法所需的一切。
+      - `packages/cli/src/utils/*.sb` (sandbox profiles) -> `bundle/`
+    - **Why:** This creates a clean, self-contained directory with everything
+      needed to run the CLI and understand its license and usage.
 
-3.  **创建 GitHub Release:**
-    - **发生什么:** `bundle` 目录的内容，包括 `gemini.js`
-      可执行文件，作为资产附加到新的 GitHub Release。
-    - **原因:** 这使得 CLI 的单文件版本可直接下载，并启用
-      `npx https://github.com/google-gemini/gemini-cli`
-      命令，该命令下载并运行此特定捆绑资产。
+3.  **The GitHub release is created:**
+    - **What happens:** The contents of the `bundle` directory, including the
+      `gemini.js` executable, are attached as assets to a new GitHub Release.
+    - **Why:** This makes the single-file version of the CLI available for
+      direct download and enables the
+      `npx https://github.com/google-gemini/gemini-cli` command, which downloads
+      and runs this specific bundled asset.
 
-**工件摘要**
+**Summary of artifacts**
 
-- **NPM:** 发布标准的、未捆绑的 Node.js 包。主要工件是 `packages/cli/dist`
-  中的代码，它依赖于 `@google/gemini-cli-core`。
-- **GitHub Release:** 发布一个包含所有依赖项的单一、捆绑的 `gemini.js`
-  文件，以便通过 `npx` 轻松执行。
+- **NPM:** Publishes standard, un-bundled Node.js packages. The primary artifact
+  is the code in `packages/cli/dist`, which depends on
+  `@google/gemini-cli-core`.
+- **GitHub release:** Publishes a single, bundled `gemini.js` file that contains
+  all dependencies, for easy execution via `npx`.
 
-这种双工件过程确保了传统 `npm` 用户和喜欢 `npx` 便利性的用户都能获得优化的体验。
+This dual-artifact process ensures that both traditional `npm` users and those
+who prefer the convenience of `npx` have an optimized experience.
 
-## 通知
+## Notifications
 
-失败的发布工作流将自动创建带有标签 `release-failure` 的 Issue。
+Failing release workflows will automatically create an issue with the label
+`release-failure`.
 
 A notification will be posted to the maintainer's chat channel when issues with
 this type are created.
@@ -450,15 +521,15 @@ this type are created.
 ### Modifying chat notifications
 
 Notifications use
-[GitHub for Google Chat](https://workspace.google.com/marketplace/app/github_for_google_chat/536184076190)。To
-modify the notifications, use `/github-settings` within the chat space.
+[GitHub for Google Chat](https://workspace.google.com/marketplace/app/github_for_google_chat/536184076190).
+To modify the notifications, use `/github-settings` within the chat space.
 
 > [!WARNING] The following instructions describe a fragile workaround that
 > depends on the internal structure of the chat application's UI. It is likely
 > to break with future updates.
 
 The list of available labels is not currently populated correctly. If you want
-add a label that does not appear alphabetically in the first 30 labels in the
+to add a label that does not appear alphabetically in the first 30 labels in the
 repo, you must use your browser's developer tools to manually modify the UI:
 
 1. Open your browser's developer tools (e.g., Chrome DevTools).

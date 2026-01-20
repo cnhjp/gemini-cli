@@ -1,91 +1,96 @@
-# Gemini CLI: 许可证、服务条款和隐私声明
+# Gemini CLI: License, Terms of Service, and Privacy Notices
 
-Gemini
-CLI 是一个开源工具，允许您直接从命令行界面与 Google 强大的 AI 服务进行交互。Gemini
-CLI 软件根据
-[Apache 2.0 许可证](https://github.com/google-gemini/gemini-cli/blob/main/LICENSE)
-授权。当您使用 Gemini
-CLI 访问或使用 Google 的服务时，适用于这些服务的服务条款和隐私声明适用于此类访问和使用。
+Gemini CLI is an open-source tool that lets you interact with Google's powerful
+AI services directly from your command-line interface. The Gemini CLI software
+is licensed under the
+[Apache 2.0 license](https://github.com/google-gemini/gemini-cli/blob/main/LICENSE).
+When you use Gemini CLI to access or use Google’s services, the Terms of Service
+and Privacy Notices applicable to those services apply to such access and use.
 
-您的 Gemini CLI 使用情况统计信息将根据 Google 的隐私政策进行处理。
+Your Gemini CLI Usage Statistics are handled in accordance with Google's Privacy
+Policy.
 
-**注意:** 有关适用于您使用 Gemini CLI 的配额和定价详情，请参阅
-[配额和定价](/docs/quota-and-pricing.md)。
+**Note:** See [quotas and pricing](/docs/quota-and-pricing.md) for the quota and
+pricing details that apply to your usage of the Gemini CLI.
 
-## 支持的身份验证方法
+## Supported authentication methods
 
-您的身份验证方法是指您用于登录和使用 Gemini
-CLI 访问 Google 服务的方法。支持的身份验证方法包括：
+Your authentication method refers to the method you use to log into and access
+Google’s services with Gemini CLI. Supported authentication methods include:
 
-- 使用您的 Google 账号登录 Gemini Code Assist。
-- 使用带有 Gemini Developer API 的 API 密钥。
-- 使用带有 Vertex AI GenAI API 的 API 密钥。
+- Logging in with your Google account to Gemini Code Assist.
+- Using an API key with Gemini Developer API.
+- Using an API key with Vertex AI GenAI API.
 
-适用于上述 Google 服务的服务条款和隐私声明如下表所示。
+The Terms of Service and Privacy Notices applicable to the aforementioned Google
+services are set forth in the table below.
 
-如果您使用 Google 账号登录，并且您的 Google 账号尚未关联 Gemini Code
-Assist 账号，您将被引导至 Gemini Code
-Assist 个人版的注册流程。如果您的 Google 账号由您的组织管理，您的管理员可能不允许访问 Gemini
-Code Assist 个人版。请参阅
-[Gemini Code Assist 个人版常见问题解答](https://developers.google.com/gemini-code-assist/resources/faqs)
-获取更多信息。
+If you log in with your Google account and you do not already have a Gemini Code
+Assist account associated with your Google account, you will be directed to the
+sign up flow for Gemini Code Assist for individuals. If your Google account is
+managed by your organization, your administrator may not permit access to Gemini
+Code Assist for individuals. Please see the
+[Gemini Code Assist for individuals FAQs](https://developers.google.com/gemini-code-assist/resources/faqs)
+for further information.
 
-| 身份验证方法              | 服务                    | 服务条款                                                                                 | 隐私声明                                                                               |
-| :------------------------ | :---------------------- | :--------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| Google 账号               | Gemini Code Assist 服务 | [服务条款](https://developers.google.com/gemini-code-assist/resources/privacy-notices)   | [隐私声明](https://developers.google.com/gemini-code-assist/resources/privacy-notices) |
-| Gemini Developer API 密钥 | Gemini API - 免费服务   | [Gemini API 服务条款 - 免费服务](https://ai.google.dev/gemini-api/terms#unpaid-services) | [Google 隐私政策](https://policies.google.com/privacy)                                 |
-| Gemini Developer API 密钥 | Gemini API - 付费服务   | [Gemini API 服务条款 - 付费服务](https://ai.google.dev/gemini-api/terms#paid-services)   | [Google 隐私政策](https://policies.google.com/privacy)                                 |
-| Vertex AI GenAI API 密钥  | Vertex AI GenAI API     | [Google Cloud Platform 服务条款](https://cloud.google.com/terms/service-terms/)          | [Google Cloud 隐私声明](https://cloud.google.com/terms/cloud-privacy-notice)           |
+| Authentication Method    | Service(s)                   | Terms of Service                                                                                        | Privacy Notice                                                                                |
+| :----------------------- | :--------------------------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------- |
+| Google Account           | Gemini Code Assist services  | [Terms of Service](https://developers.google.com/gemini-code-assist/resources/privacy-notices)          | [Privacy Notices](https://developers.google.com/gemini-code-assist/resources/privacy-notices) |
+| Gemini Developer API Key | Gemini API - Unpaid Services | [Gemini API Terms of Service - Unpaid Services](https://ai.google.dev/gemini-api/terms#unpaid-services) | [Google Privacy Policy](https://policies.google.com/privacy)                                  |
+| Gemini Developer API Key | Gemini API - Paid Services   | [Gemini API Terms of Service - Paid Services](https://ai.google.dev/gemini-api/terms#paid-services)     | [Google Privacy Policy](https://policies.google.com/privacy)                                  |
+| Vertex AI GenAI API Key  | Vertex AI GenAI API          | [Google Cloud Platform Terms of Service](https://cloud.google.com/terms/service-terms/)                 | [Google Cloud Privacy Notice](https://cloud.google.com/terms/cloud-privacy-notice)            |
 
-## 1. 如果您已使用 Google 账号登录 Gemini Code Assist
+## 1. If you have logged in with your Google account to Gemini Code Assist
 
-对于使用其 Google 账号访问 [Gemini Code Assist](https://codeassist.google)
-的用户，以下服务条款和隐私声明文档适用：
+For users who use their Google account to access
+[Gemini Code Assist](https://codeassist.google), these Terms of Service and
+Privacy Notice documents apply:
 
-- Gemini Code Assist 个人版：
-  [Google 服务条款](https://policies.google.com/terms) 和
-  [Gemini Code Assist 个人版隐私声明](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals)。
-- 带有 Google AI Pro 或 Ultra 订阅的 Gemini Code Assist：
-  [Google 服务条款](https://policies.google.com/terms)、[Google One 附加服务条款](https://one.google.com/terms-of-service)
-  和 [Google 隐私政策\*](https://policies.google.com/privacy)。
-- Gemini Code Assist 标准版和企业版：
-  [Google Cloud Platform 服务条款](https://cloud.google.com/terms) 和
-  [Google Cloud 隐私声明](https://cloud.google.com/terms/cloud-privacy-notice)。
+- Gemini Code Assist for individuals:
+  [Google Terms of Service](https://policies.google.com/terms) and
+  [Gemini Code Assist for individuals Privacy Notice](https://developers.google.com/gemini-code-assist/resources/privacy-notice-gemini-code-assist-individuals).
+- Gemini Code Assist with Google AI Pro or Ultra subscription:
+  [Google Terms of Service](https://policies.google.com/terms),
+  [Google One Additional Terms of Service](https://one.google.com/terms-of-service)
+  and [Google Privacy Policy\*](https://policies.google.com/privacy).
+- Gemini Code Assist Standard and Enterprise editions:
+  [Google Cloud Platform Terms of Service](https://cloud.google.com/terms) and
+  [Google Cloud Privacy Notice](https://cloud.google.com/terms/cloud-privacy-notice).
 
-_\* 如果您的账号还关联了 Gemini Code Assist 标准版或企业版的有效订阅，Gemini
-Code Assist 标准版或企业版的条款和隐私政策将适用于您对 Gemini Code
-Assist 的所有使用。_
+_\* If your account is also associated with an active subscription to Gemini
+Code Assist Standard or Enterprise edition, the terms and privacy policy of
+Gemini Code Assist Standard or Enterprise edition will apply to all your use of
+Gemini Code Assist._
 
-## 2. 如果您已使用 Gemini API 密钥登录 Gemini Developer API
+## 2. If you have logged in with a Gemini API key to the Gemini Developer API
 
-如果您使用 Gemini API 密钥进行
-[Gemini Developer API](https://ai.google.dev/gemini-api/docs)
-的身份验证，以下服务条款和隐私声明文档适用：
+If you are using a Gemini API key for authentication with the
+[Gemini Developer API](https://ai.google.dev/gemini-api/docs), these Terms of
+Service and Privacy Notice documents apply:
 
-- 服务条款：您对 Gemini CLI 的使用受
-  [Gemini API 服务条款](https://ai.google.dev/gemini-api/terms)
-  管辖。这些条款可能会因您使用的是免费服务还是付费服务而异：
-  - 对于免费服务，请参阅
-    [Gemini API 服务条款 - 免费服务](https://ai.google.dev/gemini-api/terms#unpaid-services)。
-  - 对于付费服务，请参阅
-    [Gemini API 服务条款 - 付费服务](https://ai.google.dev/gemini-api/terms#paid-services)。
-- 隐私声明：您的数据的收集和使用在
-  [Google 隐私政策](https://policies.google.com/privacy) 中进行了描述。
+- Terms of Service: Your use of the Gemini CLI is governed by the
+  [Gemini API Terms of Service](https://ai.google.dev/gemini-api/terms). These
+  terms may differ depending on whether you are using an unpaid or paid service:
+  - For unpaid services, refer to the
+    [Gemini API Terms of Service - Unpaid Services](https://ai.google.dev/gemini-api/terms#unpaid-services).
+  - For paid services, refer to the
+    [Gemini API Terms of Service - Paid Services](https://ai.google.dev/gemini-api/terms#paid-services).
+- Privacy Notice: The collection and use of your data is described in the
+  [Google Privacy Policy](https://policies.google.com/privacy).
 
-## 3. 如果您已使用 Gemini API 密钥登录 Vertex AI GenAI API
+## 3. If you have logged in with a Gemini API key to the Vertex AI GenAI API
 
-如果您使用 Gemini API 密钥进行
+If you are using a Gemini API key for authentication with a
 [Vertex AI GenAI API](https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest)
-后端的身份验证，以下服务条款和隐私声明文档适用：
+backend, these Terms of Service and Privacy Notice documents apply:
 
-- 服务条款：您对 Gemini CLI 的使用受
-  [Google Cloud Platform 服务条款](https://cloud.google.com/terms/service-terms/)
-  管辖。
-- 隐私声明：您的数据的收集和使用在
-  [Google Cloud 隐私声明](https://cloud.google.com/terms/cloud-privacy-notice)
-  中进行了描述。
+- Terms of Service: Your use of the Gemini CLI is governed by the
+  [Google Cloud Platform Service Terms](https://cloud.google.com/terms/service-terms/).
+- Privacy Notice: The collection and use of your data is described in the
+  [Google Cloud Privacy Notice](https://cloud.google.com/terms/cloud-privacy-notice).
 
-## 使用情况统计信息选择退出
+## Usage statistics opt-out
 
-您可以按照此处提供的说明选择不向 Google 发送 Gemini CLI 使用情况统计信息：
-[使用情况统计配置](https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md#usage-statistics)。
+You may opt-out from sending Gemini CLI Usage Statistics to Google by following
+the instructions available here:
+[Usage Statistics Configuration](https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md#usage-statistics).

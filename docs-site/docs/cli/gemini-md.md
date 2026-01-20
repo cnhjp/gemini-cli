@@ -1,87 +1,103 @@
-# 使用 GEMINI.md 文件提供上下文
+# Provide context with GEMINI.md files
 
-上下文文件（默认名称为
-`GEMINI.md`）是一个强大的功能，用于向 Gemini 模型提供指令上下文。您可以使用这些文件给出特定于项目的说明、定义角色或提供编码风格指南，以使 AI 的响应更准确并针对您的需求量身定制。
+Context files, which use the default name `GEMINI.md`, are a powerful feature
+for providing instructional context to the Gemini model. You can use these files
+to give project-specific instructions, define a persona, or provide coding style
+guides to make the AI's responses more accurate and tailored to your needs.
 
-与其在每个提示词中重复说明，不如在上下文文件中定义一次。
+Instead of repeating instructions in every prompt, you can define them once in a
+context file.
 
-## 了解上下文层级
+## Understand the context hierarchy
 
-CLI 使用分层系统来获取上下文。它从多个位置加载各种上下文文件，连接所有找到的文件的内容，并在每次提示时将它们发送给模型。CLI 按以下顺序加载文件：
+The CLI uses a hierarchical system to source context. It loads various context
+files from several locations, concatenates the contents of all found files, and
+sends them to the model with every prompt. The CLI loads files in the following
+order:
 
-1.  **全局上下文文件:**
-    - **位置:** `~/.gemini/GEMINI.md` (在您的用户主目录中)。
-    - **范围:** 为您的所有项目提供默认说明。
+1.  **Global context file:**
+    - **Location:** `~/.gemini/GEMINI.md` (in your user home directory).
+    - **Scope:** Provides default instructions for all your projects.
 
-2.  **项目根目录和祖先上下文文件:**
-    - **位置:** CLI 在当前工作目录中搜索 `GEMINI.md`
-      文件，然后在每个父目录中向上搜索，直到项目根目录（由 `.git` 文件夹标识）。
-    - **范围:** 提供与整个项目相关的上下文。
+2.  **Project root and ancestor context files:**
+    - **Location:** The CLI searches for a `GEMINI.md` file in your current
+      working directory and then in each parent directory up to the project root
+      (identified by a `.git` folder).
+    - **Scope:** Provides context relevant to the entire project.
 
-3.  **子目录上下文文件:**
-    - **位置:** CLI 还会扫描当前工作目录下方子目录中的 `GEMINI.md` 文件。它遵守
-      `.gitignore` 和 `.geminiignore` 中的规则。
-    - **范围:** 允许您为特定组件或模块编写高度具体的说明。
+3.  **Sub-directory context files:**
+    - **Location:** The CLI also scans for `GEMINI.md` files in subdirectories
+      below your current working directory. It respects rules in `.gitignore`
+      and `.geminiignore`.
+    - **Scope:** Lets you write highly specific instructions for a particular
+      component or module.
 
-CLI 页脚显示已加载上下文文件的数量，为您提供活动指令上下文的快速视觉提示。
+The CLI footer displays the number of loaded context files, which gives you a
+quick visual cue of the active instructional context.
 
-### `GEMINI.md` 文件示例
+### Example `GEMINI.md` file
 
-这是您可以在 TypeScript 项目根目录下的 `GEMINI.md` 文件中包含的内容示例：
+Here is an example of what you can include in a `GEMINI.md` file at the root of
+a TypeScript project:
 
 ```markdown
-# 项目: My TypeScript Library
+# Project: My TypeScript Library
 
-## 通用说明
+## General Instructions
 
-- 当您生成新的 TypeScript 代码时，请遵循现有的编码风格。
-- 确保所有新函数和类都有 JSDoc 注释。
-- 尽可能首选函数式编程范式。
+- When you generate new TypeScript code, follow the existing coding style.
+- Ensure all new functions and classes have JSDoc comments.
+- Prefer functional programming paradigms where appropriate.
 
-## 编码风格
+## Coding Style
 
-- 使用 2 个空格进行缩进。
-- 接口名称前缀为 `I`（例如，`IUserService`）。
-- 始终使用严格相等 (`===` 和 `!==`)。
+- Use 2 spaces for indentation.
+- Prefix interface names with `I` (for example, `IUserService`).
+- Always use strict equality (`===` and `!==`).
 ```
 
-## 使用 `/memory` 命令管理上下文
+## Manage context with the `/memory` command
 
-您可以使用 `/memory` 命令与加载的上下文文件进行交互。
+You can interact with the loaded context files by using the `/memory` command.
 
-- **`/memory show`**: 显示当前分层记忆的完整拼接内容。这让您可以检查提供给模型的确认指令上下文。
-- **`/memory refresh`**: 强制从所有配置的位置重新扫描和重新加载所有 `GEMINI.md`
-  文件。
-- **`/memory add <text>`**: 将您的文本追加到您的全局 `~/.gemini/GEMINI.md`
-  文件。这让您可以即时添加持久记忆。
+- **`/memory show`**: Displays the full, concatenated content of the current
+  hierarchical memory. This lets you inspect the exact instructional context
+  being provided to the model.
+- **`/memory refresh`**: Forces a re-scan and reload of all `GEMINI.md` files
+  from all configured locations.
+- **`/memory add <text>`**: Appends your text to your global
+  `~/.gemini/GEMINI.md` file. This lets you add persistent memories on the fly.
 
-## 使用导入模块化上下文
+## Modularize context with imports
 
-您可以通过使用 `@file.md` 语法从其他文件导入内容，将大型 `GEMINI.md`
-文件分解为更小、更易于管理的组件。此功能支持相对路径和绝对路径。
+You can break down large `GEMINI.md` files into smaller, more manageable
+components by importing content from other files using the `@file.md` syntax.
+This feature supports both relative and absolute paths.
 
-**带有导入的 `GEMINI.md` 示例:**
+**Example `GEMINI.md` with imports:**
 
 ```markdown
-# 主 GEMINI.md 文件
+# Main GEMINI.md file
 
-这是主要内容。
+This is the main content.
 
 @./components/instructions.md
 
-这里有更多内容。
+More content here.
 
 @../shared/style-guide.md
 ```
 
-有关更多详细信息，请参阅 [记忆导入处理器](../core/memport.md) 文档。
+For more details, see the [Memory Import Processor](../core/memport.md)
+documentation.
 
-## 自定义上下文文件名
+## Customize the context file name
 
-虽然 `GEMINI.md` 是默认文件名，但您可以在 `settings.json`
-文件中配置它。要指定不同的名称或名称列表，请使用 `context.fileName` 属性。
+While `GEMINI.md` is the default filename, you can configure this in your
+`settings.json` file. To specify a different name or a list of names, use the
+`context.fileName` property.
 
-**`settings.json` 示例:**
+**Example `settings.json`:**
 
 ```json
 {

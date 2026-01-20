@@ -1,13 +1,16 @@
-# 受信任文件夹 (Trusted Folders)
+# Trusted Folders
 
-受信任文件夹功能是一项安全设置，让您可以控制哪些项目可以使用 Gemini
-CLI 的全部功能。它通过在 CLI 加载任何特定于项目的配置之前要求您批准文件夹，来防止潜在的恶意代码运行。
+The Trusted Folders feature is a security setting that gives you control over
+which projects can use the full capabilities of the Gemini CLI. It prevents
+potentially malicious code from running by asking you to approve a folder before
+the CLI loads any project-specific configurations from it.
 
-## 启用功能
+## Enabling the feature
 
-受信任文件夹功能 **默认禁用**。要使用它，您必须首先在设置中启用它。
+The Trusted Folders feature is **disabled by default**. To use it, you must
+first enable it in your settings.
 
-将以下内容添加到您的用户 `settings.json` 文件：
+Add the following to your user `settings.json` file:
 
 ```json
 {
@@ -19,60 +22,74 @@ CLI 的全部功能。它通过在 CLI 加载任何特定于项目的配置之�
 }
 ```
 
-## 工作原理：信任对话框
+## How it works: The trust dialog
 
-启用该功能后，首次从文件夹运行 Gemini
-CLI 时，会自动出现一个对话框，提示您做出选择：
+Once the feature is enabled, the first time you run the Gemini CLI from a
+folder, a dialog will automatically appear, prompting you to make a choice:
 
-- **Trust folder (信任文件夹)**: 授予当前文件夹（例如 `my-project`）完全信任。
-- **Trust parent folder (信任父文件夹)**: 授予父目录（例如
-  `safe-projects`）信任，这将自动信任其所有子目录。如果您将所有安全项目保存在一个位置，这很有用。
-- **Don't trust
-  (不信任)**: 将文件夹标记为不受信任。CLI 将在受限的“安全模式”下运行。
+- **Trust folder**: Grants full trust to the current folder (e.g.,
+  `my-project`).
+- **Trust parent folder**: Grants trust to the parent directory (e.g.,
+  `safe-projects`), which automatically trusts all of its subdirectories as
+  well. This is useful if you keep all your safe projects in one place.
+- **Don't trust**: Marks the folder as untrusted. The CLI will operate in a
+  restricted "safe mode."
 
-您的选择保存在中央文件 (`~/.gemini/trustedFolders.json`) 中，因此每个文件夹只会询问一次。
+Your choice is saved in a central file (`~/.gemini/trustedFolders.json`), so you
+will only be asked once per folder.
 
-## 为什么信任很重要：不受信任工作区的影响
+## Why trust matters: The impact of an untrusted workspace
 
-当文件夹 **不受信任** 时，Gemini
-CLI 在受限的“安全模式”下运行以保护您。在此模式下，以下功能被禁用：
+When a folder is **untrusted**, the Gemini CLI runs in a restricted "safe mode"
+to protect you. In this mode, the following features are disabled:
 
-1.  **忽略工作区设置**: CLI 将 **不** 加载项目中的 `.gemini/settings.json`
-    文件。这可以防止加载自定义工具和其他潜在危险的配置。
+1.  **Workspace settings are ignored**: The CLI will **not** load the
+    `.gemini/settings.json` file from the project. This prevents the loading of
+    custom tools and other potentially dangerous configurations.
 
-2.  **忽略环境变量**: CLI 将 **不** 加载项目中的任何 `.env` 文件。
+2.  **Environment variables are ignored**: The CLI will **not** load any `.env`
+    files from the project.
 
-3.  **扩展管理受限**: 您 **无法安装、更新或卸载** 扩展。
+3.  **Extension management is restricted**: You **cannot install, update, or
+    uninstall** extensions.
 
-4.  **禁用工具自动接受**: 在运行任何工具之前，您总是会被提示，即使您已全局启用了自动接受。
+4.  **Tool auto-acceptance is disabled**: You will always be prompted before any
+    tool is run, even if you have auto-acceptance enabled globally.
 
-5.  **禁用自动记忆加载**:
-    CLI 不会自动将本地设置中指定目录中的文件加载到上下文中。
+5.  **Automatic memory loading is disabled**: The CLI will not automatically
+    load files into context from directories specified in local settings.
 
-6.  **MCP 服务器不连接**: CLI 不会尝试连接到任何
-    [模型上下文协议 (MCP)](../tools/mcp-server.md) 服务器。
+6.  **MCP servers do not connect**: The CLI will not attempt to connect to any
+    [Model Context Protocol (MCP)](../tools/mcp-server.md) servers.
 
-7.  **不加载自定义命令**:
-    CLI 不会从 .toml 文件加载任何自定义命令，包括特定于项目的命令和全局用户命令。
+7.  **Custom commands are not loaded**: The CLI will not load any custom
+    commands from .toml files, including both project-specific and global user
+    commands.
 
-向文件夹授予信任将为该工作区解锁 Gemini CLI 的全部功能。
+Granting trust to a folder unlocks the full functionality of the Gemini CLI for
+that workspace.
 
-## 管理您的信任设置
+## Managing your trust settings
 
-如果您需要更改决定或查看所有设置，您有几个选项：
+If you need to change a decision or see all your settings, you have a couple of
+options:
 
-- **更改当前文件夹的信任**: 在 CLI 中运行 `/permissions`
-  命令。这将调出相同的交互式对话框，允许您更改当前文件夹的信任级别。
+- **Change the current folder's trust**: Run the `/permissions` command from
+  within the CLI. This will bring up the same interactive dialog, allowing you
+  to change the trust level for the current folder.
 
-- **查看所有信任规则**: 要查看所有受信任和不受信任文件夹规则的完整列表，您可以检查主目录中
-  `~/.gemini/trustedFolders.json` 文件的内容。
+- **View all trust rules**: To see a complete list of all your trusted and
+  untrusted folder rules, you can inspect the contents of the
+  `~/.gemini/trustedFolders.json` file in your home directory.
 
-## 信任检查过程（高级）
+## The trust check process (advanced)
 
-对于高级用户，了解确定的信任的确切操作顺序很有帮助：
+For advanced users, it's helpful to know the exact order of operations for how
+trust is determined:
 
-1.  **IDE 信任信号**: 如果您正在使用
-    [IDE 集成](../ide-integration/index.md)，CLI 首先询问 IDE 该工作区是否受信任。IDE 的响应具有最高优先级。
+1.  **IDE trust signal**: If you are using the
+    [IDE Integration](../ide-integration/index.md), the CLI first asks the IDE
+    if the workspace is trusted. The IDE's response takes highest priority.
 
-2.  **本地信任文件**: 如果 IDE 未连接，CLI 将检查中央
-    `~/.gemini/trustedFolders.json` 文件。
+2.  **Local trust file**: If the IDE is not connected, the CLI checks the
+    central `~/.gemini/trustedFolders.json` file.

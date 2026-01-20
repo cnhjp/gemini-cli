@@ -1,78 +1,101 @@
 # Gemini CLI core
 
-Gemini CLI 的核心包 (`packages/core`) 是 Gemini CLI 的后端部分，处理与 Gemini
-API 的通信、管理工具并处理从 `packages/cli` 发送的请求。有关 Gemini
-CLI 的总体概览，请参阅 [主文档页面](../index.md)。
+Gemini CLI's core package (`packages/core`) is the backend portion of Gemini
+CLI, handling communication with the Gemini API, managing tools, and processing
+requests sent from `packages/cli`. For a general overview of Gemini CLI, see the
+[main documentation page](../index.md).
 
-## 导航本节
+## Navigating this section
 
-- **[Core tools API](./tools-api.md):**
-  有关工具如何由 core 定义、注册和使用的信息。
-- **[记忆导入处理器](./memport.md):**
-  使用 @file.md 语法的模块化 GEMINI.md 导入功能的文档。
-- **[策略引擎](./policy-engine.md):** 使用策略引擎对工具执行进行细粒度控制。
+- **[Core tools API](./tools-api.md):** Information on how tools are defined,
+  registered, and used by the core.
+- **[Memory Import Processor](./memport.md):** Documentation for the modular
+  GEMINI.md import feature using @file.md syntax.
+- **[Policy Engine](./policy-engine.md):** Use the Policy Engine for
+  fine-grained control over tool execution.
 
-## Core 的角色
+## Role of the core
 
-虽然 Gemini CLI 的 `packages/cli` 部分提供用户界面，但 `packages/core` 负责：
+While the `packages/cli` portion of Gemini CLI provides the user interface,
+`packages/core` is responsible for:
 
-- **Gemini API 交互:** 安全地与 Google Gemini
-  API 通信，发送用户提示词并接收模型响应。
-- **提示词工程:**
-  为 Gemini 模型构建有效的提示词，可能结合对话历史记录、工具定义和来自
-  `GEMINI.md` 文件的指令上下文。
-- **工具管理与编排:**
-  - 注册可用工具（例如，文件系统工具、shell 命令执行）。
-  - 解释 Gemini 模型的工具使用请求。
-  - 使用提供的参数执行请求的工具。
-  - 将工具执行结果返回给 Gemini 模型以供进一步处理。
-- **会话和状态管理:** 跟踪对话状态，包括历史记录和连贯交互所需的任何相关上下文。
-- **配置:** 管理特定于 core 的配置，例如 API 密钥访问、模型选择和工具设置。
+- **Gemini API interaction:** Securely communicating with the Google Gemini API,
+  sending user prompts, and receiving model responses.
+- **Prompt engineering:** Constructing effective prompts for the Gemini model,
+  potentially incorporating conversation history, tool definitions, and
+  instructional context from `GEMINI.md` files.
+- **Tool management & orchestration:**
+  - Registering available tools (e.g., file system tools, shell command
+    execution).
+  - Interpreting tool use requests from the Gemini model.
+  - Executing the requested tools with the provided arguments.
+  - Returning tool execution results to the Gemini model for further processing.
+- **Session and state management:** Keeping track of the conversation state,
+  including history and any relevant context required for coherent interactions.
+- **Configuration:** Managing core-specific configurations, such as API key
+  access, model selection, and tool settings.
 
-## 安全注意事项
+## Security considerations
 
-Core 在安全性方面起着至关重要的作用：
+The core plays a vital role in security:
 
-- **API 密钥管理:** 它处理 `GEMINI_API_KEY` 并确保在与 Gemini
-  API 通信时安全地使用它。
-- **工具执行:**
-  当工具与本地系统交互时（例如，`run_shell_command`），core（及其底层工具实现）必须谨慎行事，通常涉及沙盒机制以防止意外修改。
+- **API key management:** It handles the `GEMINI_API_KEY` and ensures it's used
+  securely when communicating with the Gemini API.
+- **Tool execution:** When tools interact with the local system (e.g.,
+  `run_shell_command`), the core (and its underlying tool implementations) must
+  do so with appropriate caution, often involving sandboxing mechanisms to
+  prevent unintended modifications.
 
-## 聊天记录压缩
+## Chat history compression
 
-为了确保长对话不会超过 Gemini 模型的 token 限制，core 包含聊天记录压缩功能。
+To ensure that long conversations don't exceed the token limits of the Gemini
+model, the core includes a chat history compression feature.
 
-当对话接近配置模型的 token 限制时，core 会在将其发送给模型之前自动压缩对话历史记录。这种压缩在传达信息方面设计为无损的，但减少了使用的总 token 数量。
+When a conversation approaches the token limit for the configured model, the
+core automatically compresses the conversation history before sending it to the
+model. This compression is designed to be lossless in terms of the information
+conveyed, but it reduces the overall number of tokens used.
 
-您可以在 [Google AI 文档](https://ai.google.dev/gemini-api/docs/models)
-中找到每个模型的 token 限制。
+You can find the token limits for each model in the
+[Google AI documentation](https://ai.google.dev/gemini-api/docs/models).
 
-## 模型回退
+## Model fallback
 
-Gemini
-CLI 包含模型回退机制，以确保即使默认的 "pro" 模型受到速率限制，您也可以继续使用 CLI。
+Gemini CLI includes a model fallback mechanism to ensure that you can continue
+to use the CLI even if the default "pro" model is rate-limited.
 
-如果您使用默认的 "pro" 模型，并且 CLI 检测到您受到速率限制，它会自动切换到当前会话的 "flash" 模型。这允许您不间断地继续工作。
+If you are using the default "pro" model and the CLI detects that you are being
+rate-limited, it automatically switches to the "flash" model for the current
+session. This allows you to continue working without interruption.
 
-## 文件发现服务
+## File discovery service
 
-文件发现服务负责在项目中查找与当前上下文相关的文件。它由 `@`
-命令和其他需要访问文件的工具使用。
+The file discovery service is responsible for finding files in the project that
+are relevant to the current context. It is used by the `@` command and other
+tools that need to access files.
 
-## 记忆发现服务
+## Memory discovery service
 
-记忆发现服务负责查找和加载向模型提供上下文的 `GEMINI.md`
-文件。它以分层方式搜索这些文件，从当前工作目录开始，向上移动到项目根目录和用户的主目录。它还在子目录中搜索。
+The memory discovery service is responsible for finding and loading the
+`GEMINI.md` files that provide context to the model. It searches for these files
+in a hierarchical manner, starting from the current working directory and moving
+up to the project root and the user's home directory. It also searches in
+subdirectories.
 
-这允许您拥有全局、项目级和组件级上下文文件，所有这些文件结合起来为模型提供最相关的信息。
+This allows you to have global, project-level, and component-level context
+files, which are all combined to provide the model with the most relevant
+information.
 
-您可以使用 [`/memory` 命令](../cli/commands.md) 来 `show` (显示)、`add`
-(添加) 和 `refresh` (刷新) 加载的 `GEMINI.md` 文件的内容。
+You can use the [`/memory` command](../cli/commands.md) to `show`, `add`, and
+`refresh` the content of loaded `GEMINI.md` files.
 
-## 引用
+## Citations
 
-当 Gemini 发现它正在引用来源的文本时，它会将引用附加到输出中。它默认启用，但可以通过 ui.showCitations 设置禁用。
+When Gemini finds it is reciting text from a source it appends the citation to
+the output. It is enabled by default but can be disabled with the
+ui.showCitations setting.
 
-- 在提议编辑时，引用会在给用户选择接受之前显示。
-- 引用始终显示在模型轮次的末尾。
-- 我们会对引用进行重复数据删除并按字母顺序显示。
+- When proposing an edit the citations display before giving the user the option
+  to accept.
+- Citations are always shown at the end of the model’s turn.
+- We deduplicate citations and display them in alphabetical order.

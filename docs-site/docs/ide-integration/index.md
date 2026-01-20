@@ -1,174 +1,202 @@
-# IDE 集成
+# IDE integration
 
-Gemini
-CLI 可以与您的 IDE 集成，提供更无缝和上下文感知的体验。这种集成允许 CLI 更好地了解您的工作区，并启用强大的功能，如原生编辑器内差异比较。
+Gemini CLI can integrate with your IDE to provide a more seamless and
+context-aware experience. This integration allows the CLI to understand your
+workspace better and enables powerful features like native in-editor diffing.
 
-目前，支持的 IDE 有
-[Antigravity](https://antigravity.google)、[Visual Studio Code](https://code.visualstudio.com/)
-以及其他支持 VS Code 扩展的编辑器。要为其他编辑器构建支持，请参阅
-[IDE 伴侣扩展规范](./ide-companion-spec.md)。
+Currently, the supported IDEs are [Antigravity](https://antigravity.google),
+[Visual Studio Code](https://code.visualstudio.com/), and other editors that
+support VS Code extensions. To build support for other editors, see the
+[IDE Companion Extension Spec](./ide-companion-spec.md).
 
-## 功能
+## Features
 
-- **工作区上下文:**
-  CLI 自动获得对您工作区的感知，以提供更相关和准确的响应。此上下文包括：
-  - 您工作区中 **最近访问的 10 个文件**。
-  - 您的活动光标位置。
-  - 您选择的任何文本（最多 16KB 限制；较长的选择将被截断）。
+- **Workspace context:** The CLI automatically gains awareness of your workspace
+  to provide more relevant and accurate responses. This context includes:
+  - The **10 most recently accessed files** in your workspace.
+  - Your active cursor position.
+  - Any text you have selected (up to a 16KB limit; longer selections will be
+    truncated).
 
-- **原生差异比较:**
-  当 Gemini 建议代码修改时，您可以直接在 IDE 的原生差异查看器中查看更改。这允许您无缝地审查、编辑并接受或拒绝建议的更改。
+- **Native diffing:** When Gemini suggests code modifications, you can view the
+  changes directly within your IDE's native diff viewer. This allows you to
+  review, edit, and accept or reject the suggested changes seamlessly.
 
-- **VS Code 命令:** 您可以直接从 VS Code 命令面板 (`Cmd+Shift+P` 或
-  `Ctrl+Shift+P`) 访问 Gemini CLI 功能：
-  - `Gemini CLI: Run`: 在集成终端中启动新的 Gemini CLI 会话。
-  - `Gemini CLI: Accept Diff`: 接受活动差异编辑器中的更改。
-  - `Gemini CLI: Close Diff Editor`: 拒绝更改并关闭活动差异编辑器。
-  - `Gemini CLI: View Third-Party Notices`: 显示扩展的第三方声明。
+- **VS Code commands:** You can access Gemini CLI features directly from the VS
+  Code Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`):
+  - `Gemini CLI: Run`: Starts a new Gemini CLI session in the integrated
+    terminal.
+  - `Gemini CLI: Accept Diff`: Accepts the changes in the active diff editor.
+  - `Gemini CLI: Close Diff Editor`: Rejects the changes and closes the active
+    diff editor.
+  - `Gemini CLI: View Third-Party Notices`: Displays the third-party notices for
+    the extension.
 
-## 安装和设置
+## Installation and setup
 
-可以通过三种方式设置 IDE 集成：
+There are three ways to set up the IDE integration:
 
-### 1. 自动提示（推荐）
+### 1. Automatic nudge (recommended)
 
-当您在受支持的编辑器中运行 Gemini
-CLI 时，它会自动检测您的环境并提示您连接。回答 "Yes" 将自动运行必要的设置，包括安装伴侣扩展和启用连接。
+When you run Gemini CLI inside a supported editor, it will automatically detect
+your environment and prompt you to connect. Answering "Yes" will automatically
+run the necessary setup, which includes installing the companion extension and
+enabling the connection.
 
-### 2. 从 CLI 手动安装
+### 2. Manual installation from CLI
 
-如果您之前关闭了提示或想要手动安装扩展，可以在 Gemini CLI 中运行以下命令：
+If you previously dismissed the prompt or want to install the extension
+manually, you can run the following command inside Gemini CLI:
 
 ```
 /ide install
 ```
 
-这将找到适合您 IDE 的正确扩展并安装它。
+This will find the correct extension for your IDE and install it.
 
-### 3. 从市场手动安装
+### 3. Manual installation from a marketplace
 
-您也可以直接从市场安装扩展。
+You can also install the extension directly from a marketplace.
 
-- **对于 Visual Studio Code:** 从
-  [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=google.gemini-cli-vscode-ide-companion)
-  安装。
-- **对于 VS Code 分支:** 为了支持 VS Code 的分支，该扩展也在
-  [Open VSX Registry](https://open-vsx.org/extension/google/gemini-cli-vscode-ide-companion)
-  上发布。按照您的编辑器的说明从该注册表安装扩展。
+- **For Visual Studio Code:** Install from the
+  [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=google.gemini-cli-vscode-ide-companion).
+- **For VS Code forks:** To support forks of VS Code, the extension is also
+  published on the
+  [Open VSX Registry](https://open-vsx.org/extension/google/gemini-cli-vscode-ide-companion).
+  Follow your editor's instructions for installing extensions from this
+  registry.
 
-> 注意: "Gemini CLI
-> Companion" 扩展可能会出现在搜索结果的底部。如果您没有立即看到它，请尝试向下滚动或按“最新发布”排序。
+> NOTE: The "Gemini CLI Companion" extension may appear towards the bottom of
+> search results. If you don't see it immediately, try scrolling down or sorting
+> by "Newly Published".
 >
-> 手动安装扩展后，您必须在 CLI 中运行 `/ide enable` 才能激活集成。
+> After manually installing the extension, you must run `/ide enable` in the CLI
+> to activate the integration.
 
-## 用法
+## Usage
 
-### 启用和禁用
+### Enabling and disabling
 
-您可以从 CLI 中控制 IDE 集成：
+You can control the IDE integration from within the CLI:
 
-- 要启用与 IDE 的连接，请运行：
+- To enable the connection to the IDE, run:
   ```
   /ide enable
   ```
-- 要禁用连接，请运行：
+- To disable the connection, run:
   ```
   /ide disable
   ```
 
-启用后，Gemini CLI 将自动尝试连接到 IDE 伴侣扩展。
+When enabled, Gemini CLI will automatically attempt to connect to the IDE
+companion extension.
 
-### 检查状态
+### Checking the status
 
-要检查连接状态并查看 CLI 从 IDE 接收到的上下文，请运行：
+To check the connection status and see the context the CLI has received from the
+IDE, run:
 
 ```
 /ide status
 ```
 
-如果已连接，此命令将显示它连接到的 IDE 以及它知道的最近打开的文件列表。
+If connected, this command will show the IDE it's connected to and a list of
+recently opened files it is aware of.
 
-> [!NOTE]
-> 文件列表仅限于您工作区内最近访问的 10 个文件，并且仅包括磁盘上的本地文件。
+> [!NOTE] The file list is limited to 10 recently accessed files within your
+> workspace and only includes local files on disk.)
 
-### 使用差异比较
+### Working with diffs
 
-当您要求 Gemini 修改文件时，它可以在您的编辑器中直接打开差异视图。
+When you ask Gemini to modify a file, it can open a diff view directly in your
+editor.
 
-**要接受差异**，您可以执行以下任何操作：
+**To accept a diff**, you can perform any of the following actions:
 
-- 点击差异编辑器标题栏中的 **复选标记图标**。
-- 保存文件（例如，使用 `Cmd+S` 或 `Ctrl+S`）。
-- 打开命令面板并运行 **Gemini CLI: Accept Diff**。
-- 提示时在 CLI 中回复 `yes`。
+- Click the **checkmark icon** in the diff editor's title bar.
+- Save the file (e.g., with `Cmd+S` or `Ctrl+S`).
+- Open the Command Palette and run **Gemini CLI: Accept Diff**.
+- Respond with `yes` in the CLI when prompted.
 
-**要拒绝差异**，您可以：
+**To reject a diff**, you can:
 
-- 点击差异编辑器标题栏中的 **'x' 图标**。
-- 关闭差异编辑器选项卡。
-- 打开命令面板并运行 **Gemini CLI: Close Diff Editor**。
-- 提示时在 CLI 中回复 `no`。
+- Click the **'x' icon** in the diff editor's title bar.
+- Close the diff editor tab.
+- Open the Command Palette and run **Gemini CLI: Close Diff Editor**.
+- Respond with `no` in the CLI when prompted.
 
-在接受更改之前，您还可以直接在差异视图中 **修改建议的更改**。
+You can also **modify the suggested changes** directly in the diff view before
+accepting them.
 
-如果您在 CLI 中选择 ‘Allow for this
-session’，更改将不再在 IDE 中显示，因为它们将被自动接受。
+If you select ‘Allow for this session’ in the CLI, changes will no longer show
+up in the IDE as they will be auto-accepted.
 
-## 在沙盒中使用
+## Using with sandboxing
 
-如果您在沙盒中使用 Gemini CLI，请注意以下几点：
+If you are using Gemini CLI within a sandbox, please be aware of the following:
 
-- **在 macOS 上:**
-  IDE 集成需要网络访问权限才能与 IDE 伴侣扩展通信。您必须使用允许网络访问的 Seatbelt 配置文件。
-- **在 Docker 容器中:** 如果您在 Docker (或 Podman) 容器中运行 Gemini
-  CLI，IDE 集成仍然可以连接到在主机上运行的 VS Code 扩展。CLI 配置为在
-  `host.docker.internal`
-  上自动查找 IDE 服务器。通常不需要特殊配置，但您可能需要确保您的 Docker 网络设置允许从容器到主机的连接。
+- **On macOS:** The IDE integration requires network access to communicate with
+  the IDE companion extension. You must use a Seatbelt profile that allows
+  network access.
+- **In a Docker container:** If you run Gemini CLI inside a Docker (or Podman)
+  container, the IDE integration can still connect to the VS Code extension
+  running on your host machine. The CLI is configured to automatically find the
+  IDE server on `host.docker.internal`. No special configuration is usually
+  required, but you may need to ensure your Docker networking setup allows
+  connections from the container to the host.
 
-## 故障排除
+## Troubleshooting
 
-如果您遇到 IDE 集成问题，这里有一些常见的错误消息及解决方法。
+If you encounter issues with IDE integration, here are some common error
+messages and how to resolve them.
 
-### 连接错误
+### Connection errors
 
-- **消息:**
+- **Message:**
   `🔴 Disconnected: Failed to connect to IDE companion extension in [IDE Name]. Please ensure the extension is running. To install the extension, run /ide install.`
-  - **原因:** Gemini CLI 找不到必要的环境变量 (`GEMINI_CLI_IDE_WORKSPACE_PATH`
-    或
-    `GEMINI_CLI_IDE_SERVER_PORT`) 来连接到 IDE。这通常意味着 IDE 伴侣扩展未运行或未正确初始化。
-  - **解决方案:**
-    1.  确保您已在 IDE 中安装了 **Gemini CLI Companion** 扩展并且它已启用。
-    2.  在 IDE 中打开一个新的终端窗口，以确保它获取了正确的环境。
+  - **Cause:** Gemini CLI could not find the necessary environment variables
+    (`GEMINI_CLI_IDE_WORKSPACE_PATH` or `GEMINI_CLI_IDE_SERVER_PORT`) to connect
+    to the IDE. This usually means the IDE companion extension is not running or
+    did not initialize correctly.
+  - **Solution:**
+    1.  Make sure you have installed the **Gemini CLI Companion** extension in
+        your IDE and that it is enabled.
+    2.  Open a new terminal window in your IDE to ensure it picks up the correct
+        environment.
 
-- **消息:**
+- **Message:**
   `🔴 Disconnected: IDE connection error. The connection was lost unexpectedly. Please try reconnecting by running /ide enable`
-  - **原因:** 与 IDE 伴侣的连接丢失。
-  - **解决方案:** 运行 `/ide enable`
-    尝试重新连接。如果问题仍然存在，请打开一个新的终端窗口或重新启动您的 IDE。
+  - **Cause:** The connection to the IDE companion was lost.
+  - **Solution:** Run `/ide enable` to try and reconnect. If the issue
+    continues, open a new terminal window or restart your IDE.
 
-### 配置错误
+### Configuration errors
 
-- **消息:**
+- **Message:**
   `🔴 Disconnected: Directory mismatch. Gemini CLI is running in a different location than the open workspace in [IDE Name]. Please run the CLI from one of the following directories: [List of directories]`
-  - **原因:** CLI 的当前工作目录在您 IDE 中打开的工作区之外。
-  - **解决方案:** `cd` 进入 IDE 中打开的同一目录并重新启动 CLI。
+  - **Cause:** The CLI's current working directory is outside the workspace you
+    have open in your IDE.
+  - **Solution:** `cd` into the same directory that is open in your IDE and
+    restart the CLI.
 
-- **消息:**
+- **Message:**
   `🔴 Disconnected: To use this feature, please open a workspace folder in [IDE Name] and try again.`
-  - **原因:** 您在 IDE 中没有打开工作区。
-  - **解决方案:** 在 IDE 中打开一个工作区并重新启动 CLI。
+  - **Cause:** You have no workspace open in your IDE.
+  - **Solution:** Open a workspace in your IDE and restart the CLI.
 
-### 一般错误
+### General errors
 
-- **消息:**
+- **Message:**
   `IDE integration is not supported in your current environment. To use this feature, run Gemini CLI in one of these supported IDEs: [List of IDEs]`
-  - **原因:** 您在非受支持 IDE 的终端或环境中运行 Gemini CLI。
-  - **解决方案:** 从受支持 IDE（如 Antigravity 或 VS Code）的集成终端运行 Gemini
-    CLI。
+  - **Cause:** You are running Gemini CLI in a terminal or environment that is
+    not a supported IDE.
+  - **Solution:** Run Gemini CLI from the integrated terminal of a supported
+    IDE, like Antigravity or VS Code.
 
-- **消息:**
+- **Message:**
   `No installer is available for IDE. Please install the Gemini CLI Companion extension manually from the marketplace.`
-  - **原因:** 您运行了
-    `/ide install`，但 CLI 没有针对您特定 IDE 的自动安装程序。
-  - **解决方案:** 打开您的 IDE 扩展市场，搜索 "Gemini CLI Companion"，然后
-    [手动安装](#3-manual-installation-from-a-marketplace)。
+  - **Cause:** You ran `/ide install`, but the CLI does not have an automated
+    installer for your specific IDE.
+  - **Solution:** Open your IDE's extension marketplace, search for "Gemini CLI
+    Companion", and
+    [install it manually](#3-manual-installation-from-a-marketplace).

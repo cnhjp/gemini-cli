@@ -1,36 +1,42 @@
-# Todo 工具 (`write_todos`)
+# Todo tool (`write_todos`)
 
-本文档描述了 Gemini CLI 的 `write_todos` 工具。
+This document describes the `write_todos` tool for the Gemini CLI.
 
-## 描述
+## Description
 
-`write_todos`
-工具允许 Gemini 代理为复杂的用户请求创建和管理子任务列表。这为您（用户）提供了对代理计划及其当前进度的更大可见性。它还有助于对齐，使代理不太可能忘记其当前目标。
+The `write_todos` tool allows the Gemini agent to create and manage a list of
+subtasks for complex user requests. This provides you, the user, with greater
+visibility into the agent's plan and its current progress. It also helps with
+alignment where the agent is less likely to lose track of its current goal.
 
-### 参数
+### Arguments
 
-`write_todos` 接受一个参数：
+`write_todos` takes one argument:
 
-- `todos` (对象数组, 必需): 完整的待办事项列表。这将替换现有列表。每个项目包括：
-  - `description` (string): 任务描述。
-  - `status` (string): 当前状态 (`pending`, `in_progress`, `completed`, 或
-    `cancelled`)。
+- `todos` (array of objects, required): The complete list of todo items. This
+  replaces the existing list. Each item includes:
+  - `description` (string): The task description.
+  - `status` (string): The current status (`pending`, `in_progress`,
+    `completed`, or `cancelled`).
 
-## 行为
+## Behavior
 
-代理使用此工具将复杂的多步骤请求分解为清晰的计划。
+The agent uses this tool to break down complex multi-step requests into a clear
+plan.
 
-- **进度跟踪:** 代理在工作时更新此列表，完成时将任务标记为 `completed`。
-- **单一焦点:** 一次只有一个任务会被标记为
-  `in_progress`，准确指示代理当前正在做什么。
-- **动态更新:**
-  随着代理发现新信息，计划可能会演变，导致添加新任务或取消不必要的任务。
+- **Progress tracking:** The agent updates this list as it works, marking tasks
+  as `completed` when done.
+- **Single focus:** Only one task will be marked `in_progress` at a time,
+  indicating exactly what the agent is currently working on.
+- **Dynamic updates:** The plan may evolve as the agent discovers new
+  information, leading to new tasks being added or unnecessary ones being
+  cancelled.
 
-激活时，当前的 `in_progress`
-任务显示在输入框上方，让您随时了解立即采取的行动。您可以随时按 `Ctrl+T`
-切换待办事项列表的完整视图。
+When active, the current `in_progress` task is displayed above the input box,
+keeping you informed of the immediate action. You can toggle the full view of
+the todo list at any time by pressing `Ctrl+T`.
 
-用法示例（内部表示）：
+Usage example (internal representation):
 
 ```javascript
 write_todos({
@@ -42,9 +48,10 @@ write_todos({
 });
 ```
 
-## 重要说明
+## Important notes
 
-- **启用:** 此工具默认启用。您可以通过设置 `"useWriteTodos": false` 在您的
-  `settings.json` 文件中禁用它。
+- **Enabling:** This tool is enabled by default. You can disable it in your
+  `settings.json` file by setting `"useWriteTodos": false`.
 
-- **预期用途:** 此工具主要由代理用于复杂的多轮任务。它通常不用于简单的单轮问题。
+- **Intended use:** This tool is primarily used by the agent for complex,
+  multi-turn tasks. It is generally not used for simple, single-turn questions.
