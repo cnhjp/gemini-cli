@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- Configuration ---
-const UPSTREAM_REPO = 'https://github.com/google/gemini-cli.git';
+const UPSTREAM_REPO = 'https://github.com/google-gemini/gemini-cli.git';
 const DOCS_SRC_DIR = 'docs'; // Upstream docs location
 const DOCS_TARGET_DIR = 'docs-site/docs'; // Local docs location
 const SYNC_STATE_FILE = '.last-sync-rev'; // File to store the last synced commit hash
