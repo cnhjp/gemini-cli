@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Sync Script
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SILICONFLOW_API_KEY: ${{ secrets.SILICONFLOW_API_KEY }}
         run: npx tsx scripts/sync-docs.ts
 
       - name: Create Pull Request

@@ -7,7 +7,7 @@ import simpleGit from 'simple-git';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// import { GoogleGenerativeAI } from '@google/generative-ai'; // Removed
 
 // --- Configuration ---
 const UPSTREAM_REPO = 'https://github.com/google-gemini/gemini-cli.git';
@@ -15,8 +15,13 @@ const DOCS_SRC_DIR = 'docs'; // Upstream docs location
 const DOCS_TARGET_DIR = 'docs-site/docs'; // Local docs location
 const SYNC_STATE_FILE = '.last-sync-rev'; // File to store the last synced commit hash
 const TARGET_LANG = 'Chinese (Simplified)';
-const GEMINI_MODEL = 'gemini-2.0-flash';
-const REQUEST_DELAY_MS = 4000; // 4 seconds delay between requests
+
+// SiliconFlow Configuration
+const SF_API_KEY = process.env.SILICONFLOW_API_KEY;
+const SF_BASE_URL = process.env.SF_BASE_URL || 'https://api.siliconflow.cn/v1';
+const SF_MODEL = process.env.SF_MODEL || 'deepseek-ai/DeepSeek-V2.5'; // Default to DeepSeek V2.5
+
+const REQUEST_DELAY_MS = 2000; // 2 seconds delay
 const MAX_RETRIES = 5;
 
 // --- Setup ---
@@ -26,34 +31,37 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 
 const git = simpleGit(ROOT_DIR);
 
-// Initialize Gemini API
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
+if (!SF_API_KEY) {
   console.warn(
-    'WARNING: GEMINI_API_KEY is not set. Translation will be skipped or mock mode used.',
+    'WARNING: SILICONFLOW_API_KEY is not set. Translation will be skipped or mock mode used.',
   );
 }
 
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-const model = genAI ? genAI.getGenerativeModel({ model: GEMINI_MODEL }) : null;
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+interface OpenAIResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+}
+
 /**
- * Translates content using Gemini API with retry logic.
+ * Translates content using SiliconFlow (OpenAI Compatible) API.
  */
 async function translateContent(
   content: string,
   filePath: string,
 ): Promise<string> {
-  if (!model) {
+  if (!SF_API_KEY) {
     console.warn(`Skipping translation for ${filePath} (No API Key).`);
     return content;
   }
 
-  console.log(`Translating ${filePath}...`);
+  console.log(`Translating ${filePath} using ${SF_MODEL}...`);
 
-  const prompt = `
+  const systemPrompt = `
 You are a professional technical translator specializing in software documentation.
 Translate the following Markdown content from English to ${TARGET_LANG}.
 
@@ -65,29 +73,71 @@ IMPORTANT RULES:
 4. Translate technical terms accurately. Keep specific command names (e.g., 'gemini', 'npm run'), flags, and code symbols in English.
 5. If the content is already in ${TARGET_LANG}, return it exactly as is.
 6. Return ONLY the translated Markdown content. No preamble or postscript.
-
-Content to translate:
-${content}
 `;
 
   let attempt = 0;
   while (attempt < MAX_RETRIES) {
     try {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
-    } catch (error: unknown) {
-      const err = error as { status?: number; message?: string };
-      if (err.status === 429 || err.message?.includes('429')) {
-        attempt++;
-        const waitTime = Math.pow(2, attempt) * 2000; // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+      const response = await fetch(`${SF_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${SF_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: SF_MODEL,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: content },
+          ],
+          temperature: 0.1, // Low temperature for consistent translation
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        // Handle Rate Limits (429) and Server Errors (5xx)
+        if (response.status === 429 || response.status >= 500) {
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        // Other errors (400, 401, etc.) are likely fatal
+        const errorText = await response.text();
+        console.error(
+          `API Error for ${filePath}: ${response.status} - ${errorText}`,
+        );
+        return content;
+      }
+
+      const data = (await response.json()) as OpenAIResponse;
+      if (
+        data.choices &&
+        data.choices.length > 0 &&
+        data.choices[0].message?.content
+      ) {
+        return data.choices[0].message.content.trim();
+      } else {
         console.warn(
-          `Rate limit exceeded for ${filePath}. Retrying in ${waitTime / 1000}s (Attempt ${attempt}/${MAX_RETRIES})...`,
+          `Unexpected API response structure for ${filePath}:`,
+          JSON.stringify(data),
+        );
+        return content;
+      }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      const isRateLimit =
+        err.message?.includes('429') || err.message?.includes('50'); // Retry on 429 or 5xx
+
+      if (isRateLimit) {
+        attempt++;
+        const waitTime = Math.pow(2, attempt) * 2000;
+        console.warn(
+          `API Request failed for ${filePath} (${err.message}). Retrying in ${waitTime / 1000}s (Attempt ${attempt}/${MAX_RETRIES})...`,
         );
         await sleep(waitTime);
       } else {
         console.error(`Failed to translate ${filePath}:`, error);
-        return content; // Return original on non-retriable error
+        return content;
       }
     }
   }
